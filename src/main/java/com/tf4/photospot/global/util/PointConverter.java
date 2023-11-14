@@ -5,6 +5,8 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.PrecisionModel;
 
+import com.tf4.photospot.global.dto.CoordinateDto;
+
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +16,10 @@ public final class PointConverter {
 
 	public static Point convert(final Double lat, final Double lon) {
 		return geometryFactory.createPoint(new Coordinate(lat, lon));
+	}
+
+	public static CoordinateDto convert(final Point coord) {
+		return new CoordinateDto(coord.getY(), coord.getX());
 	}
 }
 
