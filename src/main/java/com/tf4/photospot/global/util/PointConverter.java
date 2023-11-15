@@ -15,7 +15,7 @@ public final class PointConverter {
 	private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
 	public static Point convert(final Double lat, final Double lon) {
-		return geometryFactory.createPoint(new Coordinate(lat, lon));
+		return geometryFactory.createPoint(new Coordinate(lon, lat));
 	}
 
 	public static CoordinateDto convert(final Point coord) {
