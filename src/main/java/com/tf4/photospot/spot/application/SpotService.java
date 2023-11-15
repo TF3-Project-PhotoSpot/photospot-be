@@ -27,6 +27,6 @@ public class SpotService {
 
 		return spotRepository.findByCoord(foundCoord)
 			.map(FindSpotResponse::toSpotResponse)
-			.orElseGet(() -> FindSpotResponse.toNonSpotResponse(foundCoord));
+			.orElseGet(() -> FindSpotResponse.toNonSpotResponse(foundCoord, address));
 	}
 }
