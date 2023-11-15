@@ -16,8 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
+import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.spot.application.SpotService;
+import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.FindSpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
@@ -62,7 +65,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				.centerAddress("서울시 도봉구 마들로 646")
 				.recommendedSpots(recommendedSpots)
 				.build());
-		//when
+		//when then
 		mockMvc.perform(get("/api/v1/spots/recommended")
 				.queryParam("lat", "35.0000")
 				.queryParam("lon", "70.0000")
@@ -91,6 +94,72 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.recommendedSpots[].coord.lon").type(JsonFieldType.NUMBER).description("스팟 좌표"),
 					fieldWithPath("data.recommendedSpots[].photoUrls").type(JsonFieldType.ARRAY)
 						.description("최신 방명록 사진")
+				)));
+	}
+
+	@DisplayName("특정 좌표로 등록된 스팟을 찾는다.")
+	@Test
+	void findRegisteredSpot() throws Exception {
+		//given
+		Double lat = 37.6676198504815;
+		Double lon = 127.046817765572;
+
+		given(spotService.findSpot(any(FindSpotRequest.class)))
+			.willReturn(new FindSpotResponse(Boolean.TRUE, 1L, "서울특별시 도봉구 마들로 646", new CoordinateDto(lat, lon)));
+		//when then
+		mockMvc.perform(get("/api/v1/spot")
+				.queryParam("lat", String.valueOf(lat))
+				.queryParam("lon", String.valueOf(lon)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("find-registered-spot",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				queryParameters(
+					parameterWithName("lat").description("위도(latitude)"),
+					parameterWithName("lon").description("경도(longitude)")
+				),
+				responseFields(
+					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
+					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("스팟 id"),
+					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
+					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
+					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
+					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
+				)));
+	}
+
+	@DisplayName("특정 좌표로 등록되지 않은 스팟을 찾는다.")
+	@Test
+	void findUnregisteredSpot() throws Exception {
+		// given
+		Double lat = 37.6676198504815;
+		Double lon = 127.046817765572;
+		var coord = PointConverter.convert(lat, lon);
+
+		given(spotService.findSpot(any(FindSpotRequest.class)))
+			.willReturn(FindSpotResponse.toNonSpotResponse(coord, "서울특별시 도봉구 마들로 646"));
+
+		//when then
+		mockMvc.perform(get("/api/v1/spot")
+				.queryParam("lat", String.valueOf(lat))
+				.queryParam("lon", String.valueOf(lon)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("find-unregistered-spot",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				queryParameters(
+					parameterWithName("lat").description("위도(latitude)"),
+					parameterWithName("lon").description("경도(longitude)")
+				),
+				responseFields(
+					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
+					fieldWithPath("data.id").type(JsonFieldType.NULL).description("스팟 id"),
+					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
+					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
+					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
+					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
 				)));
 	}
 }
