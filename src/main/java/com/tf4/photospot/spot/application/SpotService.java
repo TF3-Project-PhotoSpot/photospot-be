@@ -1,6 +1,7 @@
 package com.tf4.photospot.spot.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
@@ -12,6 +13,7 @@ import com.tf4.photospot.spot.domain.SpotRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class SpotService {
 	private final MapApiClient mapApiClient;

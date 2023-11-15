@@ -55,21 +55,30 @@ tasks.named('test') {
 }
 
 tasks.named('asciidoctor') {
-
     configurations 'asciidoctorExtensions'
-
     sources {
         include("**/index.adoc")
     }
-
     inputs.dir snippetsDir
-
     baseDirFollowsSourceFile()
+
     dependsOn test
 }
 
+asciidoctor.doFirst {
+    delete file('src/main/resources/static/docs')
+}
+
+task createDocs(type: Copy) {
+    dependsOn asciidoctor
+    
+    from file("build/docs/asciidoc")
+    into file("src/main/resources/static/docs")
+}
+
 bootJar {
-    dependsOn 'asciidoctor'
+    dependsOn asciidoctor
+    dependsOn createDocs
     from("${asciidoctor.outputDir}") {
         into 'static/docs'
     }
