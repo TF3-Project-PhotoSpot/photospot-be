@@ -3,6 +3,8 @@ package com.tf4.photospot.spot.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
@@ -24,8 +26,10 @@ public class SpotService {
 	}
 
 	public FindSpotResponse findSpot(FindSpotRequest request) {
-		var address = mapApiClient.findAddressByCoordinate(request.coord()).orElseThrow();
-		var foundCoord = mapApiClient.findCoordinateByAddress(address).orElseThrow();
+		var address = mapApiClient.findAddressByCoordinate(request.coord())
+			.orElseThrow(() -> new ApiException(MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD));
+		var foundCoord = mapApiClient.findCoordinateByAddress(address)
+			.orElseThrow(() -> new ApiException(MapErrorCode.NO_COORD_FOR_GIVEN_ADDRESS));
 
 		return spotRepository.findByCoord(foundCoord)
 			.map(FindSpotResponse::toSpotResponse)
