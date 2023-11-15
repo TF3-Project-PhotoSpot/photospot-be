@@ -37,4 +37,11 @@ public class Spot extends BaseEntity {
 	private Long postCount;
 
 	private LocalDateTime deletedAt;
+
+	public Spot(String address, Point coord, Long postCount) {
+		this.address = address;
+		this.coord = coord;
+		this.postCount = postCount;
+		this.deletedAt = LocalDateTime.now();
+	}
 }
