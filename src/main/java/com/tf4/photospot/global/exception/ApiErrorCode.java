@@ -1,9 +1,11 @@
 package com.tf4.photospot.global.exception;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 public interface ApiErrorCode {
-	HttpStatus getHttpStatus();
+	HttpStatusCode getStatusCode();
 
 	String getMessage();
+
+	String name();
 }
