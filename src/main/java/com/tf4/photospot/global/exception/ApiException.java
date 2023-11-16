@@ -1,22 +1,23 @@
 package com.tf4.photospot.global.exception;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class ApiException extends RuntimeException {
-	private final ApiErrorCode errorStatus;
+	private final ApiErrorCode errorCode;
 
-	public String getErrorCode() {
-		return String.valueOf(errorStatus.getHttpStatus().value());
-	}
-
-	public HttpStatus getStatus() {
-		return errorStatus.getHttpStatus();
+	public HttpStatusCode getStatusCode() {
+		return errorCode.getStatusCode();
 	}
 
 	public String getMessage() {
-		return errorStatus.getMessage();
+		return errorCode.getMessage();
+	}
+
+	public String getName() {
+		return errorCode.name();
 	}
 }

@@ -95,9 +95,9 @@ class SpotServiceTest {
 			//when then
 			assertThatThrownBy(() -> spotService.findSpot(new FindSpotRequest(coord)))
 				.isInstanceOf(ApiException.class)
-				.extracting("status", "message")
+				.extracting("statusCode", "message")
 				.containsExactly(
-					MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD.getHttpStatus(),
+					MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD.getStatusCode(),
 					MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD.getMessage()
 				);
 		}
@@ -115,9 +115,9 @@ class SpotServiceTest {
 			//when then
 			assertThatThrownBy(() -> spotService.findSpot(new FindSpotRequest(coord)))
 				.isInstanceOf(ApiException.class)
-				.extracting("status", "message")
+				.extracting("statusCode", "message")
 				.containsExactly(
-					MapErrorCode.NO_COORD_FOR_GIVEN_ADDRESS.getHttpStatus(),
+					MapErrorCode.NO_COORD_FOR_GIVEN_ADDRESS.getStatusCode(),
 					MapErrorCode.NO_COORD_FOR_GIVEN_ADDRESS.getMessage()
 				);
 		}
