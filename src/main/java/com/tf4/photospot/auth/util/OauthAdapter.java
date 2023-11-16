@@ -1,7 +1,10 @@
-package com.tf4.photospot.auth.domain;
+package com.tf4.photospot.auth.util;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.tf4.photospot.auth.domain.OauthProperties;
+import com.tf4.photospot.auth.domain.OauthRegistration;
 
 public class OauthAdapter {
 
