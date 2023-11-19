@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.domain;
+package com.tf4.photospot.config.oauth;
 
 import java.util.HashMap;
 import java.util.Map;

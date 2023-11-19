@@ -1,7 +1,11 @@
 package com.tf4.photospot.auth.domain;
 
-import lombok.AllArgsConstructor;
+import com.tf4.photospot.config.oauth.OauthProperties;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
 @AllArgsConstructor
 public class OauthRegistration {
 

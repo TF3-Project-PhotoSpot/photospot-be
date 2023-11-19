@@ -3,15 +3,15 @@ package com.tf4.photospot.auth.util;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tf4.photospot.auth.domain.OauthProperties;
 import com.tf4.photospot.auth.domain.OauthRegistration;
+import com.tf4.photospot.config.oauth.OauthProperties;
 
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
 public class OauthAdapter {
 
-	private OauthAdapter() {
-	}
-
-	public static Map<String, OauthRegistration> getOauthRegistrations(OauthProperties properties) {
+	public static Map<String, OauthRegistration> createOauthRegistrations(OauthProperties properties) {
 		Map<String, OauthRegistration> oauthRegistrations = new HashMap<>();
 		properties.getClient().forEach((key, value) -> oauthRegistrations.put(key,
 			new OauthRegistration(value, properties.getProvider().get(key))));
