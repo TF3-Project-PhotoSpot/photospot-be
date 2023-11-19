@@ -3,6 +3,8 @@ package com.tf4.photospot.auth.domain;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.tf4.photospot.user.domain.User;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -20,5 +22,10 @@ public class OauthUserInfo {
 			.findFirst()
 			.orElseThrow(RuntimeException::new)
 			.of(userAttributes);
+	}
+
+	// Todo : 닉네임 랜덤 생성 추가
+	public User toUser(String provider) {
+		return new User(null, null, name, null, provider, account, null);
 	}
 }

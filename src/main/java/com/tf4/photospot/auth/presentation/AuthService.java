@@ -43,7 +43,7 @@ public class AuthService {
 		OauthTokenResponse tokenResponse = requestAccessToken(code, registration);
 		OauthUserInfo userInfo = getUserInfo(provider, registration, tokenResponse);
 
-		userService.oauthLogin(provider, userInfo);
+		Long userId = userService.oauthLogin(provider, userInfo);
 	}
 
 	private OauthTokenResponse requestAccessToken(String code, OauthRegistration registration) {
