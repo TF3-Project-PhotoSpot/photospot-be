@@ -12,8 +12,8 @@ import jakarta.validation.ConstraintValidatorContext;
  * 경도 약 124 ~ 132
  * */
 public class CoordinateValidator implements ConstraintValidator<KoreaCoordinate, CoordinateDto> {
-	private static final String COORD_NOT_EMPTY = "좌표에 빈 값이 들어갈 수 없습니다.";
-	private static final String COORD_INVALID_RANGE = "좌표의 범위가 유효하지 않습니다.";
+	public static final String COORD_NOT_EMPTY = "좌표에 빈 값이 들어갈 수 없습니다.";
+	public static final String COORD_INVALID_RANGE = "좌표의 범위가 유효하지 않습니다.";
 	private static final double MIN_LATITUDE = 33.0;
 	private static final double MAX_LATITUDE = 39.0;
 	private static final double MIN_LONGITUDE = 124.0;
