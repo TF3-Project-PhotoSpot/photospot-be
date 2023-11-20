@@ -11,10 +11,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import com.tf4.photospot.auth.domain.OauthRegistration;
-import com.tf4.photospot.auth.domain.OauthUserInfo;
+import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
+import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
 import com.tf4.photospot.auth.infrastructure.InMemoryRegistrationsRepository;
+import com.tf4.photospot.auth.presentation.response.LoginTokenResponse;
 import com.tf4.photospot.auth.presentation.response.OauthTokenResponse;
+import com.tf4.photospot.auth.presentation.response.UserLoginResponse;
 import com.tf4.photospot.user.presentation.UserService;
 
 @Service
@@ -22,18 +24,21 @@ public class AuthService {
 
 	private final InMemoryRegistrationsRepository inMemoryRegistrationsRepository;
 	private final UserService userService;
+	private final JwtService jwtService;
 	private final RestClient restClient;
 
-	public AuthService(InMemoryRegistrationsRepository inMemoryRegistrationsRepository, UserService userService) {
+	public AuthService(InMemoryRegistrationsRepository inMemoryRegistrationsRepository, UserService userService,
+		JwtService jwtService) {
 		this.inMemoryRegistrationsRepository = inMemoryRegistrationsRepository;
 		this.userService = userService;
+		this.jwtService = jwtService;
 
 		restClient = RestClient.builder()
 			.build();
 	}
 
 	// Todo : 예외 수정
-	public void login(String code, String provider) {
+	public LoginTokenResponse login(String code, String provider) {
 		OauthRegistration registration = inMemoryRegistrationsRepository.findByProviderName(provider);
 
 		if (registration == null) {
@@ -43,7 +48,8 @@ public class AuthService {
 		OauthTokenResponse tokenResponse = requestAccessToken(code, registration);
 		OauthUserInfo userInfo = getUserInfo(provider, registration, tokenResponse);
 
-		Long userId = userService.oauthLogin(provider, userInfo);
+		UserLoginResponse loginUser = userService.oauthLogin(provider, userInfo);
+		return jwtService.issueTokens(loginUser.isHasLoggedInBefore(), loginUser.getUser());
 	}
 
 	private OauthTokenResponse requestAccessToken(String code, OauthRegistration registration) {
