@@ -2,7 +2,7 @@ package com.tf4.photospot.auth.infrastructure;
 
 import java.util.Map;
 
-import com.tf4.photospot.auth.domain.OauthRegistration;
+import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
 
 import lombok.RequiredArgsConstructor;
 

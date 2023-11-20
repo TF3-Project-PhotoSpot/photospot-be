@@ -1,9 +1,9 @@
-package com.tf4.photospot.auth.util;
+package com.tf4.photospot.auth.util.oauth;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.tf4.photospot.auth.domain.OauthRegistration;
+import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
 import com.tf4.photospot.config.oauth.OauthProperties;
 
 import lombok.NoArgsConstructor;

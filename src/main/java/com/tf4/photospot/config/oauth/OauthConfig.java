@@ -6,9 +6,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.tf4.photospot.auth.domain.OauthRegistration;
+import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
 import com.tf4.photospot.auth.infrastructure.InMemoryRegistrationsRepository;
-import com.tf4.photospot.auth.util.OauthAdapter;
+import com.tf4.photospot.auth.util.oauth.OauthAdapter;
 
 import lombok.RequiredArgsConstructor;
 
