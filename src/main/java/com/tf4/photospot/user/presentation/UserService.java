@@ -4,7 +4,8 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.tf4.photospot.auth.domain.OauthUserInfo;
+import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
+import com.tf4.photospot.auth.presentation.response.UserLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
 
@@ -16,18 +17,18 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
-	public Long oauthLogin(String providerName, OauthUserInfo userInfo) {
+	public UserLoginResponse oauthLogin(String providerName, OauthUserInfo userInfo) {
 		User user = userInfo.toUser(providerName);
 		Optional<User> findUser = userRepository.findUserByAccountAndProviderType(user.getAccount(),
 			user.getProviderType());
 		return loginOrSignup(user, findUser);
 	}
 
-	private Long loginOrSignup(User user, Optional<User> findUser) {
+	private UserLoginResponse loginOrSignup(User user, Optional<User> findUser) {
 		if (findUser.isEmpty()) {
-			return userRepository.save(user).getId();
+			return new UserLoginResponse(false, userRepository.save(user));
 		}
-		return findUser.get().getId();
+		return new UserLoginResponse(true, findUser.get());
 	}
 
 }
