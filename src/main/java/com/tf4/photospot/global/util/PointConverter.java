@@ -26,4 +26,3 @@ public final class PointConverter {
 		return new CoordinateDto(coord.getX(), coord.getY());
 	}
 }
-
