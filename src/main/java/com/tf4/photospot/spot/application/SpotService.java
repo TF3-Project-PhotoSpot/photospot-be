@@ -1,5 +1,6 @@
 package com.tf4.photospot.spot.application;
 
+import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,9 +27,9 @@ public class SpotService {
 	}
 
 	public FindSpotResponse findSpot(FindSpotRequest request) {
-		var address = mapApiClient.findAddressByCoordinate(request.coord())
+		String address = mapApiClient.findAddressByCoordinate(request.coord())
 			.orElseThrow(() -> new ApiException(MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD));
-		var foundCoord = mapApiClient.findCoordinateByAddress(address)
+		Point foundCoord = mapApiClient.findCoordinateByAddress(address)
 			.orElseThrow(() -> new ApiException(MapErrorCode.NO_COORD_FOR_GIVEN_ADDRESS));
 
 		return spotRepository.findByCoord(foundCoord)

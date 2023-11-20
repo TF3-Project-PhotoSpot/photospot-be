@@ -40,9 +40,8 @@ class SpotServiceTest {
 
 		@DisplayName("등록된 스팟이 없으면 해당 장소의 정보를 반환한다")
 		@Test
-		void findUnregisteredSpot() throws Exception {
+		void findUnregisteredSpot() {
 			var coord = convert(127.046817765572, 37.6676198504815);
-			var spot = new Spot("서울시 마들로 646", coord, 0L);
 
 			given(mapApiClient.findAddressByCoordinate(any(Point.class)))
 				.willReturn(Optional.of("서울시 마들로 646"));
@@ -62,7 +61,7 @@ class SpotServiceTest {
 
 		@DisplayName("등록된 스팟이 있으면 해당 스팟의 정보를 반환한다.")
 		@Test
-		void findRegisteredSpot() throws Exception {
+		void findRegisteredSpot() {
 			//given
 			var coord = convert(127.046817765572, 37.6676198504815);
 			var spot = new Spot("서울시 마들로 646", coord, 0L);
@@ -86,7 +85,7 @@ class SpotServiceTest {
 
 		@DisplayName("해당 좌표에 해당하는 장소를 지도에서 찾을 수 없으면 NO_ADDRESS_FOR_GIVEN_COORD 예외가 발생한다.")
 		@Test
-		void notFoundForGivenCoord() throws Exception {
+		void notFoundForGivenCoord() {
 			//given
 			var coord = convert(127.046817765572, 37.6676198504815);
 			given(mapApiClient.findAddressByCoordinate(any(Point.class)))
@@ -104,7 +103,7 @@ class SpotServiceTest {
 
 		@DisplayName("해당 주소에 해당하는 장소의 좌표를 찾을 수 없으면 NO_COORD_FOR_GIVEN_ADDRESS 예외가 발생한다.")
 		@Test
-		void notFoundForGivenAddress() throws Exception {
+		void notFoundForGivenAddress() {
 			//given
 			var coord = convert(127.046817765572, 37.6676198504815);
 			var address = "서울시 도봉구 마들로 646";
