@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -37,6 +38,7 @@ public class AuthService {
 	}
 
 	// Todo : 예외 수정
+	@Transactional
 	public LoginTokenResponse login(String code, String provider) {
 		OauthRegistration registration = inMemoryRegistrationsRepository.findByProviderName(provider);
 
@@ -91,5 +93,4 @@ public class AuthService {
 			.body(new ParameterizedTypeReference<>() {
 			});
 	}
-
 }

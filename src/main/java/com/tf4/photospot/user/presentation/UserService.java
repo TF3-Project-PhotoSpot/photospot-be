@@ -3,6 +3,7 @@ package com.tf4.photospot.user.presentation;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
 import com.tf4.photospot.auth.presentation.response.UserLoginResponse;
@@ -18,6 +19,7 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
+	@Transactional
 	public UserLoginResponse oauthLogin(String providerName, OauthUserInfo userInfo) {
 		User user = userInfo.toUser(providerName, generateNickname());
 		Optional<User> findUser = userRepository.findUserByAccountAndProviderType(user.getAccount(),

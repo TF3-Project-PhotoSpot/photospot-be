@@ -3,6 +3,7 @@ package com.tf4.photospot.auth.presentation;
 import java.time.Duration;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.domain.jwt.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRepository;
@@ -21,6 +22,7 @@ public class JwtService {
 	private final JwtProvider jwtProvider;
 	private final JwtRepository jwtRepository;
 
+	@Transactional
 	public LoginTokenResponse issueTokens(boolean hasLoggedInBefore, User user) {
 		String accessToken = jwtProvider.generateToken(user, ACCESS_TOKEN_DURATION);
 		String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_DURATION);
@@ -28,5 +30,4 @@ public class JwtService {
 		jwtRepository.save(new RefreshToken(user.getId(), refreshToken));
 		return new LoginTokenResponse(hasLoggedInBefore, accessToken, refreshToken);
 	}
-
 }
