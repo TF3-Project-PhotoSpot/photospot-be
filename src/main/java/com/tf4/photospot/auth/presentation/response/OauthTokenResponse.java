@@ -1,16 +1,10 @@
 package com.tf4.photospot.auth.presentation.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-public class OauthTokenResponse {
-
-	private String accessToken;
-	private String scope;
-	private String tokenType;
-
+public record OauthTokenResponse(
+	@JsonProperty("access_token") String accessToken,
+	String scope,
+	@JsonProperty("token_type") String tokenType
+) {
 }
