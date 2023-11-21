@@ -10,7 +10,7 @@ public class NicknameGenerator {
 		StringBuilder randomNickname = new StringBuilder();
 
 		Random random = new Random();
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 10; i++) {
 			int index = random.nextInt(characters.length());
 			char randomChar = characters.charAt(index);
 			randomNickname.append(randomChar);

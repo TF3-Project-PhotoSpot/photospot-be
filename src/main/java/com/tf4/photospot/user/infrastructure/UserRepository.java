@@ -10,4 +10,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 	Optional<User> findUserByAccountAndProviderType(String account, String providerType);
 
+	boolean existsByNickname(String nickname);
+
 }
