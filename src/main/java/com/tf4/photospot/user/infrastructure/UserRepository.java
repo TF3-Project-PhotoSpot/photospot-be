@@ -8,6 +8,6 @@ import com.tf4.photospot.user.domain.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-	Optional<User> findUserByAccountAndProviderType(String account, String provider);
+	Optional<User> findUserByAccountAndProviderType(String account, String providerType);
 
 }

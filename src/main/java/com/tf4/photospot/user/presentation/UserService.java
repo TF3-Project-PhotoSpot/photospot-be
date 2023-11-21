@@ -25,8 +25,10 @@ public class UserService {
 	}
 
 	private UserLoginResponse loginOrSignup(User user, Optional<User> findUser) {
-		return findUser.map(existingUser -> new UserLoginResponse(true, existingUser))
-			.orElse(new UserLoginResponse(false, userRepository.save(user)));
+		if (findUser.isEmpty()) {
+			return new UserLoginResponse(false, userRepository.save(user));
+		}
+		return new UserLoginResponse(true, findUser.get());
 	}
 
 }
