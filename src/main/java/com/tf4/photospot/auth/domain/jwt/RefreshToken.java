@@ -10,7 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "token")
+@Table
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,9 +19,9 @@ public class RefreshToken {
 	@Id
 	private Long userId;
 
-	private String refreshToken;
+	private String token;
 
 	public boolean isTokenMatching(String refreshToken) {
-		return Objects.equals(this.refreshToken, refreshToken);
+		return Objects.equals(this.token, refreshToken);
 	}
 }
