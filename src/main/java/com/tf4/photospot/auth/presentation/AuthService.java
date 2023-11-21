@@ -1,7 +1,7 @@
 package com.tf4.photospot.auth.presentation;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -33,8 +33,7 @@ public class AuthService {
 		this.userService = userService;
 		this.jwtService = jwtService;
 
-		restClient = RestClient.builder()
-			.build();
+		restClient = RestClient.create();
 	}
 
 	// Todo : 예외 수정
@@ -55,23 +54,25 @@ public class AuthService {
 	private OauthTokenResponse requestAccessToken(String code, OauthRegistration registration) {
 		return restClient.post()
 			.uri(registration.getTokenUri())
-			.headers(header -> {
-				header.setBasicAuth(registration.getClientId(), registration.getClientSecret());
-				header.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-				header.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-				header.setAcceptCharset(Collections.singletonList(StandardCharsets.UTF_8));
+			.headers(httpHeaders -> {
+				httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+				httpHeaders.setAccept(List.of(MediaType.APPLICATION_JSON));
+				httpHeaders.setAcceptCharset(List.of(StandardCharsets.UTF_8));
 			})
 			.body(createTokenRequestParams(code, registration))
 			.retrieve()
-			.body(OauthTokenResponse.class);
+			.toEntity(OauthTokenResponse.class)
+			.getBody();
 	}
 
 	private MultiValueMap<String, String> createTokenRequestParams(String code, OauthRegistration registration) {
-		MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-		formData.add("code", code);
-		formData.add("grant_type", "authorization_code");
-		formData.add("redirect_uri", registration.getRedirectUri());
-		return formData;
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		params.add("grant_type", "authorization_code");
+		params.add("client_id", registration.getClientId());
+		params.add("client_secret", registration.getClientSecret());
+		params.add("redirect_uri", registration.getRedirectUri());
+		params.add("code", code);
+		return params;
 	}
 
 	private OauthUserInfo getUserInfo(String providerName, OauthRegistration registration,
@@ -85,7 +86,7 @@ public class AuthService {
 		return restClient.get()
 			.uri(registration.getUserInfoUri())
 			.headers(header ->
-				header.setBearerAuth(tokenResponse.getAccessToken()))
+				header.setBearerAuth(tokenResponse.accessToken()))
 			.retrieve()
 			.body(new ParameterizedTypeReference<>() {
 			});
