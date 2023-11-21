@@ -8,10 +8,15 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 public class UserLoginResponse {
 
 	private boolean hasLoggedInBefore;
+
+	@Getter
 	private User user;
+
+	public boolean hasLoggedInBefore() {
+		return hasLoggedInBefore;
+	}
 
 }

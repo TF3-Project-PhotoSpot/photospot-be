@@ -48,7 +48,7 @@ public class AuthService {
 		OauthUserInfo userInfo = getUserInfo(provider, registration, tokenResponse);
 
 		UserLoginResponse loginUser = userService.oauthLogin(provider, userInfo);
-		return jwtService.issueTokens(loginUser.isHasLoggedInBefore(), loginUser.getUser());
+		return jwtService.issueTokens(loginUser.hasLoggedInBefore(), loginUser.getUser());
 	}
 
 	private OauthTokenResponse requestAccessToken(String code, OauthRegistration registration) {
