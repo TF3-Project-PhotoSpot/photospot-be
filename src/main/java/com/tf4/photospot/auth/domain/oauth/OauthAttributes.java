@@ -13,8 +13,7 @@ public enum OauthAttributes {
 		@Override
 		public OauthUserInfo of(Map<String, Object> attributes) {
 			return new OauthUserInfo(
-				String.valueOf(attributes.get("id")),
-				String.valueOf(attributes.get("name")));
+				String.valueOf(attributes.get("id")));
 		}
 	};
 
