@@ -1,0 +1,18 @@
+ifndef::snippets[]
+:snippets: ../../build/generated-snippets
+endif::[]
+
+= PhotoSpot Rest API Document
+:doctype: book
+:icons: font
+:source-highlighter: highlightjs
+:toc: left
+:toclevels: 2
+:sectlinks:
+
+[[Spot-API]]
+== Spot API
+
+include::api/spot/recommend-spots.adoc[]
+
+include::api/spot/find-spot.adoc[]
