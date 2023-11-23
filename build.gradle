@@ -3,6 +3,9 @@ plugins {
     id 'org.springframework.boot' version '3.2.0-RC2'
     id 'io.spring.dependency-management' version '1.1.3'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'org.sonarqube' version '3.5.0.2730'
 }
 
 group = 'com.tf4'
@@ -22,6 +25,10 @@ configurations {
         extendsFrom annotationProcessor
     }
     asciidoctorExtensions
+}
+
+repositories {
+	mavenCentral()
 }
 
 dependencies {
@@ -71,7 +78,7 @@ asciidoctor.doFirst {
 
 task createDocs(type: Copy) {
     dependsOn asciidoctor
-    
+
     from file("build/docs/asciidoc")
     into file("src/main/resources/static/docs")
 }
@@ -81,5 +88,27 @@ bootJar {
     dependsOn createDocs
     from("${asciidoctor.outputDir}") {
         into 'static/docs'
+    }
+}
+
+checkstyle {
+    maxWarnings = 0
+    toolVersion = "10.4"
+    configFile = file("checkstyle/naver-checkstyle-rules.xml")
+    configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
+    sourceSets = [sourceSets.main] // CompileQuerydsl 오류 해결
+}
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+}
+sonar {
+    properties {
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.organization', 'dnd-side-project'
+        property 'sonar.projectKey', 'dnd-side-project_dnd-8th-8-backend'
+        property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
     }
 }

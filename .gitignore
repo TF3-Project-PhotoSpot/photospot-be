@@ -6,6 +6,7 @@ build/
 !**/src/test/**/build/
 
 *.yml
+!.github/ci_v1.yml
 *.properties
 
 ### STS ###
