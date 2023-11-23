@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -34,6 +35,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		@NotNull WebRequest request) {
 		return ResponseEntity.status(status)
 			.body(ApiResponse.error(String.valueOf(status.value()), joiningFieldErrorMessage(ex)));
+	}
+
+	@ExceptionHandler(IllegalArgumentException.class)
+	public ResponseEntity<ApiResponse<?>> test() {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
+			.body(ApiResponse.error(HttpStatus.BAD_REQUEST.name(), "Invalid Parameter"));
 	}
 
 	private static String joiningFieldErrorMessage(MethodArgumentNotValidException ex) {
