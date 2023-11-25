@@ -1,5 +1,7 @@
 package com.tf4.photospot.spot.application;
 
+import java.util.List;
+
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,8 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
+import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
+import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 import com.tf4.photospot.spot.domain.MapApiClient;
 import com.tf4.photospot.spot.domain.SpotRepository;
@@ -35,5 +40,10 @@ public class SpotService {
 		return spotRepository.findByCoord(foundCoord)
 			.map(FindSpotResponse::toSpotResponse)
 			.orElseGet(() -> FindSpotResponse.toNonSpotResponse(foundCoord, address));
+	}
+
+	public NearbySpotListResponse getNearbySpotList(NearbySpotRequest request) {
+		List<NearbySpotResponse> nearbySpots = spotRepository.findNearbySpots(request.coord(), request.radius());
+		return new NearbySpotListResponse(nearbySpots);
 	}
 }
