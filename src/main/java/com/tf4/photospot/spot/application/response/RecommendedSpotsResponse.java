@@ -5,8 +5,8 @@ import java.util.List;
 import lombok.Builder;
 
 @Builder
-public record RecommendedSpotListResponse(
+public record RecommendedSpotsResponse(
 	String centerAddress,
-	List<RecommendedSpot> recommendedSpots
+	List<RecommendedSpotResponse> recommendedSpots
 ) {
 }

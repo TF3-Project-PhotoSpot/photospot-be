@@ -1,0 +1,22 @@
+[[find-registered-spot]]
+=== 특정 좌표로 스팟 조회
+
+==== Request
+
+include::{snippets}/find-registered-spot/http-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/find-registered-spot/query-parameters.adoc[]
+
+==== 등록된 스팟 조회 Response
+
+include::{snippets}/find-registered-spot/http-response.adoc[]
+
+==== 등록되지 않은 스팟 조회 Response
+
+include::{snippets}/find-unregistered-spot/http-response.adoc[]
+
+==== Response Fields
+
+include::{snippets}/find-registered-spot/response-fields.adoc[]

@@ -4,34 +4,43 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.global.dto.ApiResponse;
-import com.tf4.photospot.global.util.PointConverter;
+import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.spot.application.SpotService;
-import com.tf4.photospot.spot.application.request.RecommendedSpotListServiceRequest;
-import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
-import com.tf4.photospot.spot.presentation.request.RecommendedSpotListRequest;
+import com.tf4.photospot.spot.application.request.FindSpotRequest;
+import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RequestMapping("/api/v1/spots")
+@RequestMapping("/api/v1")
 @RestController
 @RequiredArgsConstructor
 public class SpotController {
 
 	private final SpotService spotService;
 
-	@GetMapping("/recommended")
-	public ResponseEntity<ApiResponse<RecommendedSpotListResponse>> getSpotList(
-		@ModelAttribute @Valid RecommendedSpotListRequest request
+	@GetMapping("/spots/recommended")
+	public ResponseEntity<ApiResponse<RecommendedSpotsResponse>> getSpotList(
+		@ModelAttribute @Valid CoordinateDto coord,
+		@RequestParam(name = "radius") Long radius
 	) {
-		var point = PointConverter.convert(request.lat(), request.lon());
-		var response = spotService.getRecommendedSpotList(new RecommendedSpotListServiceRequest(point, request.radius()));
+		var response = spotService.getRecommendedSpotList(new RecommendedSpotsRequest(coord.toCoord(), radius));
+		return ResponseEntity.ok(ApiResponse.success(response));
+	}
 
+	@GetMapping("/spot")
+	public ResponseEntity<ApiResponse<FindSpotResponse>> getSpot(
+		@ModelAttribute @Valid CoordinateDto coord
+	) {
+		var response = spotService.findSpot(new FindSpotRequest(coord.toCoord()));
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 }

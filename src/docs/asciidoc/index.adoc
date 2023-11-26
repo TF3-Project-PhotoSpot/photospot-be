@@ -13,4 +13,6 @@ endif::[]
 [[Spot-API]]
 == Spot API
 
-include::api/spot/spot.adoc[]
+include::api/spot/recommend-spots.adoc[]
+
+include::api/spot/find-spot.adoc[]

@@ -16,10 +16,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
+import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.spot.application.SpotService;
-import com.tf4.photospot.spot.application.request.RecommendedSpotListServiceRequest;
-import com.tf4.photospot.spot.application.response.RecommendedSpot;
-import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
+import com.tf4.photospot.spot.application.request.FindSpotRequest;
+import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
@@ -35,21 +38,23 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 	@Test
 	void getRecommendedSpotList() throws Exception {
 		//given
-		var recommendedSpots = List.of(RecommendedSpot.builder()
+		Double lat = 37.6676198504815;
+		Double lon = 127.046817765572;
+		var recommendedSpots = List.of(RecommendedSpotResponse.builder()
 				.id(1L)
 				.address("서울시 도봉구 마들로 643")
-				.bookmarkedCount(10L)
-				.coordinate(new CoordinateDto(32.0000, 70.0000))
+				.postCount(10L)
+				.coord(new CoordinateDto(32.0000, 70.0000))
 				.photoUrls(List.of(
 					"http://aaaaaa1.com",
 					"http://aaaaaa2.com",
 					"http://aaaaaa3.com"
 				)).build(),
-			RecommendedSpot.builder()
+			RecommendedSpotResponse.builder()
 				.id(2L)
 				.address("서울시 도봉구 마들로 645")
-				.bookmarkedCount(15L)
-				.coordinate(new CoordinateDto(35.0000, 65.0000))
+				.postCount(15L)
+				.coord(new CoordinateDto(35.0000, 65.0000))
 				.photoUrls(List.of(
 					"http://aaaaaa4.com",
 					"http://aaaaaa5.com",
@@ -57,16 +62,15 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				)).build()
 		);
 
-
-		given(spotService.getRecommendedSpotList(any(RecommendedSpotListServiceRequest.class)))
-			.willReturn(RecommendedSpotListResponse.builder()
+		given(spotService.getRecommendedSpotList(any(RecommendedSpotsRequest.class)))
+			.willReturn(RecommendedSpotsResponse.builder()
 				.centerAddress("서울시 도봉구 마들로 646")
 				.recommendedSpots(recommendedSpots)
 				.build());
-		//when
+		//when then
 		mockMvc.perform(get("/api/v1/spots/recommended")
-				.queryParam("lat", "35.0000")
-				.queryParam("lon", "70.0000")
+				.queryParam("lat", String.valueOf(lat))
+				.queryParam("lon", String.valueOf("127.0000"))
 				.queryParam("radius", "200")
 			)
 			.andDo(print())
@@ -85,12 +89,79 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.recommendedSpots").type(JsonFieldType.ARRAY).description("주변 추천 스팟 리스트"),
 					fieldWithPath("data.recommendedSpots[].id").type(JsonFieldType.NUMBER).description("추천 스팟 ID"),
 					fieldWithPath("data.recommendedSpots[].address").type(JsonFieldType.STRING).description("추천 스팟 주소"),
-					fieldWithPath("data.recommendedSpots[].bookmarkedCount").type(JsonFieldType.NUMBER)
-						.description("추천 장소 북마크수"),
-					fieldWithPath("data.recommendedSpots[].coordinate").type(JsonFieldType.OBJECT).description("스팟 좌표"),
-					fieldWithPath("data.recommendedSpots[].coordinate.lat").type(JsonFieldType.NUMBER).description("스팟 좌표"),
-					fieldWithPath("data.recommendedSpots[].coordinate.lon").type(JsonFieldType.NUMBER).description("스팟 좌표"),
-					fieldWithPath("data.recommendedSpots[].photoUrls").type(JsonFieldType.ARRAY).description("최신 방명록 사진")
+					fieldWithPath("data.recommendedSpots[].postCount").type(JsonFieldType.NUMBER)
+						.description("추천 장소 방명록수"),
+					fieldWithPath("data.recommendedSpots[].coord").type(JsonFieldType.OBJECT).description("스팟 좌표"),
+					fieldWithPath("data.recommendedSpots[].coord.lat").type(JsonFieldType.NUMBER).description("스팟 좌표"),
+					fieldWithPath("data.recommendedSpots[].coord.lon").type(JsonFieldType.NUMBER).description("스팟 좌표"),
+					fieldWithPath("data.recommendedSpots[].photoUrls").type(JsonFieldType.ARRAY)
+						.description("최신 방명록 사진")
+				)));
+	}
+
+	@DisplayName("특정 좌표로 등록된 스팟을 찾는다.")
+	@Test
+	void findRegisteredSpot() throws Exception {
+		//given
+		Double lat = 37.6676198504815;
+		Double lon = 127.046817765572;
+
+		given(spotService.findSpot(any(FindSpotRequest.class)))
+			.willReturn(new FindSpotResponse(Boolean.TRUE, 1L, "서울특별시 도봉구 마들로 646", new CoordinateDto(lat, lon)));
+		//when then
+		mockMvc.perform(get("/api/v1/spot")
+				.queryParam("lat", String.valueOf(lat))
+				.queryParam("lon", String.valueOf(lon)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("find-registered-spot",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				queryParameters(
+					parameterWithName("lat").description("위도(latitude)"),
+					parameterWithName("lon").description("경도(longitude)")
+				),
+				responseFields(
+					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
+					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("스팟 id"),
+					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
+					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
+					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
+					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
+				)));
+	}
+
+	@DisplayName("특정 좌표로 등록되지 않은 스팟을 찾는다.")
+	@Test
+	void findUnregisteredSpot() throws Exception {
+		// given
+		Double lat = 37.6676198504815;
+		Double lon = 127.046817765572;
+		var coord = PointConverter.convert(lat, lon);
+
+		given(spotService.findSpot(any(FindSpotRequest.class)))
+			.willReturn(FindSpotResponse.toNonSpotResponse(coord, "서울특별시 도봉구 마들로 646"));
+
+		//when then
+		mockMvc.perform(get("/api/v1/spot")
+				.queryParam("lat", String.valueOf(lat))
+				.queryParam("lon", String.valueOf(lon)))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("find-unregistered-spot",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				queryParameters(
+					parameterWithName("lat").description("위도(latitude)"),
+					parameterWithName("lon").description("경도(longitude)")
+				),
+				responseFields(
+					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
+					fieldWithPath("data.id").type(JsonFieldType.NULL).description("스팟 id"),
+					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
+					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
+					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
+					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
 				)));
 	}
 }

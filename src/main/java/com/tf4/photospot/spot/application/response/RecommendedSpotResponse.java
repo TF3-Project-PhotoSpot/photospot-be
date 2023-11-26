@@ -7,11 +7,11 @@ import com.tf4.photospot.global.dto.CoordinateDto;
 import lombok.Builder;
 
 @Builder
-public record RecommendedSpot(
+public record RecommendedSpotResponse(
 	Long id,
 	String address,
-	Long bookmarkedCount,
-	CoordinateDto coordinate,
+	Long postCount,
+	CoordinateDto coord,
 	List<String> photoUrls
 ) {
 }
