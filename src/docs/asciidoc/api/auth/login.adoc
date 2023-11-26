@@ -1,0 +1,18 @@
+[[login-by-kakao]]
+=== 카카오 로그인
+
+=== Request
+
+include::{snippets}/initial-login/http-request.adoc[]
+
+=== Request Fields
+
+include::{snippets}/initial-login/query-parameters.adoc[]
+
+=== 카카오 최초 로그인 Response
+
+include::{snippets}/initial-login/http-response.adoc[]
+
+=== 기존 유저 카카오 로그인 Response
+
+include::{snippets}/previous-login/http-response.adoc[]

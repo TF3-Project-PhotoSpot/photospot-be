@@ -14,12 +14,15 @@ import lombok.NoArgsConstructor;
 public final class PointConverter {
 	private static final GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
 
-	public static Point convert(final Double lat, final Double lon) {
+	public static Point convert(final Double lon, final Double lat) {
 		return geometryFactory.createPoint(new Coordinate(lon, lat));
 	}
 
+	public static Point convert(final CoordinateDto dto) {
+		return geometryFactory.createPoint(new Coordinate(dto.lon(), dto.lat()));
+	}
+
 	public static CoordinateDto convert(final Point coord) {
-		return new CoordinateDto(coord.getY(), coord.getX());
+		return new CoordinateDto(coord.getX(), coord.getY());
 	}
 }
-

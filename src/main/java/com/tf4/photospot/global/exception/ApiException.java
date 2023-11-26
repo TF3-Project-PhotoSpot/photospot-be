@@ -1,6 +1,5 @@
 package com.tf4.photospot.global.exception;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
 import lombok.RequiredArgsConstructor;
