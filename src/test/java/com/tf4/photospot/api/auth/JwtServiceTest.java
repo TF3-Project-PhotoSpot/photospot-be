@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.IntegrationTestSupport;
-import com.tf4.photospot.auth.domain.jwt.RefreshToken;
-import com.tf4.photospot.auth.infrastructure.JwtRepository;
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.domain.jwt.RefreshToken;
+import com.tf4.photospot.auth.infrastructure.JwtRepository;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
 

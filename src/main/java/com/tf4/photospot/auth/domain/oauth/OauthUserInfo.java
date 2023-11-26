@@ -4,8 +4,7 @@ import java.util.Map;
 
 import com.tf4.photospot.user.domain.User;
 
-
-public record OauthUserInfo (String account) {
+public record OauthUserInfo(String account) {
 
 	public static OauthUserInfo of(String type, Map<String, Object> userAttributes) {
 		return OauthAttributes.findByProviderType(type).of(userAttributes);

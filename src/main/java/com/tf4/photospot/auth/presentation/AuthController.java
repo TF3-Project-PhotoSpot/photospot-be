@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.auth.application.AuthService;
-import com.tf4.photospot.auth.domain.oauth.OauthAttributes;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.domain.oauth.OauthAttributes;
 import com.tf4.photospot.global.dto.ApiResponse;
 
 import lombok.RequiredArgsConstructor;

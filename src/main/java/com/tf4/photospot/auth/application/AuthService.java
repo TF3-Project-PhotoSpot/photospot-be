@@ -12,12 +12,12 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
 
-import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
-import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
-import com.tf4.photospot.auth.infrastructure.InMemoryRegistrationsRepository;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.auth.application.response.OauthTokenResponse;
 import com.tf4.photospot.auth.application.response.UserLoginResponse;
+import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
+import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
+import com.tf4.photospot.auth.infrastructure.InMemoryRegistrationsRepository;
 import com.tf4.photospot.user.application.UserService;
 
 @Service
@@ -46,7 +46,8 @@ public class AuthService {
 		OauthUserInfo userInfo = getUserInfo(providerType, registration, tokenResponse);
 
 		UserLoginResponse loginUser = userService.oauthLogin(providerType, userInfo);
-		return jwtService.issueTokens(loginUser.hasLoggedInBefore(), userService.findUser(loginUser.getAccount(), providerType));
+		return jwtService.issueTokens(loginUser.hasLoggedInBefore(),
+			userService.findUser(loginUser.getAccount(), providerType));
 	}
 
 	private OauthTokenResponse requestAccessToken(String code, OauthRegistration registration) {

@@ -12,11 +12,11 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.IntegrationTestSupport;
-import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
 import com.tf4.photospot.auth.application.response.UserLoginResponse;
+import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
+import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
-import com.tf4.photospot.user.application.UserService;
 
 public class UserServiceTest extends IntegrationTestSupport {
 
