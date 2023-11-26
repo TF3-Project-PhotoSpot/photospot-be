@@ -3,13 +3,21 @@ plugins {
     id 'org.springframework.boot' version '3.2.0-RC2'
     id 'io.spring.dependency-management' version '1.1.3'
     id 'org.asciidoctor.jvm.convert' version '3.3.2'
+    id 'checkstyle'
+    id 'jacoco'
+    id 'org.sonarqube' version '3.5.0.2730'
 }
 
-group = 'com.photospot'
+group = 'com.tf4'
 version = '0.0.1-SNAPSHOT'
 
 java {
     sourceCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo.spring.io/milestone' }
 }
 
 configurations {
@@ -19,21 +27,15 @@ configurations {
     asciidoctorExtensions
 }
 
-repositories {
-    mavenCentral()
-    maven { url 'https://repo.spring.io/milestone' }
-}
-
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.hibernate.orm:hibernate-spatial'
-
-    implementation 'org.springframework.boot:spring-boot-configuration-processor'
     implementation 'io.jsonwebtoken:jjwt:0.9.1'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
@@ -57,22 +59,53 @@ tasks.named('test') {
 }
 
 tasks.named('asciidoctor') {
-
     configurations 'asciidoctorExtensions'
-
     sources {
         include("**/index.adoc")
     }
-
     inputs.dir snippetsDir
-
     baseDirFollowsSourceFile()
+
     dependsOn test
 }
 
+asciidoctor.doFirst {
+    delete file('src/main/resources/static/docs')
+}
+
+task createDocs(type: Copy) {
+    dependsOn asciidoctor
+
+    from file("build/docs/asciidoc")
+    into file("src/main/resources/static/docs")
+}
+
 bootJar {
-    dependsOn 'asciidoctor'
+    dependsOn asciidoctor
+    dependsOn createDocs
     from("${asciidoctor.outputDir}") {
         into 'static/docs'
+    }
+}
+
+checkstyle {
+    maxWarnings = 0
+    toolVersion = "10.4"
+    configFile = file("checkstyle/naver-checkstyle-rules.xml")
+    configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
+    sourceSets = [sourceSets.main] // CompileQuerydsl 오류 해결
+}
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+}
+sonar {
+    properties {
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.organization', 'dnd-side-project'
+        property 'sonar.projectKey', 'dnd-side-project_dnd-8th-8-backend'
+        property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
     }
 }
