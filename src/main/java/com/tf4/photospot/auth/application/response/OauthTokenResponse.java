@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.presentation.response;
+package com.tf4.photospot.auth.application.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

@@ -1,12 +1,10 @@
-package com.tf4.photospot.user.presentation;
-
-import java.util.Optional;
+package com.tf4.photospot.user.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.auth.application.response.UserLoginResponse;
 import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
-import com.tf4.photospot.auth.presentation.response.UserLoginResponse;
 import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
@@ -20,18 +18,21 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public UserLoginResponse oauthLogin(String providerName, OauthUserInfo userInfo) {
-		User user = userInfo.toUser(providerName, generateNickname());
-		Optional<User> findUser = userRepository.findUserByAccountAndProviderType(user.getAccount(),
-			user.getProviderType());
+	public UserLoginResponse oauthLogin(String providerType, OauthUserInfo userInfo) {
+		User user = userInfo.toUser(providerType, generateNickname());
+		User findUser = findUser(userInfo.account(), providerType);
 		return loginOrSignup(user, findUser);
 	}
 
-	private UserLoginResponse loginOrSignup(User user, Optional<User> findUser) {
-		if (findUser.isEmpty()) {
-			return new UserLoginResponse(false, userRepository.save(user));
+	public User findUser(String account, String providerType) {
+		return userRepository.findUserByAccountAndProviderType(account, providerType).orElse(null);
+	}
+
+	private UserLoginResponse loginOrSignup(User user, User findUser) {
+		if (findUser == null) {
+			return UserLoginResponse.from(false, userRepository.save(user));
 		}
-		return new UserLoginResponse(true, findUser.get());
+		return UserLoginResponse.from(true, findUser);
 	}
 
 	private boolean isNicknameDuplicated(String nickname) {

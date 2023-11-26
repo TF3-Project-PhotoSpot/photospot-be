@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.presentation;
+package com.tf4.photospot.auth.application;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -15,10 +15,10 @@ import org.springframework.web.client.RestClient;
 import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
 import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
 import com.tf4.photospot.auth.infrastructure.InMemoryRegistrationsRepository;
-import com.tf4.photospot.auth.presentation.response.LoginTokenResponse;
-import com.tf4.photospot.auth.presentation.response.OauthTokenResponse;
-import com.tf4.photospot.auth.presentation.response.UserLoginResponse;
-import com.tf4.photospot.user.presentation.UserService;
+import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.application.response.OauthTokenResponse;
+import com.tf4.photospot.auth.application.response.UserLoginResponse;
+import com.tf4.photospot.user.application.UserService;
 
 @Service
 public class AuthService {
@@ -39,18 +39,14 @@ public class AuthService {
 
 	// Todo : 예외 수정
 	@Transactional
-	public LoginTokenResponse login(String code, String provider) {
-		OauthRegistration registration = inMemoryRegistrationsRepository.findByProviderName(provider);
-
-		if (registration == null) {
-			throw new RuntimeException();
-		}
+	public LoginTokenResponse login(String code, String providerType) {
+		OauthRegistration registration = inMemoryRegistrationsRepository.findByProviderType(providerType).orElseThrow();
 
 		OauthTokenResponse tokenResponse = requestAccessToken(code, registration);
-		OauthUserInfo userInfo = getUserInfo(provider, registration, tokenResponse);
+		OauthUserInfo userInfo = getUserInfo(providerType, registration, tokenResponse);
 
-		UserLoginResponse loginUser = userService.oauthLogin(provider, userInfo);
-		return jwtService.issueTokens(loginUser.hasLoggedInBefore(), loginUser.getUser());
+		UserLoginResponse loginUser = userService.oauthLogin(providerType, userInfo);
+		return jwtService.issueTokens(loginUser.hasLoggedInBefore(), userService.findUser(loginUser.getAccount(), providerType));
 	}
 
 	private OauthTokenResponse requestAccessToken(String code, OauthRegistration registration) {
@@ -77,10 +73,10 @@ public class AuthService {
 		return params;
 	}
 
-	private OauthUserInfo getUserInfo(String providerName, OauthRegistration registration,
+	private OauthUserInfo getUserInfo(String providerType, OauthRegistration registration,
 		OauthTokenResponse tokenResponse) {
 		Map<String, Object> userAttributes = getUserAttributes(registration, tokenResponse);
-		return OauthUserInfo.of(providerName, userAttributes);
+		return OauthUserInfo.of(providerType, userAttributes);
 	}
 
 	private Map<String, Object> getUserAttributes(OauthRegistration registration,

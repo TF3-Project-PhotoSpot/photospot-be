@@ -13,10 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.domain.oauth.OauthUserInfo;
-import com.tf4.photospot.auth.presentation.response.UserLoginResponse;
+import com.tf4.photospot.auth.application.response.UserLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
-import com.tf4.photospot.user.presentation.UserService;
+import com.tf4.photospot.user.application.UserService;
 
 public class UserServiceTest extends IntegrationTestSupport {
 
@@ -30,13 +30,13 @@ public class UserServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Collection<DynamicTest> saveUser() {
 		// given
-		String providerName = "kakao";
+		String providerType = "kakao";
 		OauthUserInfo userInfo = new OauthUserInfo("account");
 
 		return List.of(
 			DynamicTest.dynamicTest("최초 로그인 시 사용자 정보를 DB에 저장한다.", () -> {
 				//when
-				UserLoginResponse loginResponse = userService.oauthLogin(providerName, userInfo);
+				UserLoginResponse loginResponse = userService.oauthLogin(providerType, userInfo);
 
 				//then
 				assertAll(
@@ -46,14 +46,14 @@ public class UserServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("기존에 로그인 했던 사용자는 DB에 저장하지 않는다.", () -> {
 				//when
-				UserLoginResponse loginResponse2 = userService.oauthLogin(providerName, userInfo);
+				UserLoginResponse loginResponse2 = userService.oauthLogin(providerType, userInfo);
 				User savedUser = userRepository.findById(1L).orElseThrow();
 
 				//then
 				assertAll(
 					() -> assertThat(loginResponse2.hasLoggedInBefore()).isTrue(),
 					() -> assertThat(userRepository.findAll()).hasSize(1),
-					() -> assertThat(savedUser.getAccount()).isEqualTo(userInfo.getAccount())
+					() -> assertThat(savedUser.getAccount()).isEqualTo(userInfo.account())
 				);
 			})
 		);

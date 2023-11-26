@@ -13,9 +13,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
 
-import com.tf4.photospot.auth.application.AuthController;
-import com.tf4.photospot.auth.presentation.AuthService;
-import com.tf4.photospot.auth.presentation.response.LoginTokenResponse;
+import com.tf4.photospot.auth.presentation.AuthController;
+import com.tf4.photospot.auth.application.AuthService;
+import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class AuthControllerDocsTest extends RestDocsSupport {

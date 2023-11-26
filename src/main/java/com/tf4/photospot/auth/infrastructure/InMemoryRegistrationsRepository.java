@@ -1,6 +1,7 @@
 package com.tf4.photospot.auth.infrastructure;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.tf4.photospot.auth.domain.oauth.OauthRegistration;
 
@@ -11,7 +12,7 @@ public class InMemoryRegistrationsRepository {
 
 	private final Map<String, OauthRegistration> registrations;
 
-	public OauthRegistration findByProviderName(String name) {
-		return registrations.get(name);
+	public Optional<OauthRegistration> findByProviderType(String name) {
+		return Optional.of(registrations.get(name));
 	}
 }
