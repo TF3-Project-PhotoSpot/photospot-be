@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.global.dto.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,13 @@ public class AuthController {
 	private final AuthService authService;
 
 	@GetMapping("/login")
-	public ApiResponse<LoginTokenResponse> login(
-		@RequestParam("providerType") String providerType, @RequestParam("account") String account) {
+	public ApiResponse<LoginTokenResponse> login(@RequestParam("providerType") String providerType, String account) {
 		return ApiResponse.success(authService.login(providerType, account));
+	}
+
+	@GetMapping("/reissue")
+	public ApiResponse<ReissueTokenResponse> reissueToken(
+		@RequestParam("refreshToken") String refreshToken) {
+		return ApiResponse.success(authService.reissueToken(refreshToken));
 	}
 }
