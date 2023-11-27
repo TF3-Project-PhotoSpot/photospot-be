@@ -27,9 +27,9 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 		return new AuthController(authService);
 	}
 
-	@DisplayName("카카오 최초 로그인")
+	@DisplayName("최초 로그인")
 	@Test
-	void initialLoginByKakao() throws Exception {
+	void initialLogin() throws Exception {
 
 		//given
 		var initialLoginUserResponse
@@ -39,8 +39,9 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 			.willReturn(initialLoginUserResponse);
 
 		//when & then
-		mockMvc.perform(get("/api/v1/auth/login/kakao")
-				.queryParam("code", "authorization_code")
+		mockMvc.perform(get("/api/v1/auth/login")
+				.queryParam("providerType", "kakao")
+				.queryParam("account", "123456")
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -48,7 +49,8 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				queryParameters(
-					parameterWithName("code").description("인가 코드")
+					parameterWithName("providerType").description("로그인 공급자 타입"),
+					parameterWithName("account").description("oauth에서 제공하는 사용자 고유 account")
 				),
 				responseFields(
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
@@ -58,9 +60,9 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 				)));
 	}
 
-	@DisplayName("기존 유저 카카오 로그인")
+	@DisplayName("기존 유저 로그인")
 	@Test
-	void previousLoginByKakao() throws Exception {
+	void previousLogin() throws Exception {
 
 		// given
 		var previousLoginUserResponse
@@ -70,8 +72,9 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 			.willReturn(previousLoginUserResponse);
 
 		// when & then
-		mockMvc.perform(get("/api/v1/auth/login/kakao")
-				.queryParam("code", "authorization_code")
+		mockMvc.perform(get("/api/v1/auth/login")
+				.queryParam("providerType", "kakao")
+				.queryParam("account", "123456")
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -79,7 +82,8 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
 				queryParameters(
-					parameterWithName("code").description("인가 코드")
+					parameterWithName("providerType").description("로그인 공급자 타입"),
+					parameterWithName("account").description("oauth에서 제공하는 사용자 고유 account")
 				),
 				responseFields(
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
