@@ -1,0 +1,14 @@
+[[reissue-token]]
+=== 액세트 토큰 재발급
+
+=== Request
+
+include::{snippets}/reissue-token/http-request.adoc[]
+
+=== Request Fields
+
+include::{snippets}/reissue-token/query-parameters.adoc[]
+
+=== 카카오 최초 로그인 Response
+
+include::{snippets}/reissue-token/http-response.adoc[]

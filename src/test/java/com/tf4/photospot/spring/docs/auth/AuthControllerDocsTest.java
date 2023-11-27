@@ -15,6 +15,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.presentation.AuthController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
@@ -30,7 +31,6 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@DisplayName("최초 로그인")
 	@Test
 	void initialLogin() throws Exception {
-
 		//given
 		var initialLoginUserResponse
 			= new LoginTokenResponse(false, "access_token", "refresh_token");
@@ -63,7 +63,6 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@DisplayName("기존 유저 로그인")
 	@Test
 	void previousLogin() throws Exception {
-
 		// given
 		var previousLoginUserResponse
 			= new LoginTokenResponse(true, "access_token", "refresh_token");
@@ -90,6 +89,31 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 유무"),
 					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
 					fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰")
+				)));
+	}
+
+	@DisplayName("액세스 토큰 재발급")
+	@Test
+	void reissueToken() throws Exception {
+		// given
+		var tokenResponse = new ReissueTokenResponse("access_token");
+		given(authService.reissueToken(any(String.class))).willReturn(tokenResponse);
+
+		// when & then
+		mockMvc.perform(get("/api/v1/auth/reissue")
+				.queryParam("refreshToken", "refresh_token")
+			)
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("reissue-token",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				queryParameters(
+					parameterWithName("refreshToken").description("사용자의 리프레시 토큰")
+				),
+				responseFields(
+					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
+					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰")
 				)));
 	}
 }
