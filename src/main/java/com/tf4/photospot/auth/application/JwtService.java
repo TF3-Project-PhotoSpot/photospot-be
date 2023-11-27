@@ -78,4 +78,9 @@ public class JwtService {
 		return header.substring(PREFIX.length());
 	}
 
+	@Transactional
+	public void removeRefreshToken(Long userId) {
+		jwtRepository.deleteById(userId);
+	}
+
 }

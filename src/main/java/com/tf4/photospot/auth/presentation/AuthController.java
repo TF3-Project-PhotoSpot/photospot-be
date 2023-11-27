@@ -20,7 +20,8 @@ public class AuthController {
 	private final AuthService authService;
 
 	@GetMapping("/login")
-	public ApiResponse<LoginTokenResponse> login(@RequestParam("providerType") String providerType, String account) {
+	public ApiResponse<LoginTokenResponse> login(@RequestParam("providerType") String providerType,
+		@RequestParam("account") String account) {
 		return ApiResponse.success(authService.login(providerType, account));
 	}
 
