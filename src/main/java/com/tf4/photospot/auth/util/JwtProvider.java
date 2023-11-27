@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.util.jwt;
+package com.tf4.photospot.auth.util;
 
 import java.time.Duration;
 import java.util.Date;

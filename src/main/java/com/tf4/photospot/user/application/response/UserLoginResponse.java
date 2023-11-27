@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.application.response;
+package com.tf4.photospot.user.application.response;
 
 import com.tf4.photospot.user.domain.User;
 
