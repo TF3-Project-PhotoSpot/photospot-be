@@ -5,7 +5,7 @@ import java.util.Date;
 
 import org.springframework.stereotype.Component;
 
-import com.tf4.photospot.config.jwt.JwtProperties;
+import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.user.domain.User;
 
 import io.jsonwebtoken.Header;
