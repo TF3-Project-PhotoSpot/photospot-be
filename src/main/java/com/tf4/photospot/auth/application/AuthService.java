@@ -20,7 +20,6 @@ public class AuthService {
 	private final UserService userService;
 	private final JwtService jwtService;
 
-	// Todo : 예외 수정
 	@Transactional
 	public LoginTokenResponse login(String providerType, String account) {
 		UserLoginResponse loginUser = userService.oauthLogin(providerType, account);

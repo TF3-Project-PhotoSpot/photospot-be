@@ -9,7 +9,9 @@ import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRepository;
 import com.tf4.photospot.auth.util.JwtProvider;
-import com.tf4.photospot.config.jwt.JwtProperties;
+import com.tf4.photospot.global.config.jwt.JwtProperties;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.user.domain.User;
 
 import io.jsonwebtoken.Claims;
@@ -41,11 +43,11 @@ public class JwtService {
 		return new LoginTokenResponse(hasLoggedInBefore, accessToken, refreshToken);
 	}
 
+	@Transactional
 	public String reissueAccessToken(User user) {
 		return jwtProvider.generateToken(user, ACCESS_TOKEN_DURATION);
 	}
 
-	// Todo : 예외 처리
 	public Claims parse(String authorizationHeader) {
 		String token = removePrefix(authorizationHeader);
 		try {
@@ -54,28 +56,24 @@ public class JwtService {
 				.parseClaimsJws(token)
 				.getBody();
 		} catch (ExpiredJwtException ex) {
-			throw new RuntimeException();
+			throw new ApiException(AuthErrorCode.EXPIRED_TOKEN);
 		} catch (UnsupportedJwtException | MalformedJwtException | SignatureException ex) {
-			throw new RuntimeException();
-		} catch (IllegalArgumentException ex) {
-			throw new RuntimeException();
+			throw new ApiException(AuthErrorCode.INVALID_TOKEN);
 		}
 	}
 
-	// Todo : 예외 처리
 	public void validRefreshToken(Long userId, String refreshToken) {
 		RefreshToken token = jwtRepository.findByUserId(userId)
-			.orElseThrow();
+			.orElseThrow(() -> new ApiException(AuthErrorCode.EXPIRED_TOKEN));
 
 		if (!token.isTokenMatching(removePrefix(refreshToken))) {
-			throw new RuntimeException();
+			throw new ApiException(AuthErrorCode.INVALID_TOKEN);
 		}
 	}
 
-	// Todo : 예외 처리
 	private String removePrefix(String header) {
 		if (header == null || !header.startsWith(PREFIX)) {
-			throw new RuntimeException();
+			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
 		return header.substring(PREFIX.length());
 	}
