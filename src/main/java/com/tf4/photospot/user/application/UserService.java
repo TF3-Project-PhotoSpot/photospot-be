@@ -20,19 +20,19 @@ public class UserService {
 	@Transactional
 	public UserLoginResponse oauthLogin(String providerType, OauthUserInfo userInfo) {
 		User user = userInfo.toUser(providerType, generateNickname());
-		User findUser = findUser(userInfo.account(), providerType);
-		return loginOrSignup(user, findUser);
+		return loginOrSignup(user, userInfo.account(), providerType);
 	}
 
+	private UserLoginResponse loginOrSignup(User user, String account, String providerType) {
+		return userRepository.findUserByAccountAndProviderType(account, providerType)
+			.map(findUser -> UserLoginResponse.from(true, findUser))
+			.orElseGet(() -> UserLoginResponse.from(false, userRepository.save(user)));
+	}
+
+	// Todo : 예외 처리
 	public User findUser(String account, String providerType) {
-		return userRepository.findUserByAccountAndProviderType(account, providerType).orElse(null);
-	}
-
-	private UserLoginResponse loginOrSignup(User user, User findUser) {
-		if (findUser == null) {
-			return UserLoginResponse.from(false, userRepository.save(user));
-		}
-		return UserLoginResponse.from(true, findUser);
+		return userRepository.findUserByAccountAndProviderType(account, providerType)
+			.orElseThrow();
 	}
 
 	private boolean isNicknameDuplicated(String nickname) {
