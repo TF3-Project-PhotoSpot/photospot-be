@@ -1,4 +1,4 @@
-package com.tf4.photospot.api.user;
+package com.tf4.photospot.user.application;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.IntegrationTestSupport;
-import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.response.UserLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;

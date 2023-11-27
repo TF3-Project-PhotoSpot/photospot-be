@@ -1,4 +1,4 @@
-package com.tf4.photospot.api.auth;
+package com.tf4.photospot.auth.application;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.IntegrationTestSupport;
-import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 
 public class AuthServiceTest extends IntegrationTestSupport {
