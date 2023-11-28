@@ -9,7 +9,6 @@ public record ApiResponse<T>(
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	String message,
 
-	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	T data
 ) {
 	public static <T> ApiResponse<T> success(T data) {
