@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
-import com.tf4.photospot.auth.infrastructure.JwtRepository;
 import com.tf4.photospot.auth.util.JwtProvider;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;

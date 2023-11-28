@@ -1,11 +1,9 @@
-package com.tf4.photospot.auth.infrastructure;
+package com.tf4.photospot.auth.domain;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import com.tf4.photospot.auth.domain.RefreshToken;
 
 @Repository
 public interface JwtRepository extends JpaRepository<RefreshToken, Long> {
