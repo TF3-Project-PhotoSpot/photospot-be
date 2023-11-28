@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.domain.jwt;
+package com.tf4.photospot.auth.domain;
 
 import java.util.Objects;
 

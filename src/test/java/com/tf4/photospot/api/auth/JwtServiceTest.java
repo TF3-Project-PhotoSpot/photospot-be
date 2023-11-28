@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.IntegrationTestSupport;
-import com.tf4.photospot.auth.domain.jwt.RefreshToken;
+import com.tf4.photospot.auth.application.JwtService;
+import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRepository;
-import com.tf4.photospot.auth.presentation.JwtService;
-import com.tf4.photospot.auth.presentation.response.LoginTokenResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
 
@@ -31,8 +31,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 	void issueTokens() {
 		// given
 		boolean hasLoggedInBefore = false;
-		User userInfo = new User(null, null, "nickname", null,
-			"kakao", "account", null);
+		User userInfo = new User("nickname", "kakao", "account");
 		User savedUser = userRepository.save(userInfo);
 		LoginTokenResponse tokenResponse = jwtService.issueTokens(hasLoggedInBefore, savedUser);
 

@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.util;
+package com.tf4.photospot.user.util;
 
 import java.util.Random;
 

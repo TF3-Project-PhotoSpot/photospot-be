@@ -1,8 +1,7 @@
-package com.tf4.photospot.auth.presentation.response;
+package com.tf4.photospot.auth.application.response;
 
 public record LoginTokenResponse(
 	boolean hasLoggedInBefore,
 	String accessToken,
-	String refreshToken
-) {
+	String refreshToken) {
 }

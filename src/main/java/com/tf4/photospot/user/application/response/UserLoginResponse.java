@@ -1,4 +1,4 @@
-package com.tf4.photospot.auth.presentation.response;
+package com.tf4.photospot.user.application.response;
 
 import com.tf4.photospot.user.domain.User;
 
@@ -10,13 +10,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserLoginResponse {
 
+	@Getter
 	private boolean hasLoggedInBefore;
 
 	@Getter
-	private User user;
+	private String account;
 
 	public boolean hasLoggedInBefore() {
 		return hasLoggedInBefore;
+	}
+
+	public static UserLoginResponse from(boolean hasLoggedInBefore, User user) {
+		return new UserLoginResponse(hasLoggedInBefore, user.getAccount());
 	}
 
 }

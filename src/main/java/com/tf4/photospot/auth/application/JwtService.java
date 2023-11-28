@@ -1,14 +1,14 @@
-package com.tf4.photospot.auth.presentation;
+package com.tf4.photospot.auth.application;
 
 import java.time.Duration;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.auth.domain.jwt.RefreshToken;
+import com.tf4.photospot.auth.application.response.LoginTokenResponse;
+import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRepository;
-import com.tf4.photospot.auth.presentation.response.LoginTokenResponse;
-import com.tf4.photospot.auth.util.jwt.JwtProvider;
+import com.tf4.photospot.auth.util.JwtProvider;
 import com.tf4.photospot.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
