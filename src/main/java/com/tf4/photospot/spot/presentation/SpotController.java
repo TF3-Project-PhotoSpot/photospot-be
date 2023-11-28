@@ -19,7 +19,7 @@ import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +53,7 @@ public class SpotController {
 	@GetMapping("/spots")
 	public ResponseEntity<ApiResponse<NearbySpotListResponse>> getNearbySpotList(
 		@ModelAttribute @Valid CoordinateDto coord,
-		@RequestParam(name = "radius") @PositiveOrZero(message = "반경(m)은 0보다 커야 됩니다.") Integer radius
+		@RequestParam(name = "radius") @Positive(message = "반경(m)은 0보다 커야 됩니다.") Integer radius
 	) {
 		var response = spotService.getNearbySpotList(new NearbySpotRequest(coord.toCoord(), radius));
 		return ResponseEntity.ok(ApiResponse.success(response));
