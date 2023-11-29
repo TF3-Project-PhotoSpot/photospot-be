@@ -11,12 +11,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.presentation.AuthController;
+import com.tf4.photospot.auth.presentation.request.ReissueRequest;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class AuthControllerDocsTest extends RestDocsSupport {
@@ -101,15 +103,16 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 
 		// when & then
 		mockMvc.perform(get("/api/v1/auth/reissue")
-				.queryParam("refreshToken", "refresh_token")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(new ReissueRequest("refresh_token")))
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(document("reissue-token",
 				preprocessRequest(prettyPrint()),
 				preprocessResponse(prettyPrint()),
-				queryParameters(
-					parameterWithName("refreshToken").description("사용자의 리프레시 토큰")
+				requestFields(
+					fieldWithPath("refreshToken").type(JsonFieldType.STRING).description("사용자의 리프레시 토큰")
 				),
 				responseFields(
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),

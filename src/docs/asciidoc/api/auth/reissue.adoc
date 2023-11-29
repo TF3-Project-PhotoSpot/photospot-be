@@ -5,10 +5,6 @@
 
 include::{snippets}/reissue-token/http-request.adoc[]
 
-=== Request Fields
-
-include::{snippets}/reissue-token/query-parameters.adoc[]
-
-=== 카카오 최초 로그인 Response
+=== Response Fields
 
 include::{snippets}/reissue-token/http-response.adoc[]

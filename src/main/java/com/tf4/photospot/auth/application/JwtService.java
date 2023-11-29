@@ -43,7 +43,6 @@ public class JwtService {
 		return new LoginTokenResponse(hasLoggedInBefore, accessToken, refreshToken);
 	}
 
-	@Transactional
 	public String reissueAccessToken(User user) {
 		return jwtProvider.generateToken(user, ACCESS_TOKEN_DURATION);
 	}

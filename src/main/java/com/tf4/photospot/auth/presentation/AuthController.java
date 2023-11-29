@@ -1,6 +1,7 @@
 package com.tf4.photospot.auth.presentation;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
+import com.tf4.photospot.auth.presentation.request.ReissueRequest;
 import com.tf4.photospot.global.dto.ApiResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -27,7 +29,7 @@ public class AuthController {
 
 	@GetMapping("/reissue")
 	public ApiResponse<ReissueTokenResponse> reissueToken(
-		@RequestParam("refreshToken") String refreshToken) {
-		return ApiResponse.success(authService.reissueToken(refreshToken));
+		@RequestBody ReissueRequest request) {
+		return ApiResponse.success(authService.reissueToken(request.refreshToken()));
 	}
 }
