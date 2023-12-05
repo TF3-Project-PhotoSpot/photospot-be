@@ -11,6 +11,7 @@ import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.user.domain.User;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -21,8 +22,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Post extends BaseEntity {
@@ -30,11 +34,11 @@ public class Post extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User writer;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "photo_id")
 	private Photo photo;
 
@@ -57,4 +61,16 @@ public class Post extends BaseEntity {
 	private boolean isPrivate;
 
 	private LocalDateTime deletedAt;
+
+	@Builder
+	public Post(User writer, Photo photo, Spot spot, Point coord, String detailAddress, Long likeCount,
+		boolean isPrivate) {
+		this.writer = writer;
+		this.photo = photo;
+		this.spot = spot;
+		this.coord = coord;
+		this.detailAddress = detailAddress;
+		this.likeCount = likeCount;
+		this.isPrivate = isPrivate;
+	}
 }
