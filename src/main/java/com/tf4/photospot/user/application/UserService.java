@@ -11,8 +11,9 @@ import com.tf4.photospot.user.util.NicknameGenerator;
 
 import lombok.RequiredArgsConstructor;
 
-@RequiredArgsConstructor
+@Transactional(readOnly = true)
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
 	private final UserRepository userRepository;
@@ -24,6 +25,12 @@ public class UserService {
 			.orElseGet(() -> UserLoginResponse.from(false, userRepository.save(
 				new LoginUserInfo(providerType, account).toUser(generateNickname())
 			)));
+	}
+
+	// Todo : 예외 처리
+	public User findUser(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow();
 	}
 
 	// Todo : 예외 처리

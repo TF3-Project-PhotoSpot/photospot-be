@@ -1,4 +1,4 @@
-package com.tf4.photospot.config.jwt;
+package com.tf4.photospot.global.config.jwt;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
