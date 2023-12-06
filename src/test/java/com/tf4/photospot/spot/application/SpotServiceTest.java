@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
@@ -23,8 +23,7 @@ import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
 
 @Transactional
-@SpringBootTest
-class SpotServiceTest {
+class SpotServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private SpotService spotService;
 

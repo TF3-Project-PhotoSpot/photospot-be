@@ -11,22 +11,17 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
-import com.tf4.photospot.user.application.UserService;
 
+@Transactional
 public class AuthServiceTest extends IntegrationTestSupport {
 
 	@Autowired
 	private AuthService authService;
-
-	@Autowired
-	private JwtService jwtService;
-
-	@Autowired
-	private UserService userService;
 
 	@DisplayName("사용자 로그인 및 토큰 발급 시나리오")
 	@TestFactory
