@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
@@ -23,8 +23,7 @@ import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
 
 @Transactional
-@SpringBootTest
-class SpotServiceTest {
+class SpotServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private SpotService spotService;
 
@@ -41,7 +40,7 @@ class SpotServiceTest {
 		@DisplayName("등록된 스팟이 없으면 해당 장소의 정보를 반환한다")
 		@Test
 		void findUnregisteredSpot() {
-			var coord = convert(37.6676198504815, 127.046817765572);
+			var coord = convert(127.046817765572, 37.6676198504815);
 
 			given(mapApiClient.findAddressByCoordinate(any(Point.class)))
 				.willReturn(Optional.of("서울시 마들로 646"));
@@ -55,15 +54,15 @@ class SpotServiceTest {
 			assertThat(foundSpot.isSpot()).isFalse();
 			assertThat(foundSpot.id()).isNull();
 			assertThat(foundSpot.address()).isEqualTo("서울시 마들로 646");
-			assertThat(foundSpot.coord().lat()).isEqualTo(37.6676198504815);
 			assertThat(foundSpot.coord().lon()).isEqualTo(127.046817765572);
+			assertThat(foundSpot.coord().lat()).isEqualTo(37.6676198504815);
 		}
 
 		@DisplayName("등록된 스팟이 있으면 해당 스팟의 정보를 반환한다.")
 		@Test
 		void findRegisteredSpot() {
 			//given
-			var coord = convert(37.6676198504815, 127.046817765572);
+			var coord = convert(127.046817765572, 37.6676198504815);
 			var spot = new Spot("서울시 마들로 646", coord, 0L);
 			spotRepository.save(spot);
 
@@ -79,15 +78,15 @@ class SpotServiceTest {
 			assertThat(foundSpot.isSpot()).isTrue();
 			assertThat(foundSpot.id()).isNotNull();
 			assertThat(foundSpot.address()).isEqualTo("서울시 마들로 646");
-			assertThat(foundSpot.coord().lat()).isEqualTo(37.6676198504815);
 			assertThat(foundSpot.coord().lon()).isEqualTo(127.046817765572);
+			assertThat(foundSpot.coord().lat()).isEqualTo(37.6676198504815);
 		}
 
 		@DisplayName("해당 좌표에 해당하는 장소를 지도에서 찾을 수 없으면 NO_ADDRESS_FOR_GIVEN_COORD 예외가 발생한다.")
 		@Test
 		void notFoundForGivenCoord() {
 			//given
-			var coord = convert(37.6676198504815, 127.046817765572);
+			var coord = convert(127.046817765572, 37.6676198504815);
 			given(mapApiClient.findAddressByCoordinate(any(Point.class)))
 				.willReturn(Optional.empty());
 
@@ -105,7 +104,7 @@ class SpotServiceTest {
 		@Test
 		void notFoundForGivenAddress() {
 			//given
-			var coord = convert(37.6676198504815, 127.046817765572);
+			var coord = convert(127.046817765572, 37.6676198504815);
 			var address = "서울시 도봉구 마들로 646";
 			given(mapApiClient.findAddressByCoordinate(any(Point.class))).willReturn(Optional.of(address));
 			given(mapApiClient.findCoordinateByAddress(anyString()))

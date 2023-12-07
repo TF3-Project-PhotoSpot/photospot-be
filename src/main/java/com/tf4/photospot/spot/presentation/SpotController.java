@@ -4,15 +4,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.global.dto.ApiResponse;
+import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
+import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
-import com.tf4.photospot.spot.presentation.request.FindSpotHttpRequest;
-import com.tf4.photospot.spot.presentation.request.RecommendedSpotsHttpRequest;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,17 +29,18 @@ public class SpotController {
 
 	@GetMapping("/spots/recommended")
 	public ResponseEntity<ApiResponse<RecommendedSpotsResponse>> getSpotList(
-		@ModelAttribute @Valid RecommendedSpotsHttpRequest request
+		@ModelAttribute @Valid CoordinateDto coord,
+		@RequestParam(name = "radius") Long radius
 	) {
-		var response = spotService.getRecommendedSpotList(request.toServiceRequest());
+		var response = spotService.getRecommendedSpotList(new RecommendedSpotsRequest(coord.toCoord(), radius));
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 
 	@GetMapping("/spot")
 	public ResponseEntity<ApiResponse<FindSpotResponse>> getSpot(
-		@ModelAttribute @Valid FindSpotHttpRequest request
+		@ModelAttribute @Valid CoordinateDto coord
 	) {
-		var response = spotService.findSpot(new FindSpotRequest(request.toCoord()));
+		var response = spotService.findSpot(new FindSpotRequest(coord.toCoord()));
 		return ResponseEntity.ok(ApiResponse.success(response));
 	}
 }

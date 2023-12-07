@@ -1,0 +1,10 @@
+[[reissue-token]]
+=== 액세트 토큰 재발급
+
+=== Request
+
+include::{snippets}/reissue-token/http-request.adoc[]
+
+=== Response Fields
+
+include::{snippets}/reissue-token/http-response.adoc[]

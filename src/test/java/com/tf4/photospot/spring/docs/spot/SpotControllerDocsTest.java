@@ -38,6 +38,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 	@Test
 	void getRecommendedSpotList() throws Exception {
 		//given
+		Double lat = 37.6676198504815;
+		Double lon = 127.046817765572;
 		var recommendedSpots = List.of(RecommendedSpotResponse.builder()
 				.id(1L)
 				.address("서울시 도봉구 마들로 643")
@@ -67,8 +69,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				.build());
 		//when then
 		mockMvc.perform(get("/api/v1/spots/recommended")
-				.queryParam("lat", "35.0000")
-				.queryParam("lon", "70.0000")
+				.queryParam("lat", String.valueOf(lat))
+				.queryParam("lon", String.valueOf("127.0000"))
 				.queryParam("radius", "200")
 			)
 			.andDo(print())
