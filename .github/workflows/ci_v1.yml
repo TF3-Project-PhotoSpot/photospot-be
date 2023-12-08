@@ -21,6 +21,15 @@ jobs:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
     environment: dev
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      KAKAO_MAP_REST_API_KEY: ${{ secrets.KAKAO_MAP_REST_API_KEY }}
+      KAKAO_MAP_BASE_URL: ${{ secrets.KAKAO_MAP_BASE_URL }}
+      JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -44,13 +53,3 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze
         run: ./gradlew build jacocoTestReport sonar --info
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          KAKAO_MAP_REST_API_KEY: ${{ secrets.KAKAO_MAP_REST_API_KEY }}
-          KAKAO_MAP_BASE_URL: ${{ secrets.KAKAO_MAP_BASE_URL }}
-          JWT_ISSUER: ${{ secrets.JWT_ISSUER }}
-          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
