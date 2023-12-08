@@ -1,0 +1,18 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create
+      
+kakao:
+  map:
+    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
+    base-url: ${KAKAO_MAP_BASE_URL}
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}
