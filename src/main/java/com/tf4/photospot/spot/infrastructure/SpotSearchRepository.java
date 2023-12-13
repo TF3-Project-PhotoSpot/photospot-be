@@ -36,7 +36,7 @@ public class SpotSearchRepository {
 			)
 			.orderBy(spot.postCount.desc())
 			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize() + 1)
+			.limit(pageable.getPageSize() + 1L)
 			.fetch();
 
 		return createSlice(pageable, recommendedSpots);

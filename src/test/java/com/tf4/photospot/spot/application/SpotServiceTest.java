@@ -100,7 +100,7 @@ class SpotServiceTest {
 				//when
 				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
-				assertThat(response.recommendedSpots()).allSatisfy(recommendedSpot ->
+				assertThat(response.recommendedSpots()).isNotEmpty().allSatisfy(recommendedSpot ->
 					assertThat(recommendedSpot.postPreviewResponses())
 						.isSortedAccordingTo(comparingLong(PostPreviewResponse::postId).reversed())
 				);

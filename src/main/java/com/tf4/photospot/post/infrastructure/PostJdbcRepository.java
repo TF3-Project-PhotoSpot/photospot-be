@@ -29,17 +29,17 @@ public class PostJdbcRepository {
 		return jdbcTemplate.query("""
 			select post.id as post_id, spot_id, photo_url
 			from (
-				select id, spot_id, photo_id,
-				row_number() over(partition by spot_id order by id desc) as recently_post
-				from post p
-				where spot_id in (:spotIds) and is_private = false and deleted_at is null
+			select id, spot_id, photo_id,
+			row_number() over(partition by spot_id order by id desc) as recently_post
+			from post p
+			where spot_id in (:spotIds) and is_private = false and deleted_at is null
 			) as post
 			join photo on photo_id = photo.id
-			where recently_post <= :postPreviewCount
-			""", params, (rs, rowNum) -> new PostPreviewResponse(
+			where recently_post <= :postPreviewCount""", params, (rs, rowNum) -> new PostPreviewResponse(
 			rs.getLong("spot_id"),
 			rs.getLong("post_id"),
-			rs.getString("photo_url")));
+			rs.getString("photo_url"))
+		);
 	}
 }
 
