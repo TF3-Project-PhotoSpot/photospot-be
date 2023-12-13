@@ -26,13 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.photo.domain.Photo;
-import com.tf4.photospot.post.application.response.PostThumbnailResponse;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
-import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 import com.tf4.photospot.spot.domain.MapApiClient;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
@@ -70,7 +70,7 @@ class SpotServiceTest {
 		return Stream.of(
 			dynamicTest("반경 내 추천 스팟이 없으면 빈 리스트가 반환이 된다.", () -> {
 				//when
-				RecommendedSpotsResponse response = spotService.getRecommendedSpotList(request);
+				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
 				assertThat(response.recommendedSpots()).isEmpty();
 			}),
@@ -80,10 +80,10 @@ class SpotServiceTest {
 				postRepository.saveAll(createPosts(spotWithMostPosts, 1, true));
 				postRepository.saveAll(createPosts(spotWithMiddlePosts, 1, false));
 				//when
-				RecommendedSpotsResponse response = spotService.getRecommendedSpotList(request);
+				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
-				assertThat(response.recommendedSpots().get(0).postThumbnailResponses()).isEmpty();
-				assertThat(response.recommendedSpots().get(1).postThumbnailResponses()).isNotEmpty();
+				assertThat(response.recommendedSpots().get(0).postPreviewResponses()).isEmpty();
+				assertThat(response.recommendedSpots().get(1).postPreviewResponses()).isNotEmpty();
 			}),
 			dynamicTest("스팟은 방명록 개수가 많은 순서로 정렬이 된다.", () -> {
 				//given
@@ -91,23 +91,23 @@ class SpotServiceTest {
 				postRepository.saveAll(createPosts(spotWithMiddlePosts, 10, false));
 				postRepository.saveAll(createPosts(spotWithLeastPosts, 5, false));
 				//when
-				RecommendedSpotsResponse response = spotService.getRecommendedSpotList(request);
+				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
 				assertThat(response.recommendedSpots())
 					.isSortedAccordingTo(comparingLong(RecommendedSpotResponse::postCount).reversed());
 			}),
 			dynamicTest("각 스팟의 방명록들은 최신순으로 정렬이 된다.", () -> {
 				//when
-				RecommendedSpotsResponse response = spotService.getRecommendedSpotList(request);
+				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
 				assertThat(response.recommendedSpots()).allSatisfy(recommendedSpot ->
-					assertThat(recommendedSpot.postThumbnailResponses())
-						.isSortedAccordingTo(comparingLong(PostThumbnailResponse::postId).reversed())
+					assertThat(recommendedSpot.postPreviewResponses())
+						.isSortedAccordingTo(comparingLong(PostPreviewResponse::postId).reversed())
 				);
 			}),
 			dynamicTest("다음 추천 스팟 목록이 있으면 hasNext = true를 반환한다", () -> {
 				//given when
-				RecommendedSpotsResponse response = spotService.getRecommendedSpotList(
+				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(
 					new RecommendedSpotsRequest(convert(127.0468177, 37.6676198), 5000,
 						5, PageRequest.of(0, 2)));
 				//then
@@ -115,7 +115,7 @@ class SpotServiceTest {
 			}),
 			dynamicTest("다음 추천 스팟 목록이 없으면 hasNext = false를 반환한다", () -> {
 				//given when
-				RecommendedSpotsResponse response = spotService.getRecommendedSpotList(
+				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(
 					new RecommendedSpotsRequest(convert(127.0468177, 37.6676198), 5000,
 						5, PageRequest.of(0, 100)));
 				//then

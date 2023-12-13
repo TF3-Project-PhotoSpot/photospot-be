@@ -16,8 +16,8 @@ import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
-import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
-import com.tf4.photospot.spot.presentation.response.RecommendedSpotsHttpResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
+import com.tf4.photospot.spot.presentation.response.RecommendedSpotListHttpResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -34,17 +34,17 @@ public class SpotController {
 	private final SpotService spotService;
 
 	@GetMapping("/spots/recommended")
-	public ResponseEntity<ApiResponse<RecommendedSpotsHttpResponse>> getSpotList(
+	public ResponseEntity<ApiResponse<RecommendedSpotListHttpResponse>> getSpotList(
 		@ModelAttribute @Valid CoordinateDto coord,
 		@RequestParam(name = "radius") @Positive(message = "반경(m)은 0보다 커야 됩니다.") Integer radius,
-		@RequestParam(name = "postThumbnailCount", defaultValue = "5")
-		@Range(min = 1L, max = 10L, message = "미리보기 사진은 1~10개만 가능합니다.") Integer postThumbnailCount,
+		@RequestParam(name = "postPreviewCount", defaultValue = "5")
+		@Range(min = 1, max = 10, message = "미리보기 사진은 1~10개만 가능합니다.") Integer postPreviewCount,
 		Pageable pageable
 
 	) {
-		RecommendedSpotsResponse recommendedSpotsResponse = spotService.getRecommendedSpotList(
-			new RecommendedSpotsRequest(coord.toCoord(), radius, postThumbnailCount, pageable));
-		return ResponseEntity.ok(ApiResponse.success(RecommendedSpotsHttpResponse.of(
+		RecommendedSpotListResponse recommendedSpotsResponse = spotService.getRecommendedSpotList(
+			new RecommendedSpotsRequest(coord.toCoord(), radius, postPreviewCount, pageable));
+		return ResponseEntity.ok(ApiResponse.success(RecommendedSpotListHttpResponse.of(
 			"test address", recommendedSpotsResponse)));
 	}
 

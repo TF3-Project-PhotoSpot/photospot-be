@@ -3,7 +3,7 @@ package com.tf4.photospot.spot.presentation.response;
 import java.util.List;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
-import com.tf4.photospot.post.application.response.PostThumbnailResponse;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
 
 import lombok.Builder;
@@ -23,8 +23,8 @@ public record RecommendedSpotHttpResponse(
 				.address(response.address())
 				.postCount(response.postCount())
 				.coord(response.coord())
-				.photoUrls(response.postThumbnailResponses().stream()
-					.map(PostThumbnailResponse::photoUrl)
+				.photoUrls(response.postPreviewResponses().stream()
+					.map(PostPreviewResponse::photoUrl)
 					.toList())
 				.build())
 			.toList();

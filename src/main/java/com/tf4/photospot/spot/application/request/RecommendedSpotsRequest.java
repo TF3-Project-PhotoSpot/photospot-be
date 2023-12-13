@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 public record RecommendedSpotsRequest(
 	Point coord,
 	Integer radius,
-	Integer postThumbnailCount,
+	Integer postPreviewCount,
 	Pageable pageable
 ) {
 }

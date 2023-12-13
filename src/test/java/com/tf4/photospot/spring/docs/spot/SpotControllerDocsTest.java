@@ -17,13 +17,13 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
-import com.tf4.photospot.post.application.response.PostThumbnailResponse;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
-import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
@@ -46,23 +46,23 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				.address("서울시 도봉구 마들로 643")
 				.postCount(10L)
 				.coord(new CoordinateDto(32.0000, 70.0000))
-				.postThumbnailResponses(List.of(
-					new PostThumbnailResponse(3L, "http://aaaaaa3.com"),
-					new PostThumbnailResponse(2L, "http://aaaaaa2.com"),
-					new PostThumbnailResponse(1L, "http://aaaaaa1.com")
+				.postPreviewResponses(List.of(
+					new PostPreviewResponse(3L, 1L, "http://aaaaaa3.com"),
+					new PostPreviewResponse(2L, 2L, "http://aaaaaa2.com"),
+					new PostPreviewResponse(1L, 3L, "http://aaaaaa1.com")
 				)).build(),
 			RecommendedSpotResponse.builder()
 				.id(2L)
 				.address("서울시 도봉구 마들로 645")
 				.postCount(15L)
 				.coord(new CoordinateDto(35.0000, 65.0000))
-				.postThumbnailResponses(List.of(
-					new PostThumbnailResponse(6L, "http://aaaaaa6.com"),
-					new PostThumbnailResponse(5L, "http://aaaaaa5.com"),
-					new PostThumbnailResponse(4L, "http://aaaaaa4.com")
+				.postPreviewResponses(List.of(
+					new PostPreviewResponse(6L, 2L, "http://aaaaaa6.com"),
+					new PostPreviewResponse(5L, 2L, "http://aaaaaa5.com"),
+					new PostPreviewResponse(4L, 2L, "http://aaaaaa4.com")
 				)).build()
 		);
-		RecommendedSpotsResponse recommendedSpotsResponse = RecommendedSpotsResponse.builder()
+		RecommendedSpotListResponse recommendedSpotsResponse = RecommendedSpotListResponse.builder()
 			.recommendedSpots(recommendedSpots)
 			.hasNext(true)
 			.build();
