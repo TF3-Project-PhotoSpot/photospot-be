@@ -9,8 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Photo extends BaseEntity {
@@ -18,11 +20,18 @@ public class Photo extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String originUrl;
-
-	private String resizingUrl;
+	private String photoUrl;
 
 	@OneToOne
 	@JoinColumn(name = "bubble_id")
 	private Bubble bubble;
+
+	public Photo(String photoUrl, Bubble bubble) {
+		this.photoUrl = photoUrl;
+		this.bubble = bubble;
+	}
+
+	public Photo(String photoUrl) {
+		this.photoUrl = photoUrl;
+	}
 }
