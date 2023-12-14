@@ -16,6 +16,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import com.tf4.photospot.global.dto.ApiResponse;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotNull;
 import lombok.NonNull;
 
@@ -23,8 +25,9 @@ import lombok.NonNull;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(ApiException.class)
-	public ResponseEntity<ApiResponse<?>> handleApiException(ApiException ex) {
-		return ResponseEntity.status(ex.getStatusCode()).body(ApiResponse.error(ex.getName(), ex.getMessage()));
+	public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
+		return ResponseEntity.status(ex.getStatusCode())
+			.body(ApiResponse.error(ex.getName(), ex.getMessage()));
 	}
 
 	@Override
@@ -38,7 +41,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<ApiResponse<?>> test() {
+	public ResponseEntity<ApiResponse<Void>> handleIllegalArgumentException() {
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
 			.body(ApiResponse.error(HttpStatus.BAD_REQUEST.name(), "Invalid Parameter"));
 	}
@@ -50,6 +53,15 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 				filedError -> Optional.ofNullable(filedError.getDefaultMessage())
 					.orElseGet(() -> "Invalid Parameter")
 			)).toString();
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ApiResponse<Void>> handleApiException(ConstraintViolationException ex) {
+		String errors = ex.getConstraintViolations().stream()
+			.map(ConstraintViolation::getMessage)
+			.collect(Collectors.joining());
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST.value())
+			.body(ApiResponse.error(HttpStatus.BAD_REQUEST.name(), errors));
 	}
 
 	@Override

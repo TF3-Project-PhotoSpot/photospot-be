@@ -16,3 +16,5 @@ endif::[]
 include::api/spot/recommend-spots.adoc[]
 
 include::api/spot/find-spot.adoc[]
+
+include::api/spot/nearby-spots.adoc[]

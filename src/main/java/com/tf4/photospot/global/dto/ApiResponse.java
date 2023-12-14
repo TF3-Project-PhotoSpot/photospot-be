@@ -9,14 +9,13 @@ public record ApiResponse<T>(
 	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	String message,
 
-	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	T data
 ) {
 	public static <T> ApiResponse<T> success(T data) {
 		return new ApiResponse<>(null, null, data);
 	}
 
-	public static ApiResponse<?> error(String code, String message) {
+	public static ApiResponse<Void> error(String code, String message) {
 		return new ApiResponse<>(code, message, null);
 	}
 }

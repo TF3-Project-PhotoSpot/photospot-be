@@ -12,8 +12,11 @@ import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
+import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
+import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.domain.MapApiClient;
 import com.tf4.photospot.spot.domain.Spot;
@@ -55,5 +58,10 @@ public class SpotService {
 		return spotRepository.findByCoord(foundCoord)
 			.map(FindSpotResponse::toSpotResponse)
 			.orElseGet(() -> FindSpotResponse.toNonSpotResponse(foundCoord, address));
+	}
+
+	public NearbySpotListResponse getNearbySpotList(NearbySpotRequest request) {
+		List<NearbySpotResponse> nearbySpots = spotRepository.findNearbySpots(request.coord(), request.radius());
+		return new NearbySpotListResponse(nearbySpots);
 	}
 }

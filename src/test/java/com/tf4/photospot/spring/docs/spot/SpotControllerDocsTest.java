@@ -20,8 +20,11 @@ import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
+import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
+import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
@@ -169,6 +172,41 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
 					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
 					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
-				)));
+				))
+			);
+	}
+
+	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")
+	@Test
+	void getNearbySpots() throws Exception {
+		//given
+		NearbySpotListResponse response = new NearbySpotListResponse(List.of(
+			new NearbySpotResponse(1L, new CoordinateDto(127.0468177, 37.6676198)),
+			new NearbySpotResponse(2L, new CoordinateDto(127.0273281, 37.6400187))
+		));
+		given(spotService.getNearbySpotList(any(NearbySpotRequest.class))).willReturn(response);
+		//when then
+		mockMvc.perform(get("/api/v1/spots")
+				.queryParam("lat", "37.6676198")
+				.queryParam("lon", "127.0468177")
+				.queryParam("radius", "5000"))
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andDo(document("nearby-spots",
+				preprocessRequest(prettyPrint()),
+				preprocessResponse(prettyPrint()),
+				queryParameters(
+					parameterWithName("lat").description("위도(latitude)"),
+					parameterWithName("lon").description("경도(longitude)"),
+					parameterWithName("radius").description("반경")
+				),
+				responseFields(
+					fieldWithPath("data.spots").type(JsonFieldType.ARRAY).description("주변 스팟 리스트"),
+					fieldWithPath("data.spots[].id").type(JsonFieldType.NUMBER).description("스팟 id"),
+					fieldWithPath("data.spots[].coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
+					fieldWithPath("data.spots[].coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
+					fieldWithPath("data.spots[].coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
+				))
+			);
 	}
 }
