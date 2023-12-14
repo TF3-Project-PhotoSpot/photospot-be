@@ -15,7 +15,7 @@ public record ApiResponse<T>(
 		return new ApiResponse<>(null, null, data);
 	}
 
-	public static ApiResponse<?> error(String code, String message) {
+	public static ApiResponse<Void> error(String code, String message) {
 		return new ApiResponse<>(code, message, null);
 	}
 }

@@ -167,7 +167,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 
 		@DisplayName("중심에서 직선 거리 이내에 장소가 없을 경우 빈 List가 반환된다")
 		@Test
-		public void getNearbySpotEmptyList() {
+		void getNearbySpotEmptyList() {
 			//given
 			int radius = 5000; // 반경 5km
 			Point centerCoord = convert(127.0468177, 37.6676198);

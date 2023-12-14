@@ -23,9 +23,9 @@ import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
-import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
@@ -178,7 +178,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 
 	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")
 	@Test
-	public void getNearbySpots() throws Exception {
+	void getNearbySpots() throws Exception {
 		//given
 		NearbySpotListResponse response = new NearbySpotListResponse(List.of(
 			new NearbySpotResponse(1L, new CoordinateDto(127.0468177, 37.6676198)),
