@@ -17,12 +17,13 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.FindSpotResponse;
+import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
-import com.tf4.photospot.spot.application.response.RecommendedSpotsResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
@@ -45,33 +46,36 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				.address("서울시 도봉구 마들로 643")
 				.postCount(10L)
 				.coord(new CoordinateDto(32.0000, 70.0000))
-				.photoUrls(List.of(
-					"http://aaaaaa1.com",
-					"http://aaaaaa2.com",
-					"http://aaaaaa3.com"
+				.postPreviewResponses(List.of(
+					new PostPreviewResponse(3L, 1L, "http://aaaaaa3.com"),
+					new PostPreviewResponse(2L, 2L, "http://aaaaaa2.com"),
+					new PostPreviewResponse(1L, 3L, "http://aaaaaa1.com")
 				)).build(),
 			RecommendedSpotResponse.builder()
 				.id(2L)
 				.address("서울시 도봉구 마들로 645")
 				.postCount(15L)
 				.coord(new CoordinateDto(35.0000, 65.0000))
-				.photoUrls(List.of(
-					"http://aaaaaa4.com",
-					"http://aaaaaa5.com",
-					"http://aaaaaa6.com"
+				.postPreviewResponses(List.of(
+					new PostPreviewResponse(6L, 2L, "http://aaaaaa6.com"),
+					new PostPreviewResponse(5L, 2L, "http://aaaaaa5.com"),
+					new PostPreviewResponse(4L, 2L, "http://aaaaaa4.com")
 				)).build()
 		);
+		RecommendedSpotListResponse recommendedSpotsResponse = RecommendedSpotListResponse.builder()
+			.recommendedSpots(recommendedSpots)
+			.hasNext(true)
+			.build();
 
 		given(spotService.getRecommendedSpotList(any(RecommendedSpotsRequest.class)))
-			.willReturn(RecommendedSpotsResponse.builder()
-				.centerAddress("서울시 도봉구 마들로 646")
-				.recommendedSpots(recommendedSpots)
-				.build());
+			.willReturn(recommendedSpotsResponse);
 		//when then
 		mockMvc.perform(get("/api/v1/spots/recommended")
 				.queryParam("lat", String.valueOf(lat))
-				.queryParam("lon", String.valueOf("127.0000"))
+				.queryParam("lon", String.valueOf(lon))
 				.queryParam("radius", "200")
+				.queryParam("page", "0")
+				.queryParam("size", "10")
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
@@ -81,7 +85,9 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				queryParameters(
 					parameterWithName("lat").description("위도(latitude)"),
 					parameterWithName("lon").description("경도(longitude)"),
-					parameterWithName("radius").description("반경(단위 m)")
+					parameterWithName("radius").description("반경(단위 m)"),
+					parameterWithName("page").description("페이지(0부터 시작)"),
+					parameterWithName("size").description("페이지당 개수")
 				),
 				responseFields(
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
@@ -95,7 +101,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.recommendedSpots[].coord.lat").type(JsonFieldType.NUMBER).description("스팟 좌표"),
 					fieldWithPath("data.recommendedSpots[].coord.lon").type(JsonFieldType.NUMBER).description("스팟 좌표"),
 					fieldWithPath("data.recommendedSpots[].photoUrls").type(JsonFieldType.ARRAY)
-						.description("최신 방명록 사진")
+						.description("최신 방명록 사진"),
+					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
 				)));
 	}
 

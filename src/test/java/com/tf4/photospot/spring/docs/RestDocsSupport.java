@@ -2,6 +2,7 @@ package com.tf4.photospot.spring.docs;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.MockMvcRestDocumentation;
@@ -19,6 +20,7 @@ public abstract class RestDocsSupport {
 	void setUp(RestDocumentationContextProvider contextProvider) {
 		mockMvc = MockMvcBuilders.standaloneSetup(initController())
 			.apply(MockMvcRestDocumentation.documentationConfiguration(contextProvider))
+			.setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
 			.build();
 	}
 
