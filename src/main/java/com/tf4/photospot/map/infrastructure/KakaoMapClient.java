@@ -1,15 +1,15 @@
-package com.tf4.photospot.spot.infrastructure;
+package com.tf4.photospot.map.infrastructure;
 
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.service.annotation.GetExchange;
 
-import com.tf4.photospot.spot.infrastructure.dto.kakao.KakaoAddressConvertResponse;
-import com.tf4.photospot.spot.infrastructure.dto.kakao.KakaoSearchAddressResponse;
+import com.tf4.photospot.map.application.response.kakao.KakaoCoordToAddressResponse;
+import com.tf4.photospot.map.application.response.kakao.KakaoSearchAddressResponse;
 
-public interface KakaoMapHttpExchange {
+public interface KakaoMapClient {
 
 	@GetExchange(value = "/geo/coord2address.json")
-	KakaoAddressConvertResponse convertAddress(
+	KakaoCoordToAddressResponse convertCoordToAddress(
 		@RequestParam(name = "x") String lon, @RequestParam(name = "y") String lat);
 
 	@GetExchange("/search/address.json")
