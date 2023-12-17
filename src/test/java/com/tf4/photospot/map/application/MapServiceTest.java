@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.*;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import org.junit.jupiter.api.Assertions;
@@ -45,7 +44,7 @@ public class MapServiceTest {
 
 	@DisplayName("주소로 지역을 검색한다.")
 	@Test
-	void searchAddress() throws UnsupportedEncodingException {
+	void searchAddress() {
 		//given
 		String expectedUri = UriComponentsBuilder.fromHttpUrl(properties.getBaseUrl() + "/search/address.json")
 			.queryParam("query", "전북 삼성동 100")
@@ -86,17 +85,12 @@ public class MapServiceTest {
 				]
 			}
 			""";
-
-		//when
-
 		mockServer.expect(requestTo(expectedUri))
 			.andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess(expectedResponse, MediaType.APPLICATION_JSON));
-
 		//when
 		KakaoSearchAddressResponse response = Assertions.assertDoesNotThrow(
 			() -> kakaoMapClient.searchAddress("전북 삼성동 100"));
-
 		//then
 		assertThat(response.findCoordinate())
 			.isPresent().get()
@@ -138,11 +132,9 @@ public class MapServiceTest {
 				]
 			}
 			""";
-
 		mockServer.expect(requestTo(expectedUri))
 			.andExpect(method(HttpMethod.GET))
 			.andRespond(withSuccess(expectedResponse, MediaType.APPLICATION_JSON));
-
 		//when
 		KakaoCoordToAddressResponse response = Assertions.assertDoesNotThrow(
 			() -> kakaoMapClient.convertCoordToAddress("127.0", "37.0"));
