@@ -11,6 +11,19 @@ public record KakaoCoordToAddressResponse(
 	Meta meta,
 	List<Document> documents
 ) {
+	public Optional<String> findAddressName() {
+		if (!existResult()) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(documents.get(0))
+			.map(Document::roadAddress)
+			.map(Document.RoadAddress::addressName);
+	}
+
+	private boolean existResult() {
+		return meta != null && meta.totalCount() == 1 && !documents.isEmpty();
+	}
+
 	@JsonNaming(SnakeCaseStrategy.class)
 	public record Meta(
 		Integer totalCount
@@ -43,18 +56,5 @@ public record KakaoCoordToAddressResponse(
 			String region3DepthName
 		) {
 		}
-	}
-
-	public Optional<String> findAddressName() {
-		if (!existResult()) {
-			return Optional.empty();
-		}
-		return Optional.ofNullable(documents.get(0))
-			.map(Document::roadAddress)
-			.map(Document.RoadAddress::addressName);
-	}
-
-	private boolean existResult() {
-		return meta != null && meta.totalCount() == 1 && !documents.isEmpty();
 	}
 }
