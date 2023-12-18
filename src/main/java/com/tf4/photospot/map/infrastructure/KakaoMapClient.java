@@ -10,7 +10,7 @@ public interface KakaoMapClient {
 
 	@GetExchange(value = "/geo/coord2address.json")
 	KakaoCoordToAddressResponse convertCoordToAddress(
-		@RequestParam(name = "x") String lon, @RequestParam(name = "y") String lat);
+		@RequestParam(name = "x") double lon, @RequestParam(name = "y") double lat);
 
 	@GetExchange("/search/address.json")
 	KakaoSearchAddressResponse searchAddress(@RequestParam(name = "query") String address);
