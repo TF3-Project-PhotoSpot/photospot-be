@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum MapErrorCode implements ApiErrorCode {
 	NO_ADDRESS_FOR_GIVEN_COORD(HttpStatus.NOT_FOUND, "해당 좌표의 주소를 찾을 수 없습니다."),
-	NO_COORD_FOR_GIVEN_ADDRESS(HttpStatus.NOT_FOUND, "해당 주소의 좌표를 찾을 수 없습니다.");
+	NO_COORD_FOR_GIVEN_ADDRESS(HttpStatus.NOT_FOUND, "해당 주소의 좌표를 찾을 수 없습니다."),
+	MAP_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "지도 API 에러가 발생했습니다.");
 
 	private final HttpStatusCode statusCode;
 	private final String message;
