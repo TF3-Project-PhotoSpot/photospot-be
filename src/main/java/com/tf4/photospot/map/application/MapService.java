@@ -15,7 +15,7 @@ public class MapService {
 	private final KakaoMapClient kakaoMapClient;
 
 	public String searchAddress(Point coord) {
-		return kakaoMapClient.convertCoordToAddress(String.valueOf(coord.getX()), String.valueOf(coord.getY()))
+		return kakaoMapClient.convertCoordToAddress(coord.getX(), coord.getY())
 			.findAddressName()
 			.orElseThrow(() -> new ApiException(MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD));
 	}
