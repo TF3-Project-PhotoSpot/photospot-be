@@ -1,21 +1,11 @@
 package com.tf4.photospot.global.dto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 public record ApiResponse<T>(
-	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	String code,
-
-	@JsonInclude(value = JsonInclude.Include.NON_NULL)
 	String message,
-
 	T data
 ) {
 	public static <T> ApiResponse<T> success(T data) {
-		return new ApiResponse<>(null, null, data);
-	}
-
-	public static ApiResponse<Void> error(String code, String message) {
-		return new ApiResponse<>(code, message, null);
+		return new ApiResponse<>("200", "OK", data);
 	}
 }
