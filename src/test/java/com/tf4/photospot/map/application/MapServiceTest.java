@@ -134,7 +134,6 @@ public class MapServiceTest {
 			.andRespond(withSuccess(expectedResponse, MediaType.APPLICATION_JSON));
 		//when
 		KakaoCoordToAddressResponse response = Assertions.assertDoesNotThrow(
-			// () -> kakaoMapClient.convertCoordToAddress(127.0, 37.0));
 			() -> kakaoMapClient.convertCoordToAddress(127.0, 37.0));
 
 		//then

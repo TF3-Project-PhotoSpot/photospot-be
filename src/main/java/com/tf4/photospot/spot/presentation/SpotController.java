@@ -42,7 +42,6 @@ public class SpotController {
 		@RequestParam(name = "postPreviewCount", defaultValue = "5")
 		@Range(min = 1, max = 10, message = "미리보기 사진은 1~10개만 가능합니다.") Integer postPreviewCount,
 		Pageable pageable
-
 	) {
 		RecommendedSpotListResponse recommendedSpotsResponse = spotService.getRecommendedSpotList(
 			new RecommendedSpotsRequest(coord.toCoord(), radius, postPreviewCount, pageable));
