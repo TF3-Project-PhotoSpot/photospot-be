@@ -79,13 +79,12 @@ tasks.named('test') {
 }
 
 tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
     configurations 'asciidoctorExtensions'
     sources {
         include("**/index.adoc")
     }
-    inputs.dir snippetsDir
     baseDirFollowsSourceFile()
-
     dependsOn test
 }
 
@@ -101,7 +100,6 @@ task createDocs(type: Copy) {
 }
 
 bootJar {
-    dependsOn asciidoctor
     dependsOn createDocs
     from("${asciidoctor.outputDir}") {
         into 'static/docs'

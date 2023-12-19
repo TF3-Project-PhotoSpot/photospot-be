@@ -10,11 +10,17 @@ endif::[]
 :toclevels: 2
 :sectlinks:
 
+[[Auth-API]]
+== Auth API
+
+include::api/auth/auth.adoc[]
+
 [[Spot-API]]
 == Spot API
 
-include::api/spot/recommend-spots.adoc[]
+include::api/spot/spot.adoc[]
 
-include::api/spot/find-spot.adoc[]
+[[Map-API]]
+== Map API
 
-include::api/spot/nearby-spots.adoc[]
+include::api/map/map.adoc[]

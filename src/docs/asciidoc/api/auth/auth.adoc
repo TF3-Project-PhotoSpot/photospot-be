@@ -1,0 +1,34 @@
+[[Auth-API]]
+=== 로그인
+
+'''
+
+==== Request
+
+include::{snippets}/initial-login/http-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/initial-login/query-parameters.adoc[]
+
+==== Initial-login Response
+
+include::{snippets}/initial-login/http-response.adoc[]
+
+==== Previous-login Response
+
+include::{snippets}/previous-login/http-response.adoc[]
+
+
+'''
+
+[[AccessToken-Reissue]]
+=== 액세트 토큰 재발급
+
+==== Request
+
+include::{snippets}/reissue-token/http-request.adoc[]
+
+==== Response Fields
+
+include::{snippets}/reissue-token/http-response.adoc[]
