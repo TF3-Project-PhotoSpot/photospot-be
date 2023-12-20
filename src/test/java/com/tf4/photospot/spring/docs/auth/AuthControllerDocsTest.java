@@ -55,6 +55,8 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 					parameterWithName("account").description("oauth에서 제공하는 사용자 고유 account")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 여부"),
 					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
@@ -87,6 +89,8 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 					parameterWithName("account").description("oauth에서 제공하는 사용자 고유 account")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 유무"),
 					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
@@ -115,6 +119,8 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("refreshToken").type(JsonFieldType.STRING).description("사용자의 리프레시 토큰")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰")
 				)));

@@ -93,6 +93,10 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("size").description("페이지당 개수")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.centerAddress").type(JsonFieldType.STRING).description("중심 좌표"),
 					fieldWithPath("data.recommendedSpots").type(JsonFieldType.ARRAY).description("주변 추천 스팟 리스트"),
@@ -132,6 +136,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("lon").description("경도(longitude)")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
 					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("스팟 id"),
 					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
@@ -166,6 +172,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("lon").description("경도(longitude)")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
 					fieldWithPath("data.id").type(JsonFieldType.NULL).description("스팟 id"),
 					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
@@ -201,6 +209,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("radius").description("반경")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data.spots").type(JsonFieldType.ARRAY).description("주변 스팟 리스트"),
 					fieldWithPath("data.spots[].id").type(JsonFieldType.NUMBER).description("스팟 id"),
 					fieldWithPath("data.spots[].coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),

@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum CommonErrorCode implements ApiErrorCode {
-	INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "Invalid Paramete"),
+	INVALID_PARAMETER(HttpStatus.BAD_REQUEST, "Invalid Parameter"),
 	UNEXPECTED_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "unexpected error");
 
 	private final HttpStatusCode statusCode;
