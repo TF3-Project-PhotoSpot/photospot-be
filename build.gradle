@@ -113,9 +113,64 @@ checkstyle {
     configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
     sourceSets = [sourceSets.main] // CompileQuerydsl 오류 해결
 }
+task testCoverage(type: Test) {
+    group 'verification'
+    description 'Runs the unit tests with coverage'
+
+    dependsOn(':test',
+            ':jacocoTestReport',
+            ':jacocoTestCoverageVerification')
+
+    tasks['jacocoTestReport'].mustRunAfter(tasks['test'])
+    tasks['jacocoTestCoverageVerification'].mustRunAfter(tasks['jacocoTestReport'])
+}
 jacocoTestReport {
     reports {
         xml.required = true
+    }
+    excludedClassFilesForReport(classDirectories)
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+jacocoTestCoverageVerification {
+    excludedClassFilesForReport(classDirectories)
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.80
+            }
+        }
+
+        rule {
+            enabled = true
+            element = 'BUNDLE'//BUNDLE, CLASS, PACKAGE, SOURCEFILE, METHOD
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+
+            /*
+            // 브랜치 커버리지 - 80% : 적용할지 고민
+            limit {
+                counter = 'BRANCH'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+            // 라인수 제한(설정시 총 추가할 코드 라인을 제한 할 수 있음)
+            limit {
+                counter = 'LINE'
+                value = 'TOTALCOUNT'
+                maximum = 200
+            }
+            // "해당 룰 안에서만" 커버리지 체크를 제외할 클래스 추가하기
+            // 주의 : 패키지 + 클래스명 을 적어줘야함(경로가 아님)
+            excludes = [
+                    'Q*.class',
+                    //'*.test.*',
+            ]
+             */
+        }
     }
 }
 sonar {
@@ -124,6 +179,21 @@ sonar {
         property "sonar.organization", "tf4project-f1bean-f2donghun-f3jaii-tjeegu-f4yana-photospot"
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
-        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.csv'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
     }
+}
+// Jacoco test coverage 에서 제외할 항목 추가
+/* 주의 : 경로가 아닌 '패키지 + 파일명'으로 작성, */
+
+private excludedClassFilesForReport(classDirectories) {
+    classDirectories.setFrom(
+            files(classDirectories.files.collect {
+                fileTree(dir: it, exclude: [
+                        "**/Q*",
+                        "**/*Request*",
+                        "**/*Response*",
+                        "**/*Application*"
+                ])
+            })
+    )
 }
