@@ -46,8 +46,8 @@ class SpotControllerTest {
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").doesNotExist())
-			.andExpect(jsonPath("$.message").doesNotExist())
+			.andExpect(jsonPath("$.code").isNotEmpty())
+			.andExpect(jsonPath("$.message").isNotEmpty())
 			.andExpect(jsonPath("$.data.spots").isArray());
 	}
 
@@ -63,8 +63,9 @@ class SpotControllerTest {
 			)
 			.andDo(print())
 			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.code").value("BAD_REQUEST"))
-			.andExpect(jsonPath("$.message").value("반경(m)은 0보다 커야 됩니다."))
-			.andExpect(jsonPath("$.data").doesNotExist());
+			.andExpect(jsonPath("$.code").value("INVALID_PARAMETER"))
+			.andExpect(jsonPath("$.message").value("Invalid Parameter"))
+			.andExpect(jsonPath("$.errors[0].value").value(radius))
+			.andExpect(jsonPath("$.errors[0].message").value("반경(m)은 0보다 커야 됩니다."));
 	}
 }

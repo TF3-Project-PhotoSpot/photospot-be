@@ -92,6 +92,10 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("size").description("페이지당 개수")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
 					fieldWithPath("data.centerAddress").type(JsonFieldType.STRING).description("중심 좌표"),
 					fieldWithPath("data.recommendedSpots").type(JsonFieldType.ARRAY).description("주변 추천 스팟 리스트"),
@@ -107,7 +111,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
 				)));
 	}
-
+  
 	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")
 	@Test
 	void getNearbySpots() throws Exception {
@@ -133,6 +137,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("radius").description("반경")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data.spots").type(JsonFieldType.ARRAY).description("주변 스팟 리스트"),
 					fieldWithPath("data.spots[].id").type(JsonFieldType.NUMBER).description("스팟 id"),
 					fieldWithPath("data.spots[].coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
