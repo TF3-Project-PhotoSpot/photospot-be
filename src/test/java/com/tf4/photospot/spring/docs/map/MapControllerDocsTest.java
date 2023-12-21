@@ -52,6 +52,8 @@ public class MapControllerDocsTest extends RestDocsSupport {
 					parameterWithName("lon").description("경도(longitude)")
 				),
 				responseFields(
+					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data.address").type(JsonFieldType.STRING).description("장소 주소"),
 					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("장소의 정확한 좌표"),
 					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("위도"),
