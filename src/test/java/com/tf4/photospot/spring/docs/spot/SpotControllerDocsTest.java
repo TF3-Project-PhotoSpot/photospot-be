@@ -16,13 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
-import com.tf4.photospot.global.util.PointConverter;
+import com.tf4.photospot.map.application.MapService;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
-import com.tf4.photospot.spot.application.request.FindSpotRequest;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
-import com.tf4.photospot.spot.application.response.FindSpotResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
@@ -32,10 +30,11 @@ import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class SpotControllerDocsTest extends RestDocsSupport {
 	private final SpotService spotService = mock(SpotService.class);
+	private final MapService mapService = mock(MapService.class);
 
 	@Override
 	protected Object initController() {
-		return new SpotController(spotService);
+		return new SpotController(spotService, mapService);
 	}
 
 	@DisplayName("주변 추천 스팟 리스트를 조회한다.")
@@ -112,78 +111,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
 				)));
 	}
-
-	@DisplayName("특정 좌표로 등록된 스팟을 찾는다.")
-	@Test
-	void findRegisteredSpot() throws Exception {
-		//given
-		Double lat = 37.6676198504815;
-		Double lon = 127.046817765572;
-
-		given(spotService.findSpot(any(FindSpotRequest.class)))
-			.willReturn(new FindSpotResponse(Boolean.TRUE, 1L, "서울특별시 도봉구 마들로 646", new CoordinateDto(lat, lon)));
-		//when then
-		mockMvc.perform(get("/api/v1/spot")
-				.queryParam("lat", String.valueOf(lat))
-				.queryParam("lon", String.valueOf(lon)))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(document("find-registered-spot",
-				preprocessRequest(prettyPrint()),
-				preprocessResponse(prettyPrint()),
-				queryParameters(
-					parameterWithName("lat").description("위도(latitude)"),
-					parameterWithName("lon").description("경도(longitude)")
-				),
-				responseFields(
-					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
-					fieldWithPath("data.id").type(JsonFieldType.NUMBER).description("스팟 id"),
-					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
-					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
-					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
-					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
-				)));
-	}
-
-	@DisplayName("특정 좌표로 등록되지 않은 스팟을 찾는다.")
-	@Test
-	void findUnregisteredSpot() throws Exception {
-		// given
-		Double lat = 37.6676198504815;
-		Double lon = 127.046817765572;
-		var coord = PointConverter.convert(lat, lon);
-
-		given(spotService.findSpot(any(FindSpotRequest.class)))
-			.willReturn(FindSpotResponse.toNonSpotResponse(coord, "서울특별시 도봉구 마들로 646"));
-
-		//when then
-		mockMvc.perform(get("/api/v1/spot")
-				.queryParam("lat", String.valueOf(lat))
-				.queryParam("lon", String.valueOf(lon)))
-			.andDo(print())
-			.andExpect(status().isOk())
-			.andDo(document("find-unregistered-spot",
-				preprocessRequest(prettyPrint()),
-				preprocessResponse(prettyPrint()),
-				queryParameters(
-					parameterWithName("lat").description("위도(latitude)"),
-					parameterWithName("lon").description("경도(longitude)")
-				),
-				responseFields(
-					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("data.isSpot").type(JsonFieldType.BOOLEAN).description("스팟 등록 여부"),
-					fieldWithPath("data.id").type(JsonFieldType.NULL).description("스팟 id"),
-					fieldWithPath("data.address").type(JsonFieldType.STRING).description("스팟 주소"),
-					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("스팟 좌표 정보"),
-					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("스팟 위도"),
-					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("스팟 경도")
-				))
-			);
-	}
-
+  
 	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")
 	@Test
 	void getNearbySpots() throws Exception {

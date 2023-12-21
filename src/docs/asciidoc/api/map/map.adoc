@@ -1,0 +1,18 @@
+[[Search-Location]]
+=== 특정 좌표로 주소 검색
+
+==== Request
+
+include::{snippets}/search-location/http-request.adoc[]
+
+==== Request Fields
+
+include::{snippets}/search-location/query-parameters.adoc[]
+
+==== Response
+
+include::{snippets}/search-location/response-body.adoc[]
+
+==== Response Fields
+
+include::{snippets}/search-location/response-fields.adoc[]

@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.tf4.photospot.map.application.MapService;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
@@ -23,6 +24,9 @@ import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 class SpotControllerTest {
 	@MockBean
 	private SpotService spotService;
+
+	@MockBean
+	private MapService mapService;
 
 	@Autowired
 	private MockMvc mockMvc;

@@ -3,13 +3,15 @@ package com.tf4.photospot.global.config.maps;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.support.RestClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
-import com.tf4.photospot.spot.domain.MapApiClient;
-import com.tf4.photospot.spot.infrastructure.KakaoMapApiClient;
-import com.tf4.photospot.spot.infrastructure.KakaoMapHttpExchange;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.MapErrorCode;
+import com.tf4.photospot.map.infrastructure.KakaoMapClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,19 +25,17 @@ public class MapApiConfig {
 	private final KakaoMapProperties properties;
 
 	@Bean
-	MapApiClient mapApiClient(KakaoMapHttpExchange kakaoMapHttpExchange) {
-		return new KakaoMapApiClient(kakaoMapHttpExchange);
-	}
-
-	@Bean
-	KakaoMapHttpExchange kakaoMapHttpExchange() {
-		var restClient = RestClient.builder()
+	public KakaoMapClient kakaoMapClient(RestClient.Builder restClientBuilder) {
+		RestClient restClient = restClientBuilder
 			.baseUrl(properties.getBaseUrl())
+			.defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
 			.defaultHeader(HttpHeaders.AUTHORIZATION, KAKAO_MAP_AUTHORIZATION_PREFIX + properties.getRestApiKey())
+			.defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
+				throw new ApiException(MapErrorCode.MAP_SERVER_ERROR);
+			})
 			.build();
 		return HttpServiceProxyFactory
 			.builderFor(RestClientAdapter.create(restClient))
-			.build()
-			.createClient(KakaoMapHttpExchange.class);
+			.build().createClient(KakaoMapClient.class);
 	}
 }
