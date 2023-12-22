@@ -1,12 +1,18 @@
 package com.tf4.photospot.map.application;
 
+import java.util.stream.Stream;
+
 import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
+import com.tf4.photospot.map.application.response.SearchByAddressResponse;
+import com.tf4.photospot.map.application.response.SearchByCoordResponse;
+import com.tf4.photospot.map.application.response.kakao.KakaoSearchAddressResponse;
 import com.tf4.photospot.map.infrastructure.KakaoMapClient;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,15 +20,17 @@ import lombok.RequiredArgsConstructor;
 public class MapService {
 	private final KakaoMapClient kakaoMapClient;
 
-	public String searchAddress(Point coord) {
-		return kakaoMapClient.convertCoordToAddress(coord.getX(), coord.getY())
-			.findAddressName()
-			.orElseThrow(() -> new ApiException(MapErrorCode.NO_ADDRESS_FOR_GIVEN_COORD));
+	public SearchByCoordResponse searchByCoord(Point coord) {
+		return SearchByCoordResponse.from(kakaoMapClient.convertCoordToAddress(coord.getX(), coord.getY()));
 	}
 
-	public Point searchCoordinate(String address) {
-		return kakaoMapClient.searchAddress(address)
-			.findCoordinate()
+	public SearchByAddressResponse searchByAddress(String address, String roadAddress) {
+		KakaoSearchAddressResponse response = Stream.of(address, roadAddress)
+			.filter(StringUtils::isNotEmpty)
+			.map(kakaoMapClient::searchAddress)
+			.filter(KakaoSearchAddressResponse::existResult)
+			.findFirst()
 			.orElseThrow(() -> new ApiException(MapErrorCode.NO_COORD_FOR_GIVEN_ADDRESS));
+		return SearchByAddressResponse.from(response);
 	}
 }

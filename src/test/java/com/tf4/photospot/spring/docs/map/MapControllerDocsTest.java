@@ -15,12 +15,13 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
-import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.map.application.MapService;
+import com.tf4.photospot.map.application.response.SearchByAddressResponse;
+import com.tf4.photospot.map.application.response.SearchByCoordResponse;
 import com.tf4.photospot.map.presentation.MapController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
-public class MapControllerDocsTest extends RestDocsSupport {
+class MapControllerDocsTest extends RestDocsSupport {
 	private final MapService mapService = mock(MapService.class);
 
 	@Override
@@ -32,16 +33,23 @@ public class MapControllerDocsTest extends RestDocsSupport {
 	@Test
 	void findRegisteredSpot() throws Exception {
 		//given
-		Double lat = 37.6676198504815;
-		Double lon = 127.046817765572;
-		Point exactCoord = PointConverter.convert(new CoordinateDto(lon, lat));
-
-		given(mapService.searchAddress(any(Point.class))).willReturn("서울특별시 도봉구 마들로 646");
-		given(mapService.searchCoordinate(anyString())).willReturn(exactCoord);
+		String lat = "35.97664845766847";
+		String lon = "126.99597295767953";
+		SearchByCoordResponse searchByCoordResponse = SearchByCoordResponse.builder()
+			.address("전북 익산시 부송동 100")
+			.roadAddress("전북 익산시 망산길 11-17")
+			.build();
+		given(mapService.searchByCoord(any(Point.class))).willReturn(searchByCoordResponse);
+		given(mapService.searchByAddress(anyString(), anyString())).willReturn(SearchByAddressResponse.builder()
+			.address("전북 익산시 부송동 100")
+			.addressCoord(new CoordinateDto(126.99597295767953, 35.97664845766847))
+			.roadAddress("전북 익산시 망산길 11-17")
+			.roadAddressCoord(new CoordinateDto(126.99599512792346, 35.976749396987046))
+			.build());
 		//when then
 		mockMvc.perform(get("/api/v1/map/search/location")
-				.queryParam("lat", String.valueOf(lat))
-				.queryParam("lon", String.valueOf(lon)))
+				.queryParam("lat", lat)
+				.queryParam("lon", lon))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andDo(document("search-location",
@@ -54,10 +62,14 @@ public class MapControllerDocsTest extends RestDocsSupport {
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
 					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("data.address").type(JsonFieldType.STRING).description("장소 주소"),
-					fieldWithPath("data.coord").type(JsonFieldType.OBJECT).description("장소의 정확한 좌표"),
-					fieldWithPath("data.coord.lat").type(JsonFieldType.NUMBER).description("위도"),
-					fieldWithPath("data.coord.lon").type(JsonFieldType.NUMBER).description("경도")
+					fieldWithPath("data.address").type(JsonFieldType.STRING).description("지번 주소"),
+					fieldWithPath("data.addressCoord").type(JsonFieldType.OBJECT).description("지번 주소 좌표"),
+					fieldWithPath("data.addressCoord.lat").type(JsonFieldType.NUMBER).description("지번 주소 위도"),
+					fieldWithPath("data.addressCoord.lon").type(JsonFieldType.NUMBER).description("지번 주소 경도"),
+					fieldWithPath("data.roadAddress").type(JsonFieldType.STRING).description("도로명 주소"),
+					fieldWithPath("data.roadAddressCoord").type(JsonFieldType.OBJECT).description("도로명 주소 좌표"),
+					fieldWithPath("data.roadAddressCoord.lat").type(JsonFieldType.NUMBER).description("도로명 주소 위도"),
+					fieldWithPath("data.roadAddressCoord.lon").type(JsonFieldType.NUMBER).description("도로명 주소 경도")
 				)));
 	}
 }
