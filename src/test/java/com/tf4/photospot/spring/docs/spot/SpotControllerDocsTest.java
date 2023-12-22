@@ -82,6 +82,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 				.queryParam("lat", String.valueOf(lat))
 				.queryParam("lon", String.valueOf(lon))
 				.queryParam("radius", "200")
+				.queryParam("postPreviewCount", "5")
 				.queryParam("page", "0")
 				.queryParam("size", "10")
 			)
