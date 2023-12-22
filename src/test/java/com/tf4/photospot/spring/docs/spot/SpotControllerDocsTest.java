@@ -13,10 +13,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Point;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.map.application.MapService;
+import com.tf4.photospot.map.application.response.SearchByCoordResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
@@ -41,6 +43,10 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 	@Test
 	void getRecommendedSpotList() throws Exception {
 		//given
+		given(mapService.searchByCoord(any(Point.class))).willReturn(SearchByCoordResponse.builder()
+			.address("서울시 도봉구 마들로 643")
+			.roadAddress("서울시 도봉구 마들로 643")
+			.build());
 		Double lat = 37.6676198504815;
 		Double lon = 127.046817765572;
 		var recommendedSpots = List.of(RecommendedSpotResponse.builder()
@@ -88,6 +94,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("lat").description("위도(latitude)"),
 					parameterWithName("lon").description("경도(longitude)"),
 					parameterWithName("radius").description("반경(단위 m)"),
+					parameterWithName("postPreviewCount").description("미리보기 사진 개수(1 ~ 10장)"),
 					parameterWithName("page").description("페이지(0부터 시작)"),
 					parameterWithName("size").description("페이지당 개수")
 				),
@@ -97,7 +104,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
 					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
 					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-					fieldWithPath("data.centerAddress").type(JsonFieldType.STRING).description("중심 좌표"),
+					fieldWithPath("data.centerAddress").type(JsonFieldType.STRING).description("중심 좌표의 지면 주소"),
+					fieldWithPath("data.centerRoadAddress").type(JsonFieldType.STRING).description("중심 좌표의 도로면 주소"),
 					fieldWithPath("data.recommendedSpots").type(JsonFieldType.ARRAY).description("주변 추천 스팟 리스트"),
 					fieldWithPath("data.recommendedSpots[].id").type(JsonFieldType.NUMBER).description("추천 스팟 ID"),
 					fieldWithPath("data.recommendedSpots[].address").type(JsonFieldType.STRING).description("추천 스팟 주소"),
@@ -111,7 +119,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("data.hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
 				)));
 	}
-  
+
 	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")
 	@Test
 	void getNearbySpots() throws Exception {
