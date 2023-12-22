@@ -1,15 +1,17 @@
 package com.tf4.photospot.map.presentation.response;
 
-import org.locationtech.jts.geom.Point;
-
 import com.tf4.photospot.global.dto.CoordinateDto;
-import com.tf4.photospot.global.util.PointConverter;
 
+import lombok.Builder;
+
+@Builder
 public record SearchLocationHttpResponse(
+	Boolean isExist,
 	String address,
+	String roadAddress,
 	CoordinateDto coord
 ) {
-	public static SearchLocationHttpResponse of(String address, Point coord) {
-		return new SearchLocationHttpResponse(address, PointConverter.convert(coord));
+	public SearchLocationHttpResponse {
+		isExist = (coord != null);
 	}
 }
