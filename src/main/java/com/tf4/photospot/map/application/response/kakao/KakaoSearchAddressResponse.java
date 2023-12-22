@@ -2,38 +2,39 @@ package com.tf4.photospot.map.application.response.kakao;
 
 import static com.fasterxml.jackson.databind.PropertyNamingStrategies.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.locationtech.jts.geom.Point;
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.tf4.photospot.global.util.PointConverter;
 
+import lombok.Builder;
+
+@Builder
 @JsonNaming(value = SnakeCaseStrategy.class)
 public record KakaoSearchAddressResponse(
 	Meta meta,
 	List<Document> documents
 ) {
-	public Optional<Point> findCoordinate() {
-		if (!existResult()) {
+	public KakaoSearchAddressResponse {
+		if (meta == null) {
+			meta = new Meta(0, 0, true);
+		}
+		if (documents == null) {
+			documents = Collections.emptyList();
+		}
+	}
+
+	public Optional<Document> findFirstDocument() {
+		if (documents.isEmpty()) {
 			return Optional.empty();
 		}
-		return Optional.ofNullable(documents.get(0))
-			.map(Document::roadAddress)
-			.map(this::toCoordinate);
+		return Optional.of(documents.get(0));
 	}
 
-	private boolean existResult() {
+	public boolean existResult() {
 		return meta != null && meta.totalCount() > 0 && !documents.isEmpty();
-	}
-
-	private Point toCoordinate(Document.RoadAddress roadAddress) {
-		if (roadAddress == null || roadAddress.x == null || roadAddress.y == null) {
-			return null;
-		}
-		return PointConverter.convert(Double.valueOf(roadAddress.x), Double.valueOf(roadAddress.y));
 	}
 
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -44,6 +45,7 @@ public record KakaoSearchAddressResponse(
 	) {
 	}
 
+	@Builder
 	@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 	public record Document(
 		String addressName,
@@ -53,6 +55,18 @@ public record KakaoSearchAddressResponse(
 		RoadAddress roadAddress,
 		Address address
 	) {
+		public static final Document DEFAULT_DOCUMENT = Document.builder().build();
+
+		public Document {
+			if (roadAddress == null) {
+				roadAddress = RoadAddress.DEFAULT_ROAD_ADDRESS;
+			}
+			if (address == null) {
+				address = Address.DEFAULT_ADDRESS;
+			}
+		}
+
+		@Builder
 		@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 		public record Address(
 			String addressName,
@@ -62,8 +76,10 @@ public record KakaoSearchAddressResponse(
 			String x,
 			String y
 		) {
+			public static final Address DEFAULT_ADDRESS = Address.builder().build();
 		}
 
+		@Builder
 		@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 		public record RoadAddress(
 			String addressName,
@@ -76,6 +92,7 @@ public record KakaoSearchAddressResponse(
 			String x,
 			String y
 		) {
+			public static final RoadAddress DEFAULT_ROAD_ADDRESS = RoadAddress.builder().build();
 		}
 	}
 }
