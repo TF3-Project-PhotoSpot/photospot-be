@@ -108,7 +108,6 @@ class KakaoMapClientTest {
 			.queryParam("y", "37.0")
 			.encode(StandardCharsets.UTF_8)
 			.build().toUriString();
-		String expectedAddress = "경기도 안성시 죽산면 죽산초교길 69-4";
 		String expectedResponse = """
 			{
 				"meta": {
@@ -142,12 +141,12 @@ class KakaoMapClientTest {
 			() -> kakaoMapClient.convertCoordToAddress(127.0, 37.0));
 
 		//then
-		assertThat(response.findFirstDocument()).isPresent().get()
+		assertThat(response.findFirstDocument())
+			.isPresent().get()
 			.extracting("roadAddress.addressName", "address.addressName")
 			.containsExactly(
 				"경기도 안성시 죽산면 죽산초교길 69-4",
 				"경기 안성시 죽산면 죽산리 343-1"
 			);
-
 	}
 }
