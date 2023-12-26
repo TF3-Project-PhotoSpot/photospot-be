@@ -1,16 +1,19 @@
 package com.tf4.photospot.auth.util;
 
-import java.time.Duration;
+import static com.tf4.photospot.global.config.jwt.JwtConstant.*;
+
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
+
+import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Component;
 
+import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
-import com.tf4.photospot.user.domain.User;
 
-import io.jsonwebtoken.Header;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -19,22 +22,27 @@ public class JwtProvider {
 
 	private final JwtProperties jwtProperties;
 
-	public String generateToken(User user, Duration expiredAt) {
+	public String generateAccessToken(Long userId, String authorities) {
 		Date now = new Date();
-		return makeToken(new Date(now.getTime() + expiredAt.toMillis()), user);
-	}
-
-	private String makeToken(Date expiry, User user) {
-		Date now = new Date();
-
+		SecretKey key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 		return Jwts.builder()
-			.setHeaderParam(Header.TYPE, Header.JWT_TYPE)
+			.claim(USER_ID, userId)
+			.claim(USER_AUTHORITIES, authorities)
 			.setIssuer(jwtProperties.getIssuer())
 			.setIssuedAt(now)
-			.setExpiration(expiry)
-			.claim("id", user.getId())
-			.signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
-			.compact();
+			.setExpiration(new Date(now.getTime() + JwtConstant.ACCESS_TOKEN_DURATION.toMillis()))
+			.signWith(key).compact();
+	}
+
+	public String generateRefreshToken(Long userId) {
+		Date now = new Date();
+		SecretKey key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
+		return Jwts.builder()
+			.claim(USER_ID, userId)
+			.setIssuer(jwtProperties.getIssuer())
+			.setIssuedAt(now)
+			.setExpiration(new Date(now.getTime() + JwtConstant.REFRESH_TOKEN_DURATION.toMillis()))
+			.signWith(key).compact();
 	}
 
 }

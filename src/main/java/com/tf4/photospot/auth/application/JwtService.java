@@ -1,62 +1,51 @@
 package com.tf4.photospot.auth.application;
 
-import java.time.Duration;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.auth.application.response.LoginTokenResponse;
 import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.util.JwtProvider;
+import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
-import com.tf4.photospot.user.domain.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.RequiredArgsConstructor;
 
 @Transactional(readOnly = true)
 @Service
 @RequiredArgsConstructor
 public class JwtService {
-
-	private static final String PREFIX = "Bearer ";
-	private static final Duration ACCESS_TOKEN_DURATION = Duration.ofHours(1);
-	private static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14);
 	private final JwtProvider jwtProvider;
 	private final JwtRepository jwtRepository;
 	private final JwtProperties jwtProperties;
 
-	@Transactional
-	public LoginTokenResponse issueTokens(boolean hasLoggedInBefore, User user) {
-		String accessToken = jwtProvider.generateToken(user, ACCESS_TOKEN_DURATION);
-		String refreshToken = jwtProvider.generateToken(user, REFRESH_TOKEN_DURATION);
-
-		jwtRepository.save(new RefreshToken(user.getId(), refreshToken));
-		return new LoginTokenResponse(hasLoggedInBefore, accessToken, refreshToken);
+	public String issueAccessToken(Long userId, String authorities) {
+		return jwtProvider.generateAccessToken(userId, authorities);
 	}
 
-	public String reissueAccessToken(User user) {
-		return jwtProvider.generateToken(user, ACCESS_TOKEN_DURATION);
+	public String issueRefreshToken(Long userId) {
+		return jwtProvider.generateRefreshToken(userId);
 	}
 
 	public Claims parse(String authorizationHeader) {
 		String token = removePrefix(authorizationHeader);
 		try {
-			return Jwts.parser()
+			return Jwts.parserBuilder()
 				.setSigningKey(jwtProperties.getSecretKey())
+				.build()
 				.parseClaimsJws(token)
 				.getBody();
 		} catch (ExpiredJwtException ex) {
 			throw new ApiException(AuthErrorCode.EXPIRED_TOKEN);
-		} catch (UnsupportedJwtException | MalformedJwtException | SignatureException ex) {
+		} catch (UnsupportedJwtException | MalformedJwtException | SecurityException ex) {
 			throw new ApiException(AuthErrorCode.INVALID_TOKEN);
 		}
 	}
@@ -71,10 +60,10 @@ public class JwtService {
 	}
 
 	private String removePrefix(String header) {
-		if (header == null || !header.startsWith(PREFIX)) {
+		if (header == null || !header.startsWith(JwtConstant.PREFIX)) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
-		return header.substring(PREFIX.length());
+		return header.substring(JwtConstant.PREFIX.length());
 	}
 
 	@Transactional
