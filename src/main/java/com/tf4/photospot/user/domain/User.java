@@ -38,12 +38,15 @@ public class User extends BaseEntity {
 
 	private String account;
 
+	private String role;
+
 	private LocalDateTime deletedAt;
 
 	public User(String nickname, String providerType, String account) {
 		this.nickname = nickname;
 		this.providerType = providerType;
 		this.account = account;
+		this.role = Role.USER.getType();
 	}
 
 }
