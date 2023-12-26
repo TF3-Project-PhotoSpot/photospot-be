@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.user.application.request.LoginUserInfo;
-import com.tf4.photospot.user.application.response.UserLoginResponse;
+import com.tf4.photospot.user.application.response.OauthLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
 import com.tf4.photospot.user.util.NicknameGenerator;
@@ -18,11 +18,12 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
+	// Todo : 이름 변경
 	@Transactional
-	public UserLoginResponse oauthLogin(String providerType, String account) {
+	public OauthLoginResponse oauthLogin(String providerType, String account) {
 		return userRepository.findUserByProviderTypeAndAccount(providerType, account)
-			.map(findUser -> UserLoginResponse.from(true, findUser))
-			.orElseGet(() -> UserLoginResponse.from(false, userRepository.save(
+			.map(findUser -> OauthLoginResponse.from(true, findUser))
+			.orElseGet(() -> OauthLoginResponse.from(false, userRepository.save(
 				new LoginUserInfo(providerType, account).toUser(generateNickname())
 			)));
 	}
