@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
-import com.tf4.photospot.user.application.response.OauthLoginResponse;
+import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
 import com.tf4.photospot.user.util.NicknameGenerator;
@@ -21,10 +21,10 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	@Transactional
-	public OauthLoginResponse oauthLogin(String providerType, String account) {
+	public OauthLoginUserResponse oauthLogin(String providerType, String account) {
 		return userRepository.findUserByProviderTypeAndAccount(providerType, account)
-			.map(findUser -> OauthLoginResponse.from(true, findUser))
-			.orElseGet(() -> OauthLoginResponse.from(false, userRepository.save(
+			.map(findUser -> OauthLoginUserResponse.from(true, findUser))
+			.orElseGet(() -> OauthLoginUserResponse.from(false, userRepository.save(
 				new LoginUserInfo(providerType, account).toUser(generateNickname())
 			)));
 	}

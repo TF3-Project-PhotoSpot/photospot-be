@@ -1,12 +1,8 @@
 package com.tf4.photospot.global.filter.details;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +11,7 @@ import com.tf4.photospot.auth.application.response.LoginResponse;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.LoginUserDto;
+import com.tf4.photospot.global.util.AuthorityConverter;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +29,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		Authentication authentication) throws IOException {
 		LoginUserDto loginUser = getOauthUserFromAuthentication(authentication);
 		String accessToken = jwtService.issueAccessToken(loginUser.getId(),
-			convertAuthoritiesToString(authentication.getAuthorities()));
+			AuthorityConverter.convertGrantedAuthoritiesToString(authentication.getAuthorities()));
 		String refreshToken = jwtService.issueRefreshToken(loginUser.getId());
 
 		response.addCookie(createCookie(refreshToken));
@@ -47,14 +44,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 			return (LoginUserDto)authentication.getPrincipal();
 		}
 		throw new RuntimeException("invalid authentication");
-	}
-
-	private String convertAuthoritiesToString(Collection<? extends GrantedAuthority> authorities) {
-		Set<String> authoritiesSet = new HashSet<>();
-		for (GrantedAuthority authority : authorities) {
-			authoritiesSet.add(authority.getAuthority());
-		}
-		return String.join(",", authoritiesSet);
 	}
 
 	private ApiResponse<LoginResponse> createBody(String accessToken, Boolean hasLoggedInBefore) {
