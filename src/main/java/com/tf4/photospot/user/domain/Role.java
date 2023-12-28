@@ -2,6 +2,9 @@ package com.tf4.photospot.user.domain;
 
 import java.util.Arrays;
 
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -9,15 +12,15 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Role {
 
-	USER("user"),
-	ADMIN("admin");
+	USER("ROLE_USER"),
+	ADMIN("ROLE_ADMIN,ROLE_USER");
 
 	public final String type;
 
 	public static Role findByType(String type) {
 		return Arrays.stream(Role.values())
-			.filter(role -> type.equals(role.type))
+			.filter(role -> Arrays.asList(role.type.split(",")).contains(type))
 			.findFirst()
-			.orElseThrow(IllegalArgumentException::new);
+			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_ROLE));
 	}
 }
