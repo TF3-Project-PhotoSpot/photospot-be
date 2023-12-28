@@ -19,7 +19,7 @@ public class AuthService {
 	private final JwtService jwtService;
 
 	public ReissueTokenResponse reissueToken(String refreshToken) {
-		Claims claims = jwtService.parse(refreshToken);
+		Claims claims = jwtService.parseRefreshToken(refreshToken);
 		User user = userService.findUser(claims.get("id", Long.class));
 		jwtService.validRefreshToken(user.getId(), refreshToken);
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole()));

@@ -37,7 +37,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 		// Todo : try-catch 문이 불필요해보이는데 보수적으로 넣을지 & 예외 처리
 		try {
-			Claims claims = jwtService.parse(jwt);
+			Claims claims = jwtService.parseAccessToekn(jwt);
 			Long userId = Long.valueOf(claims.getId());
 			String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
 			Authentication auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null,
@@ -50,9 +50,9 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	// 로그인 요청 API에서는 동작하지 않음
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
-		return request.getRequestURI().equals(SecurityConstant.LOGIN_URL);
+		return request.getServletPath().equals(SecurityConstant.LOGIN_URL) || request.getServletPath()
+			.equals(SecurityConstant.REISSUE_ACCESS_TOKEN_URL);
 	}
 }

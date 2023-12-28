@@ -31,31 +31,48 @@ public class JwtService {
 		return jwtProvider.generateAccessToken(userId, authorities);
 	}
 
+	@Transactional
 	public String issueRefreshToken(Long userId) {
-		return jwtProvider.generateRefreshToken(userId);
+		String refreshToken = jwtProvider.generateRefreshToken(userId);
+		jwtRepository.save(new RefreshToken(userId, refreshToken));
+		return refreshToken;
 	}
 
-	public Claims parse(String authorizationHeader) {
+	public Claims parseAccessToekn(String authorizationHeader) {
 		String token = removePrefix(authorizationHeader);
 		try {
 			return Jwts.parserBuilder()
-				.setSigningKey(jwtProperties.getSecretKey())
+				.setSigningKey(jwtProperties.getSecretKey().getBytes())
 				.build()
 				.parseClaimsJws(token)
 				.getBody();
 		} catch (ExpiredJwtException ex) {
-			throw new ApiException(AuthErrorCode.EXPIRED_TOKEN);
+			throw new ApiException(AuthErrorCode.EXPIRED_ACCESS_TOKEN);
 		} catch (UnsupportedJwtException | MalformedJwtException | SecurityException ex) {
-			throw new ApiException(AuthErrorCode.INVALID_TOKEN);
+			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+		}
+	}
+
+	public Claims parseRefreshToken(String token) {
+		try {
+			return Jwts.parserBuilder()
+				.setSigningKey(jwtProperties.getSecretKey().getBytes())
+				.build()
+				.parseClaimsJws(token)
+				.getBody();
+		} catch (ExpiredJwtException ex) {
+			throw new ApiException(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
+		} catch (UnsupportedJwtException | MalformedJwtException | SecurityException ex) {
+			throw new ApiException(AuthErrorCode.INVALID_REFRESH_TOKEN);
 		}
 	}
 
 	public void validRefreshToken(Long userId, String refreshToken) {
 		RefreshToken token = jwtRepository.findByUserId(userId)
-			.orElseThrow(() -> new ApiException(AuthErrorCode.EXPIRED_TOKEN));
+			.orElseThrow(() -> new ApiException(AuthErrorCode.EXPIRED_REFRESH_TOKEN));
 
-		if (!token.isTokenMatching(removePrefix(refreshToken))) {
-			throw new ApiException(AuthErrorCode.INVALID_TOKEN);
+		if (!token.isTokenMatching(refreshToken)) {
+			throw new ApiException(AuthErrorCode.INVALID_REFRESH_TOKEN);
 		}
 	}
 
