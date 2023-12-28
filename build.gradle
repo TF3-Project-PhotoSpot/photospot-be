@@ -65,6 +65,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
 
     implementation 'com.querydsl:querydsl-spatial'
+
+    implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
 }
 
 def querydslSrcDir = 'src/main/generated'
@@ -85,13 +87,12 @@ tasks.named('test') {
 }
 
 tasks.named('asciidoctor') {
+    inputs.dir snippetsDir
     configurations 'asciidoctorExtensions'
     sources {
         include("**/index.adoc")
     }
-    inputs.dir snippetsDir
     baseDirFollowsSourceFile()
-
     dependsOn test
 }
 
@@ -107,7 +108,6 @@ task createDocs(type: Copy) {
 }
 
 bootJar {
-    dependsOn asciidoctor
     dependsOn createDocs
     from("${asciidoctor.outputDir}") {
         into 'static/docs'

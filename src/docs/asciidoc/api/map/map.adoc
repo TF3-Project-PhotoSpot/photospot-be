@@ -1,0 +1,8 @@
+=== 특정 좌표로 주소 검색
+
+'''
+
+include::{snippets}/map-controller-docs-test/find-registered-spot/http-request.adoc[]
+include::{snippets}/map-controller-docs-test/find-registered-spot/query-parameters.adoc[]
+include::{snippets}/map-controller-docs-test/find-registered-spot/response-body.adoc[]
+include::{snippets}/map-controller-docs-test/find-registered-spot/response-fields-data.adoc[]

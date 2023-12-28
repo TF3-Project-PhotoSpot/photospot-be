@@ -1,0 +1,17 @@
+=== 주변 장소 리스트 조회
+
+'''
+
+include::{snippets}/spot-controller-docs-test/get-nearby-spots/http-request.adoc[]
+include::{snippets}/spot-controller-docs-test/get-nearby-spots/query-parameters.adoc[]
+include::{snippets}/spot-controller-docs-test/get-nearby-spots/response-body.adoc[]
+include::{snippets}/spot-controller-docs-test/get-nearby-spots/response-fields-data.adoc[]
+
+'''
+
+=== 주변 추천 장소 리스트 조회
+
+include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/http-request.adoc[]
+include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/query-parameters.adoc[]
+include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-body.adoc[]
+include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-fields-data.adoc[]
