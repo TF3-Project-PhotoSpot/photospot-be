@@ -1,0 +1,19 @@
+=== Success Example
+
+'''
+
+include::{snippets}/common-docs-test/common-success/response-fields.adoc[]
+include::{snippets}/common-docs-test/common-success/response-body.adoc[]
+
+=== Error Example
+
+'''
+
+include::{snippets}/common-docs-test/common-error/response-fields.adoc[]
+include::{snippets}/common-docs-test/common-error/response-body.adoc[]
+
+=== Enums
+
+'''
+
+include::{snippets}/common-docs-test/common-error-codes/errorcode-response-fields.adoc[]
