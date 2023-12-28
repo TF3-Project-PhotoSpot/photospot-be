@@ -1,12 +1,9 @@
 package com.tf4.photospot.spring.docs.auth;
 
 import static org.mockito.BDDMockito.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
-import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.DisplayName;
@@ -45,22 +42,17 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 				.queryParam("providerType", "kakao")
 				.queryParam("account", "123456")
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
-			.andDo(document("initial-login",
-				preprocessRequest(prettyPrint()),
-				preprocessResponse(prettyPrint()),
+			.andDo(restDocsTemplate(
 				queryParameters(
 					parameterWithName("providerType").description("로그인 공급자 타입"),
 					parameterWithName("account").description("oauth에서 제공하는 사용자 고유 account")
 				),
 				responseFields(
-					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-					fieldWithPath("data.hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 여부"),
-					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
-					fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰")
+					beneathPath("data").withSubsectionId("data"),
+					fieldWithPath("hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 여부"),
+					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
+					fieldWithPath("refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰")
 				)));
 	}
 
@@ -79,22 +71,17 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 				.queryParam("providerType", "kakao")
 				.queryParam("account", "123456")
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
-			.andDo(document("previous-login",
-				preprocessRequest(prettyPrint()),
-				preprocessResponse(prettyPrint()),
+			.andDo(restDocsTemplate(
 				queryParameters(
 					parameterWithName("providerType").description("로그인 공급자 타입"),
 					parameterWithName("account").description("oauth에서 제공하는 사용자 고유 account")
 				),
 				responseFields(
-					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-					fieldWithPath("data.hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 유무"),
-					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
-					fieldWithPath("data.refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰")
+					beneathPath("data").withSubsectionId("data"),
+					fieldWithPath("hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("이전 로그인 유무"),
+					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
+					fieldWithPath("refreshToken").type(JsonFieldType.STRING).description("리프레시 토큰")
 				)));
 	}
 
@@ -110,19 +97,14 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(new ReissueRequest("refresh_token")))
 			)
-			.andDo(print())
 			.andExpect(status().isOk())
-			.andDo(document("reissue-token",
-				preprocessRequest(prettyPrint()),
-				preprocessResponse(prettyPrint()),
+			.andDo(restDocsTemplate(
 				requestFields(
 					fieldWithPath("refreshToken").type(JsonFieldType.STRING).description("사용자의 리프레시 토큰")
 				),
 				responseFields(
-					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
-					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("data").type(JsonFieldType.OBJECT).description("응답 데이터"),
-					fieldWithPath("data.accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰")
+					beneathPath("data").withSubsectionId("data"),
+					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰")
 				)));
 	}
 }
