@@ -17,7 +17,6 @@ import com.tf4.photospot.global.filter.CustomAuthenticationFilter;
 import com.tf4.photospot.global.filter.JwtTokenValidatorFilter;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationProvider;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationSuccessHandler;
-import com.tf4.photospot.global.filter.details.JwtGenerator;
 import com.tf4.photospot.user.application.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -67,7 +66,7 @@ public class SecurityConfig {
 
 	@Bean
 	public CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler() {
-		return new CustomAuthenticationSuccessHandler(new JwtGenerator(jwtService));
+		return new CustomAuthenticationSuccessHandler(jwtService);
 	}
 
 }
