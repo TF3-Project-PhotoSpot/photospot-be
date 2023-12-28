@@ -67,10 +67,8 @@ public class JwtService {
 			.signWith(key).compact();
 	}
 
-	public Claims parse(String token, String type) {
-		if (!type.equals(REFRESH_COOKIE_NAME)) {
-			token = removePrefix(token);
-		}
+	public Claims parseAccessToken(String authorizationHeader) {
+		String token = removePrefix(authorizationHeader);
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(jwtProperties.getSecretKey().getBytes())
@@ -84,9 +82,26 @@ public class JwtService {
 		}
 	}
 
+	public Claims parseRefreshToken(String token) {
+		if (token == null) {
+			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
+		}
+		try {
+			return Jwts.parserBuilder()
+				.setSigningKey(jwtProperties.getSecretKey().getBytes())
+				.build()
+				.parseClaimsJws(token)
+				.getBody();
+		} catch (ExpiredJwtException ex) {
+			throw new ApiException(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
+		} catch (UnsupportedJwtException | MalformedJwtException | SecurityException ex) {
+			throw new ApiException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+		}
+	}
+
 	public void validRefreshToken(Long userId, String refreshToken) {
 		RefreshToken token = jwtRepository.findByUserId(userId)
-			.orElseThrow(() -> new ApiException(AuthErrorCode.EXPIRED_REFRESH_TOKEN));
+			.orElseThrow(() -> new ApiException(AuthErrorCode.UNAUTHORIZED_USER));
 
 		if (!token.isTokenMatching(refreshToken)) {
 			throw new ApiException(AuthErrorCode.INVALID_REFRESH_TOKEN);

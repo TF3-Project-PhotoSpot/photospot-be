@@ -4,7 +4,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
-import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.domain.User;
 
@@ -20,7 +19,7 @@ public class AuthService {
 	private final JwtService jwtService;
 
 	public ReissueTokenResponse reissueToken(String refreshToken) {
-		Claims claims = jwtService.parse(refreshToken, JwtConstant.REFRESH_COOKIE_NAME);
+		Claims claims = jwtService.parseRefreshToken(refreshToken);
 		User user = userService.findUser(claims.get("id", Long.class));
 		jwtService.validRefreshToken(user.getId(), refreshToken);
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole()));
