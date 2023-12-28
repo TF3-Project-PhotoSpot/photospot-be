@@ -1,0 +1,14 @@
+==== Request Fields
+
+|===
+|Path|Type|Constraints|Description
+
+{{#fields}}
+|{{#tableCellContent}}`+{{path}}+`{{/tableCellContent}}
+|{{#tableCellContent}}`+{{type}}+`{{/tableCellContent}}
+|{{#tableCellContent}}{{#constraints}}{{.}} +
+{{/constraints}}{{/tableCellContent}}
+|{{#tableCellContent}}{{description}}{{/tableCellContent}}
+
+{{/fields}}
+|===
