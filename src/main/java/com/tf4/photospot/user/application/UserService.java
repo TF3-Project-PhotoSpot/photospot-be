@@ -3,6 +3,8 @@ package com.tf4.photospot.user.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
 import com.tf4.photospot.user.application.response.OauthLoginResponse;
 import com.tf4.photospot.user.domain.User;
@@ -18,7 +20,6 @@ public class UserService {
 
 	private final UserRepository userRepository;
 
-	// Todo : 이름 변경
 	@Transactional
 	public OauthLoginResponse oauthLogin(String providerType, String account) {
 		return userRepository.findUserByProviderTypeAndAccount(providerType, account)
@@ -28,16 +29,9 @@ public class UserService {
 			)));
 	}
 
-	// Todo : 예외 처리
 	public User findUser(Long userId) {
 		return userRepository.findById(userId)
-			.orElseThrow();
-	}
-
-	// Todo : 예외 처리
-	public User findUser(String providerType, String account) {
-		return userRepository.findUserByProviderTypeAndAccount(providerType, account)
-			.orElseThrow();
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 	}
 
 	private boolean isNicknameDuplicated(String nickname) {
