@@ -37,7 +37,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 		// Todo : try-catch 문이 불필요해보이는데 보수적으로 넣을지 & 예외 처리
 		try {
-			Claims claims = jwtService.parseAccessToekn(jwt);
+			Claims claims = jwtService.parse(jwt, JwtConstant.AUTHORIZATION_HEADER);
 			Long userId = Long.valueOf(claims.getId());
 			String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
 			Authentication auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null,
