@@ -22,7 +22,6 @@ import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.security.SecurityConfig;
-import com.tf4.photospot.global.config.security.SecurityConstant;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
@@ -64,8 +63,7 @@ public class AuthControllerTest {
 		String account = "account";
 		String providerType = "kakao";
 
-		OauthLoginUserResponse mockUser
-			= new OauthLoginUserResponse(false, 1L, Role.USER.getType());
+		var mockUser = new OauthLoginUserResponse(false, 1L, Role.USER.getType());
 		Mockito.when(userService.oauthLogin(providerType, account)).thenReturn(mockUser);
 
 		String accessToken = "access token";
@@ -73,7 +71,7 @@ public class AuthControllerTest {
 		String refreshToken = "refresh token";
 		Mockito.when(jwtService.issueRefreshToken(mockUser.getId())).thenReturn(refreshToken);
 
-		mockMvc.perform(post(SecurityConstant.LOGIN_URL)
+		mockMvc.perform(post("/api/v1/auth/login")
 				.queryParam("account", account)
 				.queryParam("providerType", providerType)
 			)
@@ -93,7 +91,7 @@ public class AuthControllerTest {
 		String account = "account";
 		String providerType = "kekeo";
 
-		mockMvc.perform(post(SecurityConstant.LOGIN_URL)
+		mockMvc.perform(post("/api/v1/auth/login")
 				.queryParam("account", account)
 				.queryParam("providerType", providerType)
 			)
@@ -112,8 +110,8 @@ public class AuthControllerTest {
 
 		Mockito.when(authService.reissueToken(refreshToken)).thenReturn(new ReissueTokenResponse(newAccessToken));
 
-		mockMvc.perform(get(SecurityConstant.REISSUE_ACCESS_TOKEN_URL)
-				.cookie(new Cookie(JwtConstant.REFRESH_COOKIE_NAME, refreshToken)))
+		mockMvc.perform(get("/api/v1/auth/reissue")
+				.cookie(new Cookie("RefreshToken", refreshToken)))
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
