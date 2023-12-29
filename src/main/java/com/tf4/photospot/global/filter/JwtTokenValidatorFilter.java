@@ -12,6 +12,8 @@ import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.security.SecurityConstant;
 import com.tf4.photospot.global.dto.LoginUserDto;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -25,34 +27,31 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
 
-	// Todo : 예외 처리
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
 
 		String jwt = request.getHeader(JwtConstant.AUTHORIZATION_HEADER);
-		if (jwt == null) {
-			throw new RuntimeException("jwt is null");
-		}
-
-		// Todo : try-catch 문이 불필요해보이는데 보수적으로 넣을지 & 예외 처리
-		try {
-			Claims claims = jwtService.parseAccessToken(jwt);
-			Long userId = Long.valueOf(claims.getId());
-			String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
-			Authentication auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null,
-				AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
-			SecurityContextHolder.getContext().setAuthentication(auth);
-		} catch (Exception ex) {
-			throw new RuntimeException("invalid jwt");
-		}
+		validate(jwt);
+		Claims claims = jwtService.parseAccessToken(jwt);
+		Long userId = Long.valueOf(claims.getId());
+		String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
+		Authentication auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null,
+			AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+		SecurityContextHolder.getContext().setAuthentication(auth);
 
 		filterChain.doFilter(request, response);
 	}
 
+	private void validate(String accessToken) {
+		if (accessToken == null) {
+			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
+		}
+	}
+
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
-		return request.getServletPath().equals(SecurityConstant.LOGIN_URL) || request.getServletPath()
+		return request.getRequestURI().equals(SecurityConstant.LOGIN_URL) || request.getRequestURI()
 			.equals(SecurityConstant.REISSUE_ACCESS_TOKEN_URL);
 	}
 }

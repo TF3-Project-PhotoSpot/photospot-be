@@ -11,6 +11,8 @@ import com.tf4.photospot.auth.application.response.LoginResponse;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.LoginUserDto;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.util.AuthorityConverter;
 
 import jakarta.servlet.http.Cookie;
@@ -38,12 +40,11 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		new ObjectMapper().writeValue(response.getWriter(), createBody(accessToken, loginUser.hasLoggedInBefore()));
 	}
 
-	// Todo : 예외 변경
 	private LoginUserDto getOauthUserFromAuthentication(Authentication authentication) {
 		if (authentication != null && authentication.getPrincipal() instanceof LoginUserDto) {
 			return (LoginUserDto)authentication.getPrincipal();
 		}
-		throw new RuntimeException("invalid authentication");
+		throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 	}
 
 	private ApiResponse<LoginResponse> createBody(String accessToken, Boolean hasLoggedInBefore) {

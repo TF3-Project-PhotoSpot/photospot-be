@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -14,7 +13,10 @@ import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.global.filter.CustomAuthenticationFilter;
+import com.tf4.photospot.global.filter.CustomExceptionFilter;
 import com.tf4.photospot.global.filter.JwtTokenValidatorFilter;
+import com.tf4.photospot.global.filter.details.CustomAuthenticationEntryPoint;
+import com.tf4.photospot.global.filter.details.CustomAuthenticationFailureHandler;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationProvider;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationSuccessHandler;
 import com.tf4.photospot.user.application.UserService;
@@ -40,9 +42,11 @@ public class SecurityConfig {
 				.disable())
 			.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(new JwtTokenValidatorFilter(jwtService), CustomAuthenticationFilter.class)
+			.addFilterBefore(new CustomExceptionFilter(), JwtTokenValidatorFilter.class)
 			.authorizeHttpRequests(requests -> requests
 				.anyRequest().permitAll())
-			.httpBasic(Customizer.withDefaults());
+			.exceptionHandling(exceptionHandling -> exceptionHandling
+				.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		return http.build();
 	}
 
@@ -51,6 +55,7 @@ public class SecurityConfig {
 		CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager());
 		customAuthenticationFilter.setFilterProcessesUrl(SecurityConstant.LOGIN_URL);
 		customAuthenticationFilter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler());
+		customAuthenticationFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler());
 		return customAuthenticationFilter;
 	}
 
@@ -67,6 +72,11 @@ public class SecurityConfig {
 	@Bean
 	public CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler() {
 		return new CustomAuthenticationSuccessHandler(jwtService);
+	}
+
+	@Bean
+	public CustomAuthenticationFailureHandler customAuthenticationFailureHandler() {
+		return new CustomAuthenticationFailureHandler();
 	}
 
 }
