@@ -24,7 +24,7 @@ public class SecurityControllerDocsTest extends RestDocsSupport {
 	@DisplayName("로그인")
 	void login() throws Exception {
 		mockMvc.perform(post("/api/v1/auth/login")
-				.queryParam("account", "kakao account")
+				.queryParam("account", "kakao_account")
 				.queryParam("providerType", "kakao")
 			)
 			.andExpect(status().isOk())
