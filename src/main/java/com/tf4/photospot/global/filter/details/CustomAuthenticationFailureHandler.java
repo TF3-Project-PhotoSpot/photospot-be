@@ -17,28 +17,17 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 	@Override
 	public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response,
 		AuthenticationException exception) throws IOException {
-
 		Throwable cause = exception.getCause();
-		ApiException apiException;
-
 		if (cause instanceof ApiException) {
-			apiException = (ApiException)cause;
-			String errorCode = apiException.getName();
-			String errorMsg = apiException.getMessage();
-			response.setStatus(apiException.getStatusCode().value());
-			ErrorResponse errorResponse = ErrorResponse.builder()
-				.code(errorCode)
-				.message(errorMsg)
-				.build();
-			new ObjectMapper().writeValue(response.getWriter(), errorResponse);
+			ErrorResponseFactory.create(request, response, (ApiException)cause);
 		} else {
 			ErrorResponse errorResponse = ErrorResponse.builder()
-				.code(exception.getMessage())
+				.code("400")
+				.message(exception.getMessage())
 				.build();
+			response.setCharacterEncoding("UTF-8");
+			response.setContentType("application/json");
 			new ObjectMapper().writeValue(response.getWriter(), errorResponse);
 		}
-
-		response.setCharacterEncoding("UTF-8");
-		response.setContentType("application/json");
 	}
 }

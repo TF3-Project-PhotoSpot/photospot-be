@@ -24,46 +24,49 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
-import lombok.RequiredArgsConstructor;
 
 @Transactional(readOnly = true)
 @Service
-@RequiredArgsConstructor
 public class JwtService {
+
 	private final JwtRepository jwtRepository;
 	private final JwtProperties jwtProperties;
+	private final SecretKey key;
 
-	public String issueAccessToken(Long userId, String authorities) {
-		return generate(userId, authorities);
+	public JwtService(JwtRepository jwtRepository, JwtProperties jwtProperties) {
+		this.jwtRepository = jwtRepository;
+		this.jwtProperties = jwtProperties;
+		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 	}
 
-	private String generate(Long userId, String authorities) {
-		Date now = new Date();
+	public String issueAccessToken(Long userId, String authorities) {
+		return generateAccessToken(userId, authorities, new Date());
+	}
+
+	private String generateAccessToken(Long userId, String authorities, Date expiration) {
 		SecretKey key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 		return Jwts.builder()
 			.claim(USER_ID, userId)
 			.claim(USER_AUTHORITIES, authorities)
 			.setIssuer(jwtProperties.getIssuer())
-			.setIssuedAt(now)
-			.setExpiration(new Date(now.getTime() + JwtConstant.ACCESS_TOKEN_DURATION.toMillis()))
+			.setIssuedAt(expiration)
+			.setExpiration(new Date(expiration.getTime() + JwtConstant.ACCESS_TOKEN_DURATION.toMillis()))
 			.signWith(key).compact();
 	}
 
 	@Transactional
 	public String issueRefreshToken(Long userId) {
-		String refreshToken = generate(userId);
+		String refreshToken = generateRefreshToken(userId, new Date());
 		jwtRepository.save(new RefreshToken(userId, refreshToken));
 		return refreshToken;
 	}
 
-	private String generate(Long userId) {
-		Date now = new Date();
-		SecretKey key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
+	private String generateRefreshToken(Long userId, Date expiration) {
 		return Jwts.builder()
 			.claim(USER_ID, userId)
 			.setIssuer(jwtProperties.getIssuer())
-			.setIssuedAt(now)
-			.setExpiration(new Date(now.getTime() + JwtConstant.REFRESH_TOKEN_DURATION.toMillis()))
+			.setIssuedAt(expiration)
+			.setExpiration(new Date(expiration.getTime() + JwtConstant.REFRESH_TOKEN_DURATION.toMillis()))
 			.signWith(key).compact();
 	}
 
