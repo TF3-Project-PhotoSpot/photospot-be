@@ -16,7 +16,6 @@ import com.tf4.photospot.global.filter.CustomAuthenticationFilter;
 import com.tf4.photospot.global.filter.CustomExceptionFilter;
 import com.tf4.photospot.global.filter.JwtTokenValidatorFilter;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationEntryPoint;
-import com.tf4.photospot.global.filter.details.CustomAuthenticationFailureHandler;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationProvider;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationSuccessHandler;
 import com.tf4.photospot.user.application.UserService;
@@ -55,7 +54,6 @@ public class SecurityConfig {
 		CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager());
 		customAuthenticationFilter.setFilterProcessesUrl(SecurityConstant.LOGIN_URL);
 		customAuthenticationFilter.setAuthenticationSuccessHandler(customAuthenticationSuccessHandler());
-		customAuthenticationFilter.setAuthenticationFailureHandler(customAuthenticationFailureHandler());
 		return customAuthenticationFilter;
 	}
 
@@ -72,11 +70,6 @@ public class SecurityConfig {
 	@Bean
 	public CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler() {
 		return new CustomAuthenticationSuccessHandler(jwtService);
-	}
-
-	@Bean
-	public CustomAuthenticationFailureHandler customAuthenticationFailureHandler() {
-		return new CustomAuthenticationFailureHandler();
 	}
 
 }

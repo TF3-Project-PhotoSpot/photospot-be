@@ -19,7 +19,7 @@ public class WithMockCustomerUserSecurityContextFactory implements WithSecurityC
 			mockUser.role());
 		Authentication auth = new UsernamePasswordAuthenticationToken(
 			new LoginUserDto(loginUser.getId(), loginUser.hasLoggedInBefore()), null,
-			AuthorityConverter.convertStringToGrantedAuthority(loginUser.getRole()));
+			AuthorityConverter.convertStringToGrantedAuthority(loginUser.getRole().type));
 		context.setAuthentication(auth);
 		return context;
 	}

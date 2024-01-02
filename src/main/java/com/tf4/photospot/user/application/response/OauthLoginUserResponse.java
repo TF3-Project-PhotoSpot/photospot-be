@@ -1,5 +1,6 @@
 package com.tf4.photospot.user.application.response;
 
+import com.tf4.photospot.user.domain.Role;
 import com.tf4.photospot.user.domain.User;
 
 import lombok.AllArgsConstructor;
@@ -16,7 +17,7 @@ public class OauthLoginUserResponse {
 	private Long id;
 
 	@Getter
-	private String role;
+	private Role role;
 
 	public boolean hasLoggedInBefore() {
 		return hasLoggedInBefore;

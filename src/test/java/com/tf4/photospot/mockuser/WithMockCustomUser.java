@@ -5,6 +5,8 @@ import java.lang.annotation.RetentionPolicy;
 
 import org.springframework.security.test.context.support.WithSecurityContext;
 
+import com.tf4.photospot.user.domain.Role;
+
 @Retention(RetentionPolicy.RUNTIME)
 @WithSecurityContext(factory = WithMockCustomerUserSecurityContextFactory.class)
 public @interface WithMockCustomUser {
@@ -13,6 +15,6 @@ public @interface WithMockCustomUser {
 
 	boolean hasLoggedInBefore() default false;
 
-	String role() default "ROLE_USER";
+	Role role() default Role.USER;
 
 }

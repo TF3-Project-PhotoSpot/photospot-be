@@ -27,7 +27,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		String account = authentication.getPrincipal().toString();
 		String providerType = authentication.getCredentials().toString();
 		OauthLoginUserResponse loginUser = userService.oauthLogin(providerType, account);
-		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(loginUser.getRole());
+		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(
+			loginUser.getRole().type);
 		return new UsernamePasswordAuthenticationToken(
 			new LoginUserDto(loginUser.getId(), loginUser.hasLoggedInBefore()), null, authorities);
 	}

@@ -63,11 +63,11 @@ public class AuthControllerTest {
 		String account = "account";
 		String providerType = "kakao";
 
-		var mockUser = new OauthLoginUserResponse(false, 1L, Role.USER.getType());
+		var mockUser = new OauthLoginUserResponse(false, 1L, Role.USER);
 		Mockito.when(userService.oauthLogin(providerType, account)).thenReturn(mockUser);
 
 		String accessToken = "access token";
-		Mockito.when(jwtService.issueAccessToken(mockUser.getId(), mockUser.getRole())).thenReturn(accessToken);
+		Mockito.when(jwtService.issueAccessToken(mockUser.getId(), mockUser.getRole().type)).thenReturn(accessToken);
 		String refreshToken = "refresh token";
 		Mockito.when(jwtService.issueRefreshToken(mockUser.getId())).thenReturn(refreshToken);
 

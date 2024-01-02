@@ -69,7 +69,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 		// given
 		User user = new User("nickname", "kakao", "account");
 		User savedUser = userRepository.save(user);
-		String accessToken = jwtService.issueAccessToken(savedUser.getId(), savedUser.getRole());
+		String accessToken = jwtService.issueAccessToken(savedUser.getId(), savedUser.getRole().type);
 
 		return List.of(
 			DynamicTest.dynamicTest("정상적인 액세스 토큰에서 값을 추출한다.", () -> {
@@ -82,7 +82,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 				// then
 				assertAll(
 					() -> assertThat(claims.get("id", Long.class)).isEqualTo(savedUser.getId()),
-					() -> assertThat(claims.get("authorities", String.class)).isEqualTo(savedUser.getRole())
+					() -> assertThat(claims.get("authorities", String.class)).isEqualTo(savedUser.getRole().type)
 				);
 			}),
 			DynamicTest.dynamicTest("액세스 토큰 값으로 null을 전달 받으면 예외를 발생한다.", () -> {
