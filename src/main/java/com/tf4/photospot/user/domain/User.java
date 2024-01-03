@@ -8,6 +8,8 @@ import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.spot.domain.BookmarkFolder;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -38,12 +40,16 @@ public class User extends BaseEntity {
 
 	private String account;
 
+	@Enumerated(EnumType.STRING)
+	private Role role;
+
 	private LocalDateTime deletedAt;
 
 	public User(String nickname, String providerType, String account) {
 		this.nickname = nickname;
 		this.providerType = providerType;
 		this.account = account;
+		this.role = Role.USER;
 	}
 
 }

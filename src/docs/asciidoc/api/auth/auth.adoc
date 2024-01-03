@@ -1,17 +1,17 @@
-=== Initial Login
+=== 로그인
 
 '''
 
-include::{snippets}/auth-controller-docs-test/initial-login/http-request.adoc[]
-include::{snippets}/auth-controller-docs-test/initial-login/query-parameters.adoc[]
-include::{snippets}/auth-controller-docs-test/initial-login/response-body.adoc[]
-include::{snippets}/auth-controller-docs-test/previous-login/response-fields-data.adoc[]
+include::{snippets}/security-controller-docs-test/login/http-request.adoc[]
+include::{snippets}/security-controller-docs-test/login/query-parameters.adoc[]
+include::{snippets}/security-controller-docs-test/login/response-body.adoc[]
+include::{snippets}/security-controller-docs-test/login/response-fields-data.adoc[]
 
 === 액세트 토큰 재발급
 
 '''
 
 include::{snippets}/auth-controller-docs-test/reissue-token/http-request.adoc[]
-include::{snippets}/auth-controller-docs-test/reissue-token/request-fields.adoc[]
+include::{snippets}/auth-controller-docs-test/reissue-token/request-cookies.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-body.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-fields-data.adoc[]

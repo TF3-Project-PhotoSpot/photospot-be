@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.IntegrationTestSupport;
-import com.tf4.photospot.user.application.response.UserLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.infrastructure.UserRepository;
 
@@ -36,7 +35,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 		return List.of(
 			DynamicTest.dynamicTest("최초 로그인 시 사용자 정보를 DB에 저장한다.", () -> {
 				//when
-				UserLoginResponse loginResponse = userService.oauthLogin(providerType, account);
+				var loginResponse = userService.oauthLogin(providerType, account);
 
 				//then
 				assertAll(
@@ -46,7 +45,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("기존에 로그인 했던 사용자는 DB에 저장하지 않는다.", () -> {
 				//when
-				UserLoginResponse loginResponse2 = userService.oauthLogin(providerType, account);
+				var loginResponse2 = userService.oauthLogin(providerType, account);
 				User savedUser = userRepository.findUserByProviderTypeAndAccount(providerType, account).orElseThrow();
 
 				//then
