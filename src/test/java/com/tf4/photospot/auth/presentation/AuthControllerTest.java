@@ -7,70 +7,50 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.tf4.photospot.auth.application.AuthService;
+import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.application.JwtService;
-import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
+import com.tf4.photospot.auth.domain.OauthAttributes;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
-import com.tf4.photospot.global.config.security.SecurityConfig;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.user.application.UserService;
-import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
-import com.tf4.photospot.user.domain.Role;
 
 import jakarta.servlet.http.Cookie;
 
-@WebMvcTest(AuthController.class)
-@Import(SecurityConfig.class)
-public class AuthControllerTest {
+public class AuthControllerTest extends IntegrationTestSupport {
 
-	@Autowired
 	private MockMvc mockMvc;
 
 	@Autowired
-	private WebApplicationContext webApplicationContext;
+	private WebApplicationContext context;
 
-	@MockBean
-	private AuthService authService;
-
-	@MockBean
+	@Autowired
 	private JwtService jwtService;
 
-	@MockBean
+	@Autowired
 	private UserService userService;
 
 	@BeforeEach
-	public void setUp() {
+	void setUp() {
 		mockMvc = MockMvcBuilders
-			.webAppContextSetup(webApplicationContext)
+			.webAppContextSetup(context)
 			.apply(SecurityMockMvcConfigurers.springSecurity())
 			.build();
 	}
 
 	@Test
-	@DisplayName("로그인 성공 테스트")
+	@DisplayName("로그인을 성공한다.")
 	void login() throws Exception {
 		// given
-		String account = "account";
-		String providerType = "kakao";
+		var account = "account_value";
+		var providerType = "kakao";
 
-		var mockUser = new OauthLoginUserResponse(false, 1L, Role.USER);
-		Mockito.when(userService.oauthLogin(providerType, account)).thenReturn(mockUser);
-
-		String accessToken = "access token";
-		Mockito.when(jwtService.issueAccessToken(mockUser.getId(), mockUser.getRole().type)).thenReturn(accessToken);
-		String refreshToken = "refresh token";
-		Mockito.when(jwtService.issueRefreshToken(mockUser.getId())).thenReturn(refreshToken);
-
+		// when & then
 		mockMvc.perform(post("/api/v1/auth/login")
 				.queryParam("account", account)
 				.queryParam("providerType", providerType)
@@ -79,21 +59,21 @@ public class AuthControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("OK"))
-			.andExpect(jsonPath("$.data.accessToken").value(accessToken))
-			.andExpect(jsonPath("$.data.hasLoggedInBefore").value(false))
-			.andExpect(cookie().value(JwtConstant.REFRESH_COOKIE_NAME, refreshToken));
+			.andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+			.andExpect(cookie().exists(JwtConstant.REFRESH_COOKIE_NAME));
 	}
 
 	@Test
-	@DisplayName("잘못된 공급자를 받으면 예외를 응답한다.")
+	@DisplayName("로그인 시 잘못된 공급자를 받으면 예외를 응답한다.")
 	void loginWithInvalidProviderType() throws Exception {
 		// given
-		String account = "account";
-		String providerType = "kekeo";
+		var account = "account_value";
+		var invalidProviderType = "koukou";
 
+		// when & then
 		mockMvc.perform(post("/api/v1/auth/login")
 				.queryParam("account", account)
-				.queryParam("providerType", providerType)
+				.queryParam("providerType", invalidProviderType)
 			)
 			.andDo(print())
 			.andExpect(status().isBadRequest())
@@ -101,17 +81,17 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.message").value(AuthErrorCode.INVALID_PROVIDER_TYPE.getMessage()));
 	}
 
+	@DisplayName("액세스 토큰 재발급을 성공한다.")
 	@Test
-	@DisplayName("액세스 토큰 재발급")
-	void reissueAccessTokenWithRefreshToken() throws Exception {
+	void reissueToken() throws Exception {
 		// given
-		String refreshToken = "refresh token";
-		String newAccessToken = "new access token";
+		var loginUser = userService.oauthLogin(OauthAttributes.KAKAO.getType(), "account_value");
+		var refreshToken = jwtService.issueRefreshToken(loginUser.getId());
 
-		Mockito.when(authService.reissueToken(refreshToken)).thenReturn(new ReissueTokenResponse(newAccessToken));
-
+		// when & then
 		mockMvc.perform(get("/api/v1/auth/reissue")
-				.cookie(new Cookie("RefreshToken", refreshToken)))
+				.cookie(new Cookie("RefreshToken", refreshToken))
+			)
 			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
@@ -119,4 +99,13 @@ public class AuthControllerTest {
 			.andExpect(jsonPath("$.data.accessToken").isNotEmpty());
 	}
 
+	@Test
+	@DisplayName("리프레시 토큰 없이 액세스 토큰 재발급을 요청하면 예외를 응답한다.")
+	void reissueWithNoRefreshToken() throws Exception {
+		mockMvc.perform(get("/api/v1/auth/reissue"))
+			.andDo(print())
+			.andExpect(status().isUnauthorized())
+			.andExpect(jsonPath("$.code").value(AuthErrorCode.UNAUTHORIZED_USER.name()))
+			.andExpect(jsonPath("$.message").value(AuthErrorCode.UNAUTHORIZED_USER.getMessage()));
+	}
 }
