@@ -1,5 +1,6 @@
 package com.tf4.photospot.spring.docs.auth;
 
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.restdocs.cookies.CookieDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
@@ -30,12 +31,12 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@Test
 	void reissueToken() throws Exception {
 		// given
-		var tokenResponse = new ReissueTokenResponse("access_token");
-		given(authService.reissueToken(any(String.class))).willReturn(tokenResponse);
+		var reissueResponse = new ReissueTokenResponse("new_access_token_value");
+		given(authService.reissueToken(anyLong(), anyString())).willReturn(reissueResponse);
 
 		// when & then
 		mockMvc.perform(get("/api/v1/auth/reissue")
-				.cookie(new Cookie("RefreshToken", "refresh token value"))
+				.cookie(new Cookie("RefreshToken", "refresh_token_value"))
 			)
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(

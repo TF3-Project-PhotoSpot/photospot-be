@@ -21,6 +21,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tf4.photospot.global.argument.CoordinateValidator;
+import com.tf4.photospot.mockobject.RestDocsAuthenticationPrincipalArgumentResolver;
 
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsSupport {
@@ -32,7 +33,9 @@ public abstract class RestDocsSupport {
 	void setUp(RestDocumentationContextProvider contextProvider) {
 		mockMvc = MockMvcBuilders.standaloneSetup(initController())
 			.apply(documentationConfiguration(contextProvider))
-			.setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
+			.setCustomArgumentResolvers(
+				new PageableHandlerMethodArgumentResolver(),
+				new RestDocsAuthenticationPrincipalArgumentResolver())
 			.alwaysDo(MockMvcResultHandlers.print())
 			.addFilters(new CharacterEncodingFilter("UTF-8", true))
 			.build();

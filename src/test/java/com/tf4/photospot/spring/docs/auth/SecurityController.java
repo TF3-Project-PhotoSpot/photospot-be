@@ -16,8 +16,8 @@ public class SecurityController {
 
 	@PostMapping("/login")
 	public ApiResponse<LoginResponse> login(HttpServletResponse response) {
-		Cookie cookie = new Cookie("RefreshToken", "refresh token value");
+		Cookie cookie = new Cookie("RefreshToken", "refresh_token_value");
 		response.addCookie(cookie);
-		return ApiResponse.success(new LoginResponse("access token", false));
+		return ApiResponse.success(new LoginResponse("access_token", false));
 	}
 }
