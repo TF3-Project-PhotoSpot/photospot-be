@@ -5,13 +5,11 @@ import static org.assertj.core.api.Assertions.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.user.application.UserService;
 
-@Transactional
 public class AuthServiceTest extends IntegrationTestSupport {
 
 	@Autowired
@@ -33,7 +31,7 @@ public class AuthServiceTest extends IntegrationTestSupport {
 		String refreshToken = jwtService.issueRefreshToken(loginUser);
 
 		// when
-		ReissueTokenResponse tokenResponse = authService.reissueToken(refreshToken);
+		ReissueTokenResponse tokenResponse = authService.reissueToken(loginUser, refreshToken);
 
 		// then
 		assertThat(tokenResponse.accessToken()).isNotBlank();

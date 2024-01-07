@@ -1,4 +1,4 @@
-package com.tf4.photospot.mockuser;
+package com.tf4.photospot.mockobject;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,10 +8,10 @@ import org.springframework.security.test.context.support.WithSecurityContext;
 import com.tf4.photospot.user.domain.Role;
 
 @Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = WithMockCustomerUserSecurityContextFactory.class)
-public @interface WithMockCustomUser {
+@WithSecurityContext(factory = WithCustomerMockUserSecurityContextFactory.class)
+public @interface WithCustomMockUser {
 
-	long id() default 1L;
+	long userId() default 1L;
 
 	boolean hasLoggedInBefore() default false;
 

@@ -1,6 +1,7 @@
 package com.tf4.photospot.global.filter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,16 +32,22 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
 		FilterChain filterChain) throws ServletException, IOException {
-
-		String jwt = request.getHeader(JwtConstant.AUTHORIZATION_HEADER);
-		validate(jwt);
-		Claims claims = jwtService.parseAccessToken(jwt);
-		Long userId = Long.valueOf(claims.getId());
-		String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
-		Authentication auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null,
-			AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+		Authentication auth;
+		if (request.getRequestURI().equals(SecurityConstant.REISSUE_ACCESS_TOKEN_URL)) {
+			String refreshToken = extractRefreshTokenFromCookie(request);
+			Claims claims = jwtService.parseRefreshToken(refreshToken);
+			Long userId = claims.get(JwtConstant.USER_ID, Long.class);
+			auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null, null);
+		} else {
+			String jwt = request.getHeader(JwtConstant.AUTHORIZATION_HEADER);
+			validate(jwt);
+			Claims claims = jwtService.parseAccessToken(jwt);
+			Long userId = claims.get(JwtConstant.USER_ID, Long.class);
+			String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
+			auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null,
+				AuthorityUtils.commaSeparatedStringToAuthorityList(authorities));
+		}
 		SecurityContextHolder.getContext().setAuthentication(auth);
-
 		filterChain.doFilter(request, response);
 	}
 
@@ -49,9 +57,20 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		}
 	}
 
+	private String extractRefreshTokenFromCookie(HttpServletRequest request) {
+		Cookie[] cookies = request.getCookies();
+		if (cookies == null) {
+			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
+		}
+		return Arrays.stream(cookies)
+			.filter(cookie -> JwtConstant.REFRESH_COOKIE_NAME.equals(cookie.getName()))
+			.findFirst()
+			.map(Cookie::getValue)
+			.orElseThrow(() -> new ApiException(AuthErrorCode.UNAUTHORIZED_USER));
+	}
+
 	@Override
 	protected boolean shouldNotFilter(HttpServletRequest request) {
-		return request.getRequestURI().equals(SecurityConstant.LOGIN_URL) || request.getRequestURI()
-			.equals(SecurityConstant.REISSUE_ACCESS_TOKEN_URL);
+		return request.getRequestURI().equals(SecurityConstant.LOGIN_URL);
 	}
 }
