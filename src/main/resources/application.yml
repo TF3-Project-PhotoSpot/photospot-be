@@ -23,7 +23,8 @@ spring:
   config:
     activate:
       on-profile: dev
-    import: aws-parameterstore:/config/photospot_dev/
+    import:
+      optional: aws-parameterstore:/config/photospot_dev/
 
   jpa:
     hibernate:
@@ -47,7 +48,8 @@ spring:
   config:
     activate:
       on-profile: prod
-  import: aws-parameterstore:/config/photospot_prod/
+  import:
+    optional: aws-parameterstore:/config/photospot_prod/
 
   jpa:
     hibernate:
