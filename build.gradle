@@ -15,6 +15,10 @@ java {
     sourceCompatibility = '17'
 }
 
+jar {
+    enabled = false
+}
+
 jacoco {
     toolVersion = "0.8.8"
 }
@@ -37,6 +41,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.hibernate.orm:hibernate-spatial'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
+
+    //AWS Parameter Store
+    implementation 'io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
+
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     compileOnly 'org.projectlombok:lombok'

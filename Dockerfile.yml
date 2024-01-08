@@ -1,0 +1,8 @@
+FROM openjdk:17
+
+COPY ./build/libs/*.jar ./photospot.jar
+
+ARG PROFILE
+ENV SPRING_PROFILES_ACTIVE=$PROFILE
+
+ENTRYPOINT ["java", "-jar", "photospot.jar"]
