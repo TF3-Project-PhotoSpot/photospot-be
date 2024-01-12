@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
-import com.tf4.photospot.user.infrastructure.UserRepository;
+import com.tf4.photospot.user.domain.UserRepository;
 
 @Transactional
 public class UserServiceTest extends IntegrationTestSupport {

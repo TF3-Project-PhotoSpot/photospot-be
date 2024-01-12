@@ -8,7 +8,7 @@ import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
 import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
 import com.tf4.photospot.user.domain.User;
-import com.tf4.photospot.user.infrastructure.UserRepository;
+import com.tf4.photospot.user.domain.UserRepository;
 import com.tf4.photospot.user.util.NicknameGenerator;
 
 import lombok.RequiredArgsConstructor;
