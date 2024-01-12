@@ -1,18 +1,18 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/photospot
+    username: root
+    password: 1234
   jpa:
     hibernate:
       ddl-auto: create
-      
+
 kakao:
   map:
-    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
-    base-url: ${KAKAO_MAP_BASE_URL}
+    rest-api-key: test6d177caw1120g3510952427y92d3
+    base-url: https://dapi.kakao.com/v2/local
 
 jwt:
-  issuer: ${JWT_ISSUER}
-  secret_key: ${JWT_SECRET_KEY}
+  issuer: test-issuer
+  secret_key: testk24rlk24j4akfjaklfj3k3rj439841398sadkfjkefjkqefj44324230fskfjwkgjwlgkjw2lsfkjlefjwlkj50921ifkljfwdlkfjwlkfjdwlkfj
