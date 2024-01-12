@@ -10,6 +10,7 @@ public class LoginUserDto {
 
 	public LoginUserDto(Long id) {
 		this.id = id;
+		this.hasLoggedInBefore = true;
 	}
 
 	public LoginUserDto(Long id, boolean hasLoggedInBefore) {

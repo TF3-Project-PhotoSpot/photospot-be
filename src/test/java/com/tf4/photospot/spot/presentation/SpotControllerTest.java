@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.ResultMatcher;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.map.application.MapService;
 import com.tf4.photospot.map.application.response.SearchByCoordResponse;
-import com.tf4.photospot.mockuser.WithMockCustomUser;
+import com.tf4.photospot.mockobject.WithCustomMockUser;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
@@ -34,7 +34,7 @@ import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
 
-@WithMockCustomUser
+@WithCustomMockUser
 @WebMvcTest(controllers = SpotController.class)
 class SpotControllerTest {
 	@MockBean
