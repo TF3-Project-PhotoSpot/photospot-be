@@ -123,7 +123,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 		List<Post> posts = new ArrayList<>();
 		for (int i = 0; i < count; i++) {
 			posts.add(Post.builder()
-				.photo(new Photo("testUrl" + i))
+				.photo(Photo.builder().photoUrl("testUrl" + i).build())
 				.spot(spot)
 				.isPrivate(isPrivate)
 				.build());

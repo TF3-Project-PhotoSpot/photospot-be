@@ -1,10 +1,11 @@
 package com.tf4.photospot.photo.application;
 
-import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 
+import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,15 +38,19 @@ public class PhotoService {
 
 	// 방명록 사진 업로드
 	@Transactional
-	public PhotoUploadResponse savePostPhoto(MultipartFile file, Long postPhotoId) {
+	public PhotoUploadResponse savePostPhoto(MultipartFile file, Point point, LocalDate takenAt) {
 		String photoUrl = upload(file, Directory.POST_FOLDER.getFolder());
-		Photo photo = photoRepository.findById(postPhotoId).orElseThrow(() -> new RuntimeException());
-		photo.updatePhotoUrl(photoUrl);
-		return new PhotoUploadResponse(photo.getId());
+		Photo photo = Photo.builder()
+			.photoUrl(photoUrl)
+			.coord(point)
+			.takenAt(takenAt)
+			.build();
+		Long postPhotoId = photoRepository.save(photo).getId();
+		return new PhotoUploadResponse(postPhotoId);
 	}
 
 	// 그 외 사진 업로드(폴더로 구분)
-	public String savePhoto(MultipartFile file, String type) {
+	public String uploadOtherPhoto(MultipartFile file, String type) {
 		Directory directory = Directory.findByType(type).orElseThrow(() -> new RuntimeException());
 		return upload(file, directory.getFolder());
 	}
@@ -80,7 +85,7 @@ public class PhotoService {
 		return now + NAME_SEPARATOR + uuid + EXTENSION_SEPARATOR + extension.getType();
 	}
 
-	private ObjectMetadata generateObjectMetadata(MultipartFile file) throws IOException {
+	private ObjectMetadata generateObjectMetadata(MultipartFile file) {
 		ObjectMetadata objectMetadata = new ObjectMetadata();
 		objectMetadata.setContentType(file.getContentType());
 		objectMetadata.setContentLength(file.getSize());
