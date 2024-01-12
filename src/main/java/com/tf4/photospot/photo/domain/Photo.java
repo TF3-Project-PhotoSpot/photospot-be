@@ -34,4 +34,8 @@ public class Photo extends BaseEntity {
 	public Photo(String photoUrl) {
 		this.photoUrl = photoUrl;
 	}
+
+	public void updatePhotoUrl(String photoUrl) {
+		this.photoUrl = photoUrl;
+	}
 }
