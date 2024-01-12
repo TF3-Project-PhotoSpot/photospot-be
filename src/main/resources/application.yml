@@ -1,25 +1,9 @@
 spring:
-  profiles:
-    active: dev
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-
-kakao:
-  map:
-    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
-    base-url: ${KAKAO_MAP_BASE_URL}
-
-jwt:
-  issuer: ${JWT_ISSUER}
-  secret_key: ${JWT_SECRET_KEY}
----
-spring:
-  config:
-    activate:
-      on-profile: dev
   jpa:
     hibernate:
       ddl-auto: create
@@ -35,19 +19,47 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.type.descriptor.sql.BasicBinder: trace
+
+kakao:
+  map:
+    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
+    base-url: ${KAKAO_MAP_BASE_URL}
+
+jwt:
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}
+
 ---
+
+config:
+  type: aws-parameterstore:/config/photospot_dev/
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+    import: ${config.type}
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+---
+
+config:
+  type: aws-parameterstore:/config/photospot_dev/
+
 spring:
   config:
     activate:
       on-profile: prod
+  import: ${config.type}
 
   jpa:
     hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        defer-datasource-initialization: true
-        default_batch_fetch_size: 30
-        use_sql_comments: true
-        format_sql: true
-    open-in-view: false
+      ddl-auto: none
