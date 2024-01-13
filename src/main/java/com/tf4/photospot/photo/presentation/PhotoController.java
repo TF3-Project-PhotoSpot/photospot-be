@@ -9,7 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.photo.application.PhotoService;
 import com.tf4.photospot.photo.presentation.request.PostPhotoSaveRequest;
-import com.tf4.photospot.photo.presentation.response.PhotoUploadResponse;
+import com.tf4.photospot.photo.presentation.response.PhotoSaveResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -21,9 +21,9 @@ public class PhotoController {
 	private final PhotoService photoService;
 
 	@PostMapping
-	public ApiResponse<PhotoUploadResponse> savePostPhoto(@RequestPart("file") MultipartFile file,
+	public ApiResponse<PhotoSaveResponse> savePhoto(@RequestPart("file") MultipartFile file,
 		@RequestPart("request") PostPhotoSaveRequest request) {
-		return ApiResponse.success(photoService.savePostPhoto(file, request.toCoord(), request.toDate()));
+		return ApiResponse.success(photoService.save(file, request.toCoord(), request.toDate()));
 	}
 
 }

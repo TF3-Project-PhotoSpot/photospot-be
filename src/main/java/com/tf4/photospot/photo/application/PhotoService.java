@@ -11,7 +11,7 @@ import com.tf4.photospot.global.util.S3Uploader;
 import com.tf4.photospot.photo.domain.Directory;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.PhotoRepository;
-import com.tf4.photospot.photo.presentation.response.PhotoUploadResponse;
+import com.tf4.photospot.photo.presentation.response.PhotoSaveResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +23,7 @@ public class PhotoService {
 	private final S3Uploader s3Uploader;
 
 	@Transactional
-	public PhotoUploadResponse savePostPhoto(MultipartFile file, Point point, LocalDate takenAt) {
+	public PhotoSaveResponse save(MultipartFile file, Point point, LocalDate takenAt) {
 		String photoUrl = s3Uploader.upload(file, Directory.POST_FOLDER.getType());
 		Photo photo = Photo.builder()
 			.photoUrl(photoUrl)
@@ -31,7 +31,7 @@ public class PhotoService {
 			.takenAt(takenAt)
 			.build();
 		Long postPhotoId = photoRepository.save(photo).getId();
-		return new PhotoUploadResponse(postPhotoId);
+		return new PhotoSaveResponse(postPhotoId);
 	}
 
 }
