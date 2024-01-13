@@ -1,7 +1,6 @@
 package com.tf4.photospot.photo.presentation;
 
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,8 +22,8 @@ public class PhotoController {
 
 	@PostMapping
 	public ApiResponse<PhotoUploadResponse> savePostPhoto(@RequestPart("file") MultipartFile file,
-		@RequestBody PostPhotoSaveRequest request) {
-		return ApiResponse.success(photoService.savePostPhoto(file, request.toCoord(), request.toLocalDate()));
+		@RequestPart("request") PostPhotoSaveRequest request) {
+		return ApiResponse.success(photoService.savePostPhoto(file, request.toCoord(), request.toDate()));
 	}
 
 }

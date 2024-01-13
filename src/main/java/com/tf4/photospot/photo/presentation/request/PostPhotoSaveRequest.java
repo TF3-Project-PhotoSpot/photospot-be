@@ -1,7 +1,7 @@
 package com.tf4.photospot.photo.presentation.request;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.time.OffsetDateTime;
 
 import org.locationtech.jts.geom.Point;
 
@@ -18,8 +18,9 @@ public record PostPhotoSaveRequest(
 		return PointConverter.convert(lon, lat);
 	}
 
-	public LocalDate toLocalDate() {
-		DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE;
-		return LocalDate.parse(takenAt, formatter);
+	// 사진 찍인 날짜를 ISO 8601 형식으로 받는다고 가정
+	public LocalDate toDate() {
+		OffsetDateTime odt = OffsetDateTime.parse(takenAt);
+		return odt.toLocalDate();
 	}
 }
