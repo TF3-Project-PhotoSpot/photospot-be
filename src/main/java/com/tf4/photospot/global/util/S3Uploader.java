@@ -12,6 +12,8 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 import com.tf4.photospot.photo.domain.Directory;
 import com.tf4.photospot.photo.domain.Extension;
 
@@ -30,8 +32,9 @@ public class S3Uploader {
 	private String bucket;
 
 	public String upload(MultipartFile file, String type) {
-		validateFileExists(file);
-		Directory directory = Directory.findByType(type).orElseThrow(() -> new RuntimeException());
+		validFiltNotEmpty(file);
+		Directory directory = Directory.findByType(type)
+			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION));
 		String fileKey = directory.getFolder() + generateNewFileName(file.getContentType());
 		try {
 			ObjectMetadata objectMetadata = generateObjectMetadata(file);
@@ -44,15 +47,15 @@ public class S3Uploader {
 		return amazonS3Client.getUrl(bucket, fileKey).toString();
 	}
 
-	private void validateFileExists(MultipartFile file) {
+	private void validFiltNotEmpty(MultipartFile file) {
 		if (file.isEmpty()) {
-			throw new RuntimeException();
+			throw new ApiException(S3UploaderErrorCode.EMPTY_FILE);
 		}
 	}
 
 	private String generateNewFileName(String contentType) {
 		Extension extension = Extension.getPhotoExtension(contentType)
-			.orElseThrow(() -> new RuntimeException());
+			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION));
 		String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
 		String uuid = UUID.randomUUID().toString().substring(0, 8);
 
