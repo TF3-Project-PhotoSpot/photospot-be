@@ -37,12 +37,12 @@ public class PhotoControllerDocsTest extends RestDocsSupport {
 	@DisplayName("사진 업로드")
 	void savePhoto() throws Exception {
 		// given
-		MockMultipartFile image = new MockMultipartFile("file", "image.jpg", "image/jpg", "<<image.jpg>>".getBytes());
-		String requestContent = "{\"lon\" : 26.31, \"lat\" : 27.14, \"takenAt\" : \"2024-01-13T05:20:18.981+09:00\"}";
-		MockMultipartFile request = new MockMultipartFile("request", "", "application/json", requestContent.getBytes());
-
+		var image = new MockMultipartFile("file", "image.jpg", "image/jpg", "<<image.jpg>>".getBytes());
+		var requestContent = "{\"lon\" : 26.31, \"lat\" : 27.14, \"takenAt\" : \"2024-01-13T05:20:18.981+09:00\"}";
+		var request = new MockMultipartFile("request", "", "application/json", requestContent.getBytes());
 		var response = new PhotoSaveResponse(1L);
 		var photoUrl = "imageUrl";
+
 		given(s3Uploader.upload(any(MultipartFile.class), anyString())).willReturn(photoUrl);
 		given(photoService.save(any(MultipartFile.class), any(Point.class), any(LocalDate.class))).willReturn(response);
 
