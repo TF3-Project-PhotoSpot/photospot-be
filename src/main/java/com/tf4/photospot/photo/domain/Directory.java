@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public enum Directory {
 
 	POST_FOLDER("post", "temp/"),
-	PROFILE_FOLDER("profile", "member_profile_images/");
+	PROFILE_FOLDER("profile", "profile_images/");
 
 	private final String type;
 	private final String folder;

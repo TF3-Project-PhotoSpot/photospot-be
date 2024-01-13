@@ -30,7 +30,8 @@ public class Photo extends BaseEntity {
 
 	private LocalDate takenAt;
 
-	@Column(columnDefinition = "POINT SRID 4326", nullable = false)
+	// Todo : nullable = false 설정 넣으면 spotServiceTest 오류 발생 => 수정할것
+	@Column(columnDefinition = "POINT SRID 4326")
 	private Point coord;
 
 	@OneToOne
