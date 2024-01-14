@@ -56,7 +56,7 @@ public class PhotoControllerDocsTest extends RestDocsSupport {
 			.andDo(restDocsTemplate(
 				requestParts(
 					partWithName("file").description("사용자가 업로드한 사진 파일"),
-					partWithName("request").description("사용자가 업로드한 사진 정보")),
+					partWithName("request").description("사용자가 업로드한 사진 정보(lon, lat, takenAt 포함)")),
 				requestPartFields("request",
 					fieldWithPath("lon").description("사진의 경도"),
 					fieldWithPath("lat").description("사진의 위도"),

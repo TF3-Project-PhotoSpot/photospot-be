@@ -703,6 +703,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">AuthErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>NOT_FOUND_USER</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NOT_FOUND_USER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">404</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">존재하지 않는 사용자입니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AuthErrorCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>INVALID_PROVIDER_TYPE</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">INVALID_PROVIDER_TYPE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">400</p></td>
@@ -729,7 +736,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <hr>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/v1/auth/login?account=kakao%20account&amp;providerType=kakao HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/v1/auth/login?account=kakao_account&amp;providerType=kakao HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 Host: localhost:8080</code></pre>
 </div>
@@ -776,7 +783,7 @@ Host: localhost:8080</code></pre>
   "code" : "200",
   "message" : "OK",
   "data" : {
-    "accessToken" : "access token",
+    "accessToken" : "access_token",
     "hasLoggedInBefore" : false
   }
 }</code></pre>
@@ -824,7 +831,7 @@ Host: localhost:8080</code></pre>
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/auth/reissue HTTP/1.1
 Host: localhost:8080
-Cookie: RefreshToken=refresh token value</code></pre>
+Cookie: RefreshToken=refresh_token_value</code></pre>
 </div>
 </div>
 <table class="tableblock frame-all grid-all stretch">
@@ -851,7 +858,7 @@ Cookie: RefreshToken=refresh token value</code></pre>
   "code" : "200",
   "message" : "OK",
   "data" : {
-    "accessToken" : "access_token"
+    "accessToken" : "new_access_token_value"
   }
 }</code></pre>
 </div>
@@ -1343,7 +1350,7 @@ Host: localhost:8080</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2023-12-28 21:41:27 +0900
+Last updated 2024-01-06 16:08:16 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

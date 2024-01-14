@@ -1,0 +1,9 @@
+=== 사용자 프로필 업데이트
+
+'''
+
+include::{snippets}/user-controller-docs-test/update-profile/http-request.adoc[]
+include::{snippets}/user-controller-docs-test/update-profile/request-parts.adoc[]
+include::{snippets}/user-controller-docs-test/update-profile/request-part-request-fields.adoc[]
+include::{snippets}/user-controller-docs-test/update-profile/response-body.adoc[]
+include::{snippets}/user-controller-docs-test/update-profile/response-fields-data.adoc[]

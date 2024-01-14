@@ -56,7 +56,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 			.andDo(restDocsTemplate(
 				requestParts(
 					partWithName("file").description("사용자가 업로드한 프로필 사진"),
-					partWithName("request").description("사진 정보")),
+					partWithName("request").description("사진 정보(type 포함)")),
 				requestPartFields("request",
 					fieldWithPath("type").description("프로필 사진에 대한 요청임을 명시")
 				),
