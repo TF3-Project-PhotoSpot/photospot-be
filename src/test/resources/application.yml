@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: test
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DB_URL}
@@ -7,7 +9,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-      
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 kakao:
   map:
     rest-api-key: ${KAKAO_MAP_REST_API_KEY}
@@ -16,3 +22,12 @@ kakao:
 jwt:
   issuer: ${JWT_ISSUER}
   secret_key: ${JWT_SECRET_KEY}
+
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    s3:
+      bucket: ${S3_BUCKET}
