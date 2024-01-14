@@ -27,11 +27,11 @@ public class UserService {
 
 	@Transactional
 	public UserProfileResponse updateProfile(Long userId, MultipartFile file, String request) {
-		String photoUrl = s3Uploader.upload(file, request);
+		String imageUrl = s3Uploader.upload(file, request);
 		User loginUser = userRepository.findById(userId)
 			.orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
-		loginUser.updateProfile(photoUrl);
-		return new UserProfileResponse(photoUrl);
+		loginUser.updateProfile(imageUrl);
+		return new UserProfileResponse(imageUrl);
 	}
 
 	// Todo : 로그인 관련 메서드 AuthService 옮기기

@@ -8,14 +8,19 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.IntegrationTestSupport;
+import com.tf4.photospot.mockobject.MockS3Config;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
+@Import(MockS3Config.class)
 @Transactional
 public class UserServiceTest extends IntegrationTestSupport {
 
@@ -55,6 +60,25 @@ public class UserServiceTest extends IntegrationTestSupport {
 					() -> assertThat(savedUser.getAccount()).isEqualTo(account)
 				);
 			})
+		);
+	}
+
+	@Test
+	@DisplayName("사용자의 프로필 사진을 업데이트 한다.")
+	void updateProfile() {
+		// given
+		var user = new User("nickname", "kakao", "account_value");
+		var userId = userRepository.save(user).getId();
+		var file = new MockMultipartFile("file", "profile.jpeg", "image/jpeg", "<<jpeg data>>".getBytes());
+		var request = "profile";
+
+		// when
+		var response = userService.updateProfile(userId, file, request);
+
+		// then
+		assertAll(
+			() -> assertThat(response.imageUrl()).isEqualTo("https://example.com"),
+			() -> assertThat(userRepository.findById(userId).get().getProfileUrl()).isEqualTo("https://example.com")
 		);
 	}
 }
