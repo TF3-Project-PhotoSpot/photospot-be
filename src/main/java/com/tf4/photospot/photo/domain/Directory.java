@@ -10,15 +10,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum Directory {
 
-	POST_FOLDER("post", "temp/"),
+	TEMP_FOLDER("temp", "temp/"),
+	POST_FOLDER("post", "post_images/"),
 	PROFILE_FOLDER("profile", "profile_images/");
 
-	private final String type;
 	private final String folder;
+	private final String path;
 
-	public static Optional<Directory> findByType(String requestType) {
+	public static Optional<Directory> findByFolder(String folder) {
 		return Arrays.stream(Directory.values())
-			.filter(folder -> folder.type.equals(requestType))
+			.filter(dir -> dir.folder.equals(folder))
 			.findFirst();
 	}
 }

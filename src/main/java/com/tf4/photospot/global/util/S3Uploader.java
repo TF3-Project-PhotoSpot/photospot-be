@@ -31,11 +31,11 @@ public class S3Uploader {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
-	public String upload(MultipartFile file, String type) {
+	public String upload(MultipartFile file, String folder) {
 		validFiltNotEmpty(file);
-		Directory directory = Directory.findByType(type)
+		Directory directory = Directory.findByFolder(folder)
 			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION));
-		String fileKey = directory.getFolder() + generateNewFileName(file.getContentType());
+		String fileKey = directory.getPath() + generateNewFileName(file.getContentType());
 		try {
 			ObjectMetadata objectMetadata = generateObjectMetadata(file);
 			amazonS3Client.putObject(
@@ -67,5 +67,10 @@ public class S3Uploader {
 		objectMetadata.setContentType(file.getContentType());
 		objectMetadata.setContentLength(file.getSize());
 		return objectMetadata;
+	}
+
+	public String moveFolder(String sourceKey, String destinationKey) {
+		amazonS3Client.copyObject(bucket, sourceKey, bucket, destinationKey);
+		return amazonS3Client.getUrl(bucket, destinationKey).toString();
 	}
 }
