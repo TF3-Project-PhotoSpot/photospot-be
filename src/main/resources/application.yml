@@ -31,14 +31,11 @@ jwt:
 
 ---
 
-config:
-  type: aws-parameterstore:/config/photospot_dev/
-
 spring:
   config:
     activate:
       on-profile: dev
-    import: ${config.type}
+    import: aws-parameterstore:/config/photospot_dev/
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -48,18 +45,3 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-
----
-
-config:
-  type: aws-parameterstore:/config/photospot_dev/
-
-spring:
-  config:
-    activate:
-      on-profile: prod
-  import: ${config.type}
-
-  jpa:
-    hibernate:
-      ddl-auto: none
