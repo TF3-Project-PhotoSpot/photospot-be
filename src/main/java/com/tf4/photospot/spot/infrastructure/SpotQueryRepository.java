@@ -1,6 +1,7 @@
 package com.tf4.photospot.spot.infrastructure;
 
 import static com.tf4.photospot.spot.domain.QSpot.*;
+import static com.tf4.photospot.spot.domain.QSpotBookmark.*;
 
 import java.util.List;
 
@@ -17,15 +18,12 @@ import com.querydsl.spatial.GeometryExpressions;
 import com.querydsl.spatial.SpatialOps;
 import com.tf4.photospot.spot.domain.Spot;
 
-import jakarta.persistence.EntityManager;
+import lombok.RequiredArgsConstructor;
 
 @Repository
-public class SpotSearchRepository {
+@RequiredArgsConstructor
+public class SpotQueryRepository {
 	private final JPAQueryFactory queryFactory;
-
-	public SpotSearchRepository(EntityManager em) {
-		this.queryFactory = new JPAQueryFactory(em);
-	}
 
 	public Slice<Spot> searchRecommendedSpots(Point coord, Integer radius, Pageable pageable) {
 		List<Spot> recommendedSpots = queryFactory
@@ -68,5 +66,13 @@ public class SpotSearchRepository {
 				Expressions.constant(coord),
 				Expressions.asNumber(radius)
 			), spot.coord);
+	}
+
+	public Boolean existsBookmark(Long spotId, Long userId) {
+		Integer exists = queryFactory.selectOne()
+			.from(spotBookmark)
+			.where(spotBookmark.spot.id.eq(spotId).and(spotBookmark.user.id.eq(userId)))
+			.fetchFirst();
+		return exists != null;
 	}
 }
