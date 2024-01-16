@@ -16,6 +16,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import com.tf4.photospot.global.config.maps.KakaoMapProperties;
@@ -26,28 +27,30 @@ import com.tf4.photospot.map.application.response.kakao.KakaoSearchAddressRespon
 
 @EnableConfigurationProperties(value = KakaoMapProperties.class)
 @TestPropertySource("classpath:application.yml")
-@RestClientTest(value = MapApiConfig.class)
+@RestClientTest
 class KakaoMapClientTest {
-	@Autowired
-	private KakaoMapClient kakaoMapClient;
+	private final MockRestServiceServer mockServer;
+	private final KakaoMapClient kakaoMapClient;
 
-	@Autowired
-	private KakaoMapProperties properties;
-
-	@Autowired
-	private MockRestServiceServer mockServer;
+	public KakaoMapClientTest(
+		@Autowired RestClient.Builder restClientBuilder,
+		@Autowired KakaoMapProperties properties
+	) {
+		mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
+		kakaoMapClient = new MapApiConfig(properties).kakaoMapClient(restClientBuilder);
+	}
 
 	@DisplayName("주소로 지역을 검색한다.")
 	@Test
 	void searchAddress() {
 		//given
-		String expectedUri = UriComponentsBuilder.fromHttpUrl(properties.getBaseUrl() + "/search/address.json")
+		CoordinateDto expectedRoadAddressCoord = new CoordinateDto(126.99599512792346, 35.976749396987046);
+		CoordinateDto expecteAddressCoord = new CoordinateDto(126.99597295767953, 35.97664845766847);
+		String expectedUri = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v2/local/search/address.json")
 			.queryParam("query", "전북 삼성동 100")
 			.encode(StandardCharsets.UTF_8)
 			.build().toUriString();
-		CoordinateDto expectedRoadAddressCoord = new CoordinateDto(126.99599512792346, 35.976749396987046);
-		CoordinateDto expecteAddressCoord = new CoordinateDto(126.99597295767953, 35.97664845766847);
-		String expectedResponse = """
+		final String expectedResponse = """
 			{
 				"meta": {
 					"total_count": 4,
@@ -103,7 +106,7 @@ class KakaoMapClientTest {
 	@Test
 	void convertCoordToAddress() {
 		//given
-		String expectedUri = UriComponentsBuilder.fromHttpUrl(properties.getBaseUrl() + "/geo/coord2address.json")
+		String expectedUri = UriComponentsBuilder.fromHttpUrl("https://dapi.kakao.com/v2/local/geo/coord2address.json")
 			.queryParam("x", "127.0")
 			.queryParam("y", "37.0")
 			.encode(StandardCharsets.UTF_8)
