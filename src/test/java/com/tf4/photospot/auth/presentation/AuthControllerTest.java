@@ -13,11 +13,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.auth.domain.OauthAttributes;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.application.UserService;
 
 import jakarta.servlet.http.Cookie;
