@@ -1,13 +1,10 @@
 package com.tf4.photospot.spot.domain;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.locationtech.jts.geom.Point;
 
 import com.tf4.photospot.global.entity.BaseEntity;
-import com.tf4.photospot.post.domain.Post;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,9 +12,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -33,9 +30,6 @@ public class Spot extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToMany(mappedBy = "spot")
-	private List<Post> posts = new ArrayList<>();
-
 	private String address;
 
 	@Column(columnDefinition = "POINT SRID 4326", nullable = false)
@@ -45,6 +39,7 @@ public class Spot extends BaseEntity {
 
 	private LocalDateTime deletedAt;
 
+	@Builder
 	public Spot(String address, Point coord, Long postCount) {
 		this.address = address;
 		this.coord = coord;

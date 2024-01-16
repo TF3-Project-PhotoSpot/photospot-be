@@ -16,6 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -45,6 +46,7 @@ public class User extends BaseEntity {
 
 	private LocalDateTime deletedAt;
 
+	@Builder
 	public User(String nickname, String providerType, String account) {
 		this.nickname = nickname;
 		this.providerType = providerType;
