@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -33,4 +34,12 @@ public class SpotBookmark extends BaseEntity {
 	private BookmarkFolder bookmarkFolder;
 
 	private String description;
+
+	@Builder
+	public SpotBookmark(Spot spot, User user, BookmarkFolder bookmarkFolder, String description) {
+		this.spot = spot;
+		this.user = user;
+		this.bookmarkFolder = bookmarkFolder;
+		this.description = description;
+	}
 }
