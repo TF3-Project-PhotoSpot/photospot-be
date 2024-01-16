@@ -6,8 +6,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
+import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.application.UserService;
 
 public class AuthServiceTest extends IntegrationTestSupport {
