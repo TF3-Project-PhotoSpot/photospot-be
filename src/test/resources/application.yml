@@ -9,9 +9,7 @@ spring:
       ddl-auto: create
 
 kakao:
-  map:
-    rest-api-key: test6d177caw1120g3510952427y92d3
-    base-url: https://dapi.kakao.com/v2/local
+  rest-api-key: test6d177caw1120g3510952427y92d3
 
 jwt:
   issuer: test-issuer
