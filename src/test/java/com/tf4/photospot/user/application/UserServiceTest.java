@@ -30,6 +30,9 @@ public class UserServiceTest extends IntegrationTestSupport {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private MockS3Config mockS3Config;
+
 	@DisplayName("사용자 등록 시나리오")
 	@TestFactory
 	Collection<DynamicTest> saveUser() {
@@ -77,8 +80,9 @@ public class UserServiceTest extends IntegrationTestSupport {
 
 		// then
 		assertAll(
-			() -> assertThat(response.imageUrl()).isEqualTo("https://example.com"),
-			() -> assertThat(userRepository.findById(userId).get().getProfileUrl()).isEqualTo("https://example.com")
+			() -> assertThat(response.imageUrl()).isEqualTo(mockS3Config.getDummyUrl()),
+			() -> assertThat(userRepository.findById(userId).get().getProfileUrl()).isEqualTo(
+				mockS3Config.getDummyUrl())
 		);
 	}
 }

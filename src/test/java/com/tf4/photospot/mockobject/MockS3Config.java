@@ -20,14 +20,24 @@ import com.amazonaws.services.s3.model.PutObjectResult;
 @Profile("test")
 public class MockS3Config {
 
-	private static final String DUMMY_URL = "https://example.com";
+	private URL dummyUrl;
+
+	private static final String URL_PREFIX = "https://bucket_name.s3.ap-northeast-2.amazonaws.com/";
 
 	@Bean
 	@Primary
 	public AmazonS3 mockAmazonS3Client() throws MalformedURLException {
 		AmazonS3 amazonS3 = Mockito.mock(AmazonS3.class);
 		given(amazonS3.putObject(any(PutObjectRequest.class))).willReturn(new PutObjectResult());
-		given(amazonS3.getUrl(any(), any())).willReturn(new URL(DUMMY_URL));
+		given(amazonS3.getUrl(any(), any())).willAnswer(invocation -> {
+			String fileName = invocation.getArgument(1);
+			dummyUrl = new URL(URL_PREFIX + fileName);
+			return dummyUrl;
+		});
 		return amazonS3;
+	}
+
+	public String getDummyUrl() {
+		return dummyUrl.toString();
 	}
 }

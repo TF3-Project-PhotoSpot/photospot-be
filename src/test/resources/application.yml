@@ -1,9 +1,11 @@
 spring:
+  profiles:
+    active: test
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/photospot
-    username: root
-    password: 1234
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: create
@@ -14,17 +16,17 @@ spring:
 
 kakao:
   map:
-    rest-api-key: test6d177caw1120g3510952427y92d3
-    base-url: https://dapi.kakao.com/v2/local
+    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
+    base-url: ${KAKAO_MAP_BASE_URL}
 
 jwt:
-  issuer: test-issuer
-  secret_key: testk24rlk24j4akfjaklfj3k3rj439841398sadkfjkefjkqefj44324230fskfjwkgjwlgkjw2lsfkjlefjwlkj50921ifkljfwdlkfjwlkfjdwlkfj
+  issuer: ${JWT_ISSUER}
+  secret_key: ${JWT_SECRET_KEY}
 
 cloud:
   aws:
     credentials:
-      access-key: test_access_key
-      secret-key: test_secret_key
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
     s3:
       bucket: ${S3_BUCKET}
