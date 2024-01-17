@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,7 +17,9 @@ import com.tf4.photospot.photo.presentation.response.PhotoSaveResponse;
 import com.tf4.photospot.post.domain.PostRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PhotoService {
@@ -39,12 +40,12 @@ public class PhotoService {
 		return new PhotoSaveResponse(postPhotoId);
 	}
 
-	// 매일 새벽 4시 스케줄링
-	@Scheduled(cron = "0 0 04 * * ?")
 	@Transactional
-	public void scheduleToMovePhotos() {
+	public void movePhotos() {
 		LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+		log.info(twentyFourHoursAgo.toString());
 		List<Photo> postPhotos = photoRepository.findAllByCreatedAtGreaterThanEqual(twentyFourHoursAgo);
+		log.info(String.valueOf(photoRepository.count()));
 		for (Photo postPhoto : postPhotos) {
 			moveFromTempToPost(postPhoto);
 		}
