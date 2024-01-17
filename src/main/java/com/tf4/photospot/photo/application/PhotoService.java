@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tf4.photospot.global.util.S3Directory;
 import com.tf4.photospot.global.util.S3Uploader;
-import com.tf4.photospot.photo.domain.Directory;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.PhotoRepository;
 import com.tf4.photospot.photo.presentation.response.PhotoSaveResponse;
@@ -29,7 +29,7 @@ public class PhotoService {
 
 	@Transactional
 	public PhotoSaveResponse save(MultipartFile file, Point point, LocalDate takenAt) {
-		String photoUrl = s3Uploader.upload(file, Directory.TEMP_FOLDER.getFolder());
+		String photoUrl = s3Uploader.upload(file, S3Directory.TEMP_FOLDER.getFolder());
 		Photo photo = Photo.builder()
 			.photoUrl(photoUrl)
 			.coord(point)
@@ -53,8 +53,8 @@ public class PhotoService {
 	private void moveFromTempToPost(Photo photo) {
 		if (postRepository.existsByPhotoId(photo.getId())) {
 			String fileName = extractFileName(photo.getPhotoUrl());
-			String sourceKey = Directory.TEMP_FOLDER.getPath() + fileName;
-			String destinationKey = Directory.POST_FOLDER.getPath() + fileName;
+			String sourceKey = S3Directory.TEMP_FOLDER.getPath() + fileName;
+			String destinationKey = S3Directory.POST_FOLDER.getPath() + fileName;
 			String renewalUrl = s3Uploader.moveFolder(sourceKey, destinationKey);
 			photo.updatePhotoUrl(renewalUrl);
 		}

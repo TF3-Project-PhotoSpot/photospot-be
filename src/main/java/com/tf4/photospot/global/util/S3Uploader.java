@@ -14,7 +14,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
-import com.tf4.photospot.photo.domain.Directory;
 import com.tf4.photospot.photo.domain.Extension;
 
 import lombok.RequiredArgsConstructor;
@@ -32,10 +31,10 @@ public class S3Uploader {
 	private String bucket;
 
 	public String upload(MultipartFile file, String folder) {
-		validFiltNotEmpty(file);
-		Directory directory = Directory.findByFolder(folder)
+		validFileNotEmpty(file);
+		S3Directory s3Directory = S3Directory.findByFolder(folder)
 			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION));
-		String fileKey = directory.getPath() + generateNewFileName(file.getContentType());
+		String fileKey = s3Directory.getPath() + generateNewFileName(file.getContentType());
 		try {
 			ObjectMetadata objectMetadata = generateObjectMetadata(file);
 			amazonS3Client.putObject(
@@ -47,7 +46,7 @@ public class S3Uploader {
 		return amazonS3Client.getUrl(bucket, fileKey).toString();
 	}
 
-	private void validFiltNotEmpty(MultipartFile file) {
+	private void validFileNotEmpty(MultipartFile file) {
 		if (file.isEmpty()) {
 			throw new ApiException(S3UploaderErrorCode.EMPTY_FILE);
 		}
