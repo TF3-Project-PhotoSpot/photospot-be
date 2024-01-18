@@ -35,16 +35,17 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.hibernate.orm:hibernate-spatial'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
     testImplementation 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
-
-    compileOnly 'org.projectlombok:lombok'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    compileOnly 'org.projectlombok:lombok'
+    
+    // Spatial
+    implementation 'org.hibernate.orm:hibernate-spatial'
+    implementation 'com.querydsl:querydsl-spatial'
+
 
     //AWS
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
@@ -70,9 +71,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.security:spring-security-test'
 
-    implementation 'com.querydsl:querydsl-spatial'
-
+    // HttpClient for RestClient
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
+
+    // test
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 }
 
 def querydslSrcDir = 'src/main/generated'
