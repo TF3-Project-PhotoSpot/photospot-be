@@ -4,22 +4,18 @@ import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.application.UserService;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class AuthServiceTest extends IntegrationTestSupport {
-
-	@Autowired
-	private AuthService authService;
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private JwtService jwtService;
+	private final AuthService authService;
+	private final UserService userService;
+	private final JwtService jwtService;
 
 	@DisplayName("DB에 저장된 리프레시 토큰과 전달 받은 토큰이 같으면 액세스 토큰을 재발급 한다.")
 	@Test

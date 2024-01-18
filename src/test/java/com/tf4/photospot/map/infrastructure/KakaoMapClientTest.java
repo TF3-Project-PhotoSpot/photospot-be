@@ -9,12 +9,8 @@ import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,17 +20,15 @@ import com.tf4.photospot.global.config.maps.MapApiConfig;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.map.application.response.kakao.KakaoCoordToAddressResponse;
 import com.tf4.photospot.map.application.response.kakao.KakaoSearchAddressResponse;
+import com.tf4.photospot.support.RestClientTestSupport;
 
-@EnableConfigurationProperties(value = KakaoMapProperties.class)
-@TestPropertySource("classpath:application.yml")
-@RestClientTest
-class KakaoMapClientTest {
+class KakaoMapClientTest extends RestClientTestSupport {
 	private final MockRestServiceServer mockServer;
 	private final KakaoMapClient kakaoMapClient;
 
 	public KakaoMapClientTest(
-		@Autowired RestClient.Builder restClientBuilder,
-		@Autowired KakaoMapProperties properties
+		RestClient.Builder restClientBuilder,
+		KakaoMapProperties properties
 	) {
 		mockServer = MockRestServiceServer.bindTo(restClientBuilder).build();
 		kakaoMapClient = new MapApiConfig(properties).kakaoMapClient(restClientBuilder);

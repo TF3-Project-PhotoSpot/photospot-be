@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
@@ -39,25 +37,16 @@ import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
-@Transactional
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 class SpotServiceTest extends IntegrationTestSupport {
-	@Autowired
-	private SpotService spotService;
-
-	@Autowired
-	private SpotRepository spotRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private SpotBookmarkRepository spotBookmarkRepository;
-
-	@Autowired
-	private BookmarFolderRepository bookmarFolderRepository;
+	private final SpotService spotService;
+	private final SpotRepository spotRepository;
+	private final PostRepository postRepository;
+	private final UserRepository userRepository;
+	private final SpotBookmarkRepository spotBookmarkRepository;
+	private final BookmarFolderRepository bookmarFolderRepository;
 
 	@DisplayName("특정 스팟을 조회한다.")
 	@TestFactory
