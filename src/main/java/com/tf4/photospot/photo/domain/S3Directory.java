@@ -1,4 +1,4 @@
-package com.tf4.photospot.global.util;
+package com.tf4.photospot.photo.domain;
 
 import java.util.Arrays;
 import java.util.Optional;

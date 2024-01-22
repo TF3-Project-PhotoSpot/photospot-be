@@ -14,6 +14,14 @@ spring:
         use_sql_comments: true
         format_sql: true
     open-in-view: false
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        region: ap-northeast-2
+        bucket: ${S3_BUCKET}
   servlet:
     multipart:
       max-file-size: 5MB
@@ -32,14 +40,6 @@ kakao:
 jwt:
   issuer: ${JWT_ISSUER}
   secret_key: ${JWT_SECRET_KEY}
-
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    s3:
-      bucket: ${S3_BUCKET}
 
 ---
 

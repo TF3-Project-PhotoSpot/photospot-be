@@ -1,32 +1,26 @@
 spring:
-  profiles:
-    active: test
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://localhost:3306/photospot
+    username: root
+    password: 3987
   jpa:
     hibernate:
       ddl-auto: create
-  servlet:
-    multipart:
-      max-file-size: 5MB
-      max-request-size: 5MB
+  cloud:
+    aws:
+      credentials:
+        access-key: awsaccesskey
+        secret-key: awssecretkey
+      s3:
+        region: ap-northeast-2
+        bucket: bucket
 
 kakao:
   map:
-    rest-api-key: ${KAKAO_MAP_REST_API_KEY}
-    base-url: ${KAKAO_MAP_BASE_URL}
+    rest-api-key: test6d177caw1120g3510952427y92d3
+    base-url: https://dapi.kakao.com/v2/local
 
 jwt:
-  issuer: ${JWT_ISSUER}
-  secret_key: ${JWT_SECRET_KEY}
-
-cloud:
-  aws:
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    s3:
-      bucket: ${S3_BUCKET}
+  issuer: test-issuer
+  secret_key: testk24rlk24j4akfjaklfj3k3rj439841398sadkfjkefjkqefj44324230fskfjwkgjwlgkjw2lsfkjlefjwlkj50921ifkljfwdlkfjwlkfjdwlkfj

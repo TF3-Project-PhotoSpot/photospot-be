@@ -14,8 +14,8 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tf4.photospot.global.util.S3Uploader;
 import com.tf4.photospot.mockobject.WithCustomMockUser;
+import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.response.UserProfileResponse;

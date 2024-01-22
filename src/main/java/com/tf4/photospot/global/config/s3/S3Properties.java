@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @Component
-@ConfigurationProperties(prefix = "cloud.aws.credentials")
+@ConfigurationProperties(prefix = "spring.cloud.aws.credentials")
 public class S3Properties {
 
 	private String accessKey;

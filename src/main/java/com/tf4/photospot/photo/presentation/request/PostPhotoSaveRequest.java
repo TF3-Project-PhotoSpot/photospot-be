@@ -9,6 +9,8 @@ import com.tf4.photospot.global.util.PointConverter;
 
 // Todo : 중심 좌표 validate 어떻게 할 건지
 public record PostPhotoSaveRequest(
+
+	String photoUrl,
 	Double lon,
 	Double lat,
 	String takenAt

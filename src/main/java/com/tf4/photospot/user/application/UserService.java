@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
-import com.tf4.photospot.global.util.S3Uploader;
+import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
 import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
 import com.tf4.photospot.user.application.response.UserProfileResponse;

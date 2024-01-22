@@ -1,4 +1,4 @@
-package com.tf4.photospot.global.util;
+package com.tf4.photospot.photo.application;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -15,6 +15,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 import com.tf4.photospot.photo.domain.Extension;
+import com.tf4.photospot.photo.domain.S3Directory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,7 @@ public class S3Uploader {
 
 	private final AmazonS3 amazonS3Client;
 
-	@Value("${cloud.aws.s3.bucket}")
+	@Value("${spring.cloud.aws.s3.bucket}")
 	private String bucket;
 
 	public String upload(MultipartFile file, String folder) {
@@ -70,6 +71,7 @@ public class S3Uploader {
 
 	public String moveFolder(String sourceKey, String destinationKey) {
 		amazonS3Client.copyObject(bucket, sourceKey, bucket, destinationKey);
+		amazonS3Client.deleteObject(bucket, sourceKey); // 이동 후 삭제
 		return amazonS3Client.getUrl(bucket, destinationKey).toString();
 	}
 }
