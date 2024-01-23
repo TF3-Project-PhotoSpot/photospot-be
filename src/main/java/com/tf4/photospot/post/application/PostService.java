@@ -3,8 +3,11 @@ package com.tf4.photospot.post.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
-import com.tf4.photospot.post.application.request.SimplePostListRequest;
+import com.tf4.photospot.post.application.response.PostDetailResponse;
+import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class PostService {
+	private final PostQueryRepository postQueryRepository;
 
 	@Transactional
 	public void upload(PostUploadRequest request) {
@@ -24,7 +28,7 @@ public class PostService {
 		// 방명록 생성
 	}
 
-	public void getSimplePosts(SimplePostListRequest request) {
-		//
+	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
+		return SlicePageDto.wrap(postQueryRepository.findPosts(request.spotId(), 1L, request.pageable()));
 	}
 }
