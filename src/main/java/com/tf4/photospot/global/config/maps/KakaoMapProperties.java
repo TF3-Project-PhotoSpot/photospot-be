@@ -7,8 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@ConfigurationProperties("kakao.map")
+@ConfigurationProperties("kakao")
 public class KakaoMapProperties {
 	private String restApiKey;
-	private String baseUrl;
 }

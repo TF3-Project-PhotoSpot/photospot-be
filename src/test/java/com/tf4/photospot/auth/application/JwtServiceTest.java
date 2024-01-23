@@ -17,12 +17,12 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 

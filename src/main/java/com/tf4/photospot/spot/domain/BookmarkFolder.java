@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 
 @Entity
@@ -34,4 +35,20 @@ public class BookmarkFolder extends BaseEntity {
 	private String name;
 
 	private String color;
+
+	@Builder
+	private BookmarkFolder(User user, String name, String color) {
+		this.user = user;
+		this.name = name;
+		this.color = color;
+	}
+
+	public static BookmarkFolder createDefaultBookmark(User user) {
+		BookmarkFolder bookmarkFolder = BookmarkFolder.builder()
+			.user(user)
+			.name("기본 폴더")
+			.build();
+		user.getBookmarkFolders().add(bookmarkFolder);
+		return bookmarkFolder;
+	}
 }

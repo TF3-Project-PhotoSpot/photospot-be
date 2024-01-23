@@ -12,11 +12,11 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
 import com.tf4.photospot.map.application.response.kakao.KakaoSearchAddressResponse;
 import com.tf4.photospot.map.infrastructure.KakaoMapClient;
+import com.tf4.photospot.support.IntegrationTestSupport;
 
 class MapServiceTest extends IntegrationTestSupport {
 	@Autowired

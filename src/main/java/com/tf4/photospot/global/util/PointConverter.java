@@ -25,4 +25,8 @@ public final class PointConverter {
 	public static CoordinateDto convert(final Point coord) {
 		return new CoordinateDto(coord.getX(), coord.getY());
 	}
+
+	public static String toStringValue(final Point coord) {
+		return coord.getX() + "," + coord.getY();
+	}
 }

@@ -15,3 +15,10 @@ include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/http-req
 include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/query-parameters.adoc[]
 include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-body.adoc[]
 include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-fields-data.adoc[]
+
+=== 특정 장소 조회
+
+include::{snippets}/spot-controller-docs-test/get-spot/http-request.adoc[]
+include::{snippets}/spot-controller-docs-test/get-spot/query-parameters.adoc[]
+include::{snippets}/spot-controller-docs-test/get-spot/response-body.adoc[]
+include::{snippets}/spot-controller-docs-test/get-spot/response-fields-data.adoc[]
