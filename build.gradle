@@ -37,6 +37,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.hibernate.orm:hibernate-spatial'
     implementation 'javax.xml.bind:jaxb-api:2.3.1'
+    testImplementation 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     compileOnly 'org.projectlombok:lombok'
@@ -45,9 +46,10 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
 
-    //AWS Parameter Store
+    //AWS
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
+    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.641'
 
     // RestDocs
     asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'

@@ -37,7 +37,7 @@ import com.tf4.photospot.spot.domain.SpotBookmarkRepository;
 import com.tf4.photospot.spot.domain.SpotRepository;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
-import com.tf4.photospot.user.infrastructure.UserRepository;
+import com.tf4.photospot.user.domain.UserRepository;
 
 @Transactional
 class SpotServiceTest extends IntegrationTestSupport {

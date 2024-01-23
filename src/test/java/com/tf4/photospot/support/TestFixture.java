@@ -44,7 +44,7 @@ public class TestFixture {
 	}
 
 	public static Photo createPhoto(String photoUrl) {
-		return new Photo(photoUrl);
+		return Photo.builder().photoUrl(photoUrl).build();
 	}
 
 	public static Photo createPhoto() {

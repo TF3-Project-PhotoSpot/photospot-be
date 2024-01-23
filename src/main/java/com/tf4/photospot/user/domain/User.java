@@ -54,4 +54,8 @@ public class User extends BaseEntity {
 		this.role = Role.USER;
 	}
 
+	public void updateProfile(String profileUrl) {
+		this.profileUrl = profileUrl;
+	}
+
 }
