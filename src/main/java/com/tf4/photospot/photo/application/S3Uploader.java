@@ -42,7 +42,7 @@ public class S3Uploader {
 				new PutObjectRequest(bucket, fileKey, file.getInputStream(), objectMetadata)
 					.withCannedAcl(CannedAccessControlList.PublicRead));
 		} catch (Exception ex) {
-			throw new RuntimeException();
+			throw new ApiException(S3UploaderErrorCode.UNEXPECTED_UPLOAD_FAIL);
 		}
 		return amazonS3Client.getUrl(bucket, fileKey).toString();
 	}
