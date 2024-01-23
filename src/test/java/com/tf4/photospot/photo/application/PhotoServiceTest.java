@@ -17,13 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 
-import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 import com.tf4.photospot.mockobject.MockS3Config;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.PhotoRepository;
 import com.tf4.photospot.photo.domain.S3Directory;
+import com.tf4.photospot.support.IntegrationTestSupport;
 
 @Import(MockS3Config.class)
 public class PhotoServiceTest extends IntegrationTestSupport {

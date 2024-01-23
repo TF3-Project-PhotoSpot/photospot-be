@@ -15,8 +15,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.IntegrationTestSupport;
 import com.tf4.photospot.mockobject.MockS3Config;
+import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
