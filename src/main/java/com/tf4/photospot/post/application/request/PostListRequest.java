@@ -10,6 +10,7 @@ import com.tf4.photospot.global.exception.domain.CommonErrorCode;
 
 public record PostListRequest(
 	Long spotId,
+	Long userId,
 	Pageable pageable
 ) {
 	private static final Set<String> sortableProperties = Set.of("id", "likeCount");

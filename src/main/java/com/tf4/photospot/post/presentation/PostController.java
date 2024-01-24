@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tf4.photospot.global.argument.AuthUserId;
 import com.tf4.photospot.global.dto.ApiResponse;
+import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
+import com.tf4.photospot.post.application.response.PostDetailResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -37,10 +40,11 @@ public class PostController {
 	}
 
 	@GetMapping
-	public ApiResponse<?> getPosts(
+	public ApiResponse<SlicePageDto<PostDetailResponse>> getPostDetails(
 		@RequestParam(name = "spotId") Long spotId,
+		@AuthUserId Long userId,
 		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		return ApiResponse.success(postService.getPosts(new PostListRequest(spotId, pageable)));
+		return ApiResponse.success(postService.getPosts(new PostListRequest(spotId, userId, pageable)));
 	}
 }

@@ -11,4 +11,8 @@ public record SlicePageDto<T>(
 	public static <T> SlicePageDto<T> wrap(Slice<T> slice) {
 		return new SlicePageDto<>(slice.getContent(), slice.hasNext());
 	}
+
+	public static <T> SlicePageDto<T> wrap(List<T> content, Boolean hasNext) {
+		return new SlicePageDto<>(content, hasNext);
+	}
 }
