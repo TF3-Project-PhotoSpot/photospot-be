@@ -5,9 +5,7 @@ import static java.util.Comparator.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -20,7 +18,6 @@ import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.domain.Post;
-import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTagRepository;
@@ -110,12 +107,6 @@ class PostServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("좋아요순으로 조회할 수 있다.", () -> {
 				//given when
-				final Random random = new Random();
-				final List<PostLike> postLikes = new ArrayList<>();
-				// 방명록별로 좋아요를 랜덤하게 생성
-				posts.forEach(post -> postLikes.addAll(createList(() ->
-					createPostLike(post, reader), random.nextInt(20))));
-				postLikeRepository.saveAll(postLikes);
 				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCount = postService.getPosts(
 					new PostListRequest(spot.getId(), reader.getId(),
 						PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount")))));
@@ -127,6 +118,20 @@ class PostServiceTest extends IntegrationTestSupport {
 					comparing(PostDetailResponse::likeCount).reversed());
 				assertThatList(postsSortedByLeastLikeCount.content()).isSortedAccordingTo(
 					comparing(PostDetailResponse::likeCount));
+			}),
+			dynamicTest("좋아요순으로, 좋아요가 같으면 최신순으로 조회할 수 있다.", () -> {
+				//given when
+				final Long mostLikeCount = 1000L;
+				postRepository.saveAll(createList(() -> createPost(spot, writer, mostLikeCount), 5));
+				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCountAndLatest = postService.getPosts(
+					new PostListRequest(spot.getId(), reader.getId(),
+						PageRequest.of(0, 10, Sort.by(
+							Sort.Order.desc("likeCount"),
+							Sort.Order.desc("id")))));
+				//then
+				assertThatList(postsSortedByMostLikeCountAndLatest.content())
+					.isSortedAccordingTo(comparing(PostDetailResponse::likeCount).reversed()
+						.thenComparing(comparing(PostDetailResponse::id).reversed()));
 			})
 		);
 	}

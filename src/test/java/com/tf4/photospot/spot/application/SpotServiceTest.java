@@ -128,8 +128,8 @@ class SpotServiceTest extends IntegrationTestSupport {
 			dynamicTest("스팟에 비공개 처리 된 방명록은 제외 된다.", () -> {
 				//given
 				spotRepository.saveAll(List.of(spotWithMostPosts, spotWithMiddlePosts, spotWithLeastPosts));
-				postRepository.save(createPost(spotWithMostPosts, user, createPhoto(), createPoint(), true));
-				postRepository.save(createPost(spotWithMiddlePosts, user, createPhoto(), createPoint(), false));
+				postRepository.save(createPost(spotWithMostPosts, user, true));
+				postRepository.save(createPost(spotWithMiddlePosts, user, false));
 				//when
 				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
@@ -139,9 +139,9 @@ class SpotServiceTest extends IntegrationTestSupport {
 			dynamicTest("스팟은 방명록 개수가 많은 순서로 정렬이 된다.", () -> {
 				//given
 				postRepository.saveAll(Stream.of(
-					createList(() -> createPost(spotWithMostPosts, user, createPhoto(), createPoint()), 15),
-					createList(() -> createPost(spotWithMiddlePosts, user, createPhoto(), createPoint()), 10),
-					createList(() -> createPost(spotWithLeastPosts, user, createPhoto(), createPoint()), 15)
+					createList(() -> createPost(spotWithMostPosts, user), 15),
+					createList(() -> createPost(spotWithMiddlePosts, user), 10),
+					createList(() -> createPost(spotWithLeastPosts, user), 15)
 				).flatMap(Collection::stream).toList());
 				//when
 				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);

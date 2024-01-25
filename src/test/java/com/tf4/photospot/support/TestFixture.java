@@ -2,6 +2,7 @@ package com.tf4.photospot.support;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
@@ -22,6 +23,8 @@ import com.tf4.photospot.user.domain.User;
 public class TestFixture {
 	private static final AtomicLong COORD_UNIQUE_KEY = new AtomicLong(1L);
 	private static final Double COORD_UNIT_VALUE = 0.0001;
+	private static final Random RANDOM = new Random();
+	private static final int LIKE_COUNT_RANGE = 100;
 
 	public static Spot createSpot(String address, Point coord, Long postCount) {
 		return Spot.builder()
@@ -32,27 +35,39 @@ public class TestFixture {
 	}
 
 	public static Spot createSpot() {
-		return createSpot("주소", createPoint(), 0L);
-	}
-
-	public static Post createPost(Spot spot, User user, Photo photo, Point coord) {
-		return createPost(spot, user, photo, coord, false);
+		return createSpot("주소", createPoint(), getRandomLikeCount());
 	}
 
 	public static Post createPost(Spot spot, User user) {
-		return createPost(spot, user, createPhoto("photo"), createPoint(), false);
+		return createPost(spot, user, getRandomLikeCount());
 	}
 
-	public static Post createPost(Spot spot, User user, Photo photo, Point coord, boolean isPrivate) {
+	public static Post createPost(Spot spot, User user, boolean isPrivate) {
+		return createPost(spot, user, createPhoto(), createPoint(), getRandomLikeCount(), isPrivate);
+	}
+
+	public static Post createPost(Spot spot, User user, Long likeCount) {
+		return createPost(spot, user, createPhoto(), createPoint(), likeCount, false);
+	}
+
+	public static Post createPost(Spot spot, User user, Photo photo, Point coord) {
+		return createPost(spot, user, photo, coord, getRandomLikeCount(), false);
+	}
+
+	public static Post createPost(Spot spot, User user, Photo photo, Point coord, Long likeCount, boolean isPrivate) {
 		return Post.builder()
 			.spot(spot)
 			.writer(user)
 			.photo(photo)
 			.coord(coord)
 			.detailAddress("디테일 주소")
-			.likeCount(5L)
+			.likeCount(likeCount)
 			.isPrivate(isPrivate)
 			.build();
+	}
+
+	private static long getRandomLikeCount() {
+		return RANDOM.nextInt(LIKE_COUNT_RANGE);
 	}
 
 	public static Photo createPhoto(String photoUrl) {
