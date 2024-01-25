@@ -9,6 +9,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.data.web.PageableHandlerMethodArgumentResolver;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
@@ -20,6 +21,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tf4.photospot.global.argument.CoordinateValidator;
 import com.tf4.photospot.mockobject.RestDocsAuthenticationPrincipalArgumentResolver;
 
@@ -27,12 +30,16 @@ import com.tf4.photospot.mockobject.RestDocsAuthenticationPrincipalArgumentResol
 public abstract class RestDocsSupport {
 	private static final String DOCUMENT_AUTO_FORMAT = "{class-name}/{method-name}";
 	protected MockMvc mockMvc;
-	protected ObjectMapper mapper = new ObjectMapper();
+	protected ObjectMapper mapper;
 
 	@BeforeEach
 	void setUp(RestDocumentationContextProvider contextProvider) {
+		mapper = new ObjectMapper();
+		mapper.registerModule(new JavaTimeModule());
+		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 		mockMvc = MockMvcBuilders.standaloneSetup(initController())
 			.apply(documentationConfiguration(contextProvider))
+			.setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
 			.setCustomArgumentResolvers(
 				new PageableHandlerMethodArgumentResolver(),
 				new RestDocsAuthenticationPrincipalArgumentResolver())

@@ -1,0 +1,8 @@
+=== 방명록 상세 목록 조회
+
+'''
+
+include::{snippets}/post-controller-docs-test/get-posts/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/get-posts/query-parameters.adoc[]
+include::{snippets}/post-controller-docs-test/get-posts/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/get-posts/response-fields-data.adoc[]
