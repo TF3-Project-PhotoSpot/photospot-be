@@ -20,7 +20,7 @@ import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
-import com.tf4.photospot.post.application.response.QPostWithLikedResponse;
+import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.user.domain.QUser;
@@ -35,7 +35,7 @@ public class PostQueryRepository {
 	public Slice<PostWithLikeStatus> findPostsWithLikeStatus(PostListRequest request) {
 		final Pageable pageable = request.pageable();
 		final QUser writer = new QUser("writer");
-		var query = queryFactory.select(new QPostWithLikedResponse(post, postLike.isNotNull().as("isLiked")))
+		var query = queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull().as("isLiked")))
 			.from(post)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()

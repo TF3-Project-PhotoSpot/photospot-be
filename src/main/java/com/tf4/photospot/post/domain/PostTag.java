@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,14 +24,21 @@ public class PostTag extends BaseEntity {
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tag_id")
-	private Tag tag;
+	@JoinColumn(name = "spot_id")
+	private Spot spot;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "post_id")
 	private Post post;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "spot_id")
-	private Spot spot;
+	@JoinColumn(name = "tag_id")
+	private Tag tag;
+
+	@Builder
+	public PostTag(Spot spot, Post post, Tag tag) {
+		this.spot = spot;
+		this.post = post;
+		this.tag = tag;
+	}
 }
