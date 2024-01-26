@@ -48,4 +48,17 @@ public class PostService {
 			.toList();
 		return SlicePageDto.wrap(postDetailResponses, postResponses.hasNext());
 	}
+
+	public SlicePageDto<PostDetailResponse> getPostPreviews(PostListRequest request) {
+		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(request);
+		final Map<Post, List<PostTag>> postTagGroup = postQueryRepository
+			.findPostTagsIn(postResponses.stream().map(PostWithLikeStatus::post).toList())
+			.stream()
+			.collect(Collectors.groupingBy(PostTag::getPost));
+		final List<PostDetailResponse> postDetailResponses = postResponses.stream()
+			.map(postResponse -> PostDetailResponse.of(postResponse,
+				postTagGroup.getOrDefault(postResponse.post(), Collections.emptyList())))
+			.toList();
+		return SlicePageDto.wrap(postDetailResponses, postResponses.hasNext());
+	}
 }

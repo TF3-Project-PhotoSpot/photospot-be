@@ -6,8 +6,10 @@ import org.locationtech.jts.geom.Point;
 
 import com.tf4.photospot.global.entity.BaseEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -30,11 +32,10 @@ public class Photo extends BaseEntity {
 
 	private LocalDate takenAt;
 
-	// Todo : nullable = false 설정 넣으면 spotServiceTest 오류 발생 => 수정할것
-	@Column(columnDefinition = "POINT SRID 4326")
+	@Column(columnDefinition = "POINT SRID 4326", nullable = false)
 	private Point coord;
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@JoinColumn(name = "bubble_id")
 	private Bubble bubble;
 
