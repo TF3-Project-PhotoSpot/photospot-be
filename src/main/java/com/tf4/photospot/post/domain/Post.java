@@ -74,4 +74,10 @@ public class Post extends BaseEntity {
 		this.likeCount = likeCount;
 		this.isPrivate = isPrivate;
 	}
+
+	public void delete() {
+		if (deletedAt == null) {
+			deletedAt = LocalDateTime.now();
+		}
+	}
 }
