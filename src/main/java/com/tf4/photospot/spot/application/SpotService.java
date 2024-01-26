@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.SpotErrorCode;
+import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
@@ -42,9 +43,9 @@ public class SpotService {
 		if (recommendedSpots.isEmpty()) {
 			return RecommendedSpotListResponse.emptyResponse();
 		}
-		List<PostPreviewResponse> postThumbnailsResponse = postJdbcRepository.findRecentlyPostThumbnailsInSpotIds(
+		List<PostPreviewResponse> postPreviews = postJdbcRepository.findRecentlyPostThumbnailsInSpotIds(
 			recommendedSpots.stream().map(Spot::getId).toList(), request.postPreviewCount());
-		return RecommendedSpotListResponse.of(recommendedSpots, postThumbnailsResponse);
+		return RecommendedSpotListResponse.of(recommendedSpots, postPreviews);
 	}
 
 	public NearbySpotListResponse getNearbySpotList(NearbySpotRequest request) {
@@ -55,7 +56,8 @@ public class SpotService {
 	public SpotResponse findSpot(Long spotId, Long userId, int postPreviewCount) {
 		Spot spot = spotRepository.findById(spotId).orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
 		Boolean bookmarked = spotQueryRepository.existsBookmark(spot.getId(), userId);
-		List<PostPreviewResponse> postPreviews = postQueryRepository.findRecentlyPostPreviews(spotId, postPreviewCount);
-		return SpotResponse.of(spot, bookmarked, postPreviews);
+		Slice<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(
+			PostPreviewListRequest.createLatestPostsRequest(spotId, postPreviewCount));
+		return SpotResponse.of(spot, bookmarked, postPreviews.getContent());
 	}
 }

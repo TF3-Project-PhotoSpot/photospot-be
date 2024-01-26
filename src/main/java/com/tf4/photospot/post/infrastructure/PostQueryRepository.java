@@ -17,6 +17,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tf4.photospot.global.util.PageUtils;
 import com.tf4.photospot.global.util.QueryDslUtils;
 import com.tf4.photospot.post.application.request.PostListRequest;
+import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
@@ -31,6 +32,25 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostQueryRepository {
 	private final JPAQueryFactory queryFactory;
+
+	public Slice<PostPreviewResponse> findPostPreviews(PostPreviewListRequest request) {
+		final Pageable pageable = request.pageable();
+		var query = queryFactory.select(new QPostPreviewResponse(
+				post.spot.id,
+				post.id,
+				photo.photoUrl
+			))
+			.from(post)
+			.join(post.photo, photo)
+			.where(
+				post.spot.id.eq(request.spotId()),
+				canVisble()
+			);
+		return PageUtils.toSlice(pageable, QueryDslUtils.orderBy(query, post, pageable)
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1L)
+			.fetch());
+	}
 
 	public Slice<PostWithLikeStatus> findPostsWithLikeStatus(PostListRequest request) {
 		final Pageable pageable = request.pageable();
@@ -56,23 +76,6 @@ public class PostQueryRepository {
 			.from(postTag)
 			.join(postTag.tag).fetchJoin()
 			.where(postTag.post.in(posts))
-			.fetch();
-	}
-
-	public List<PostPreviewResponse> findRecentlyPostPreviews(Long spotId, int postPreviewCount) {
-		return queryFactory.select(new QPostPreviewResponse(
-				post.spot.id,
-				post.id,
-				photo.photoUrl
-			))
-			.from(post)
-			.join(post.photo, photo)
-			.where(
-				post.spot.id.eq(spotId),
-				canVisble()
-			)
-			.orderBy(post.id.desc())
-			.limit(postPreviewCount)
 			.fetch();
 	}
 
