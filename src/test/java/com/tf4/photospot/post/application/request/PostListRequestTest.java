@@ -23,7 +23,10 @@ class PostListRequestTest {
 		);
 		//when then
 		assertThatStream(sortableList.stream()).allSatisfy(
-			sort -> new PostListRequest(1L, 1L, PageRequest.of(0, 10, sort)));
+			sort -> assertThatNoException().isThrownBy(
+				() -> new PostListRequest(1L, 1L, PageRequest.of(0, 10, sort)))
+		);
+
 	}
 
 	@DisplayName("정렬 불가능한 property로 페이징 요청을 생성하면 CANNOT_SORTED_PROPERTY 예외가 발생한다.")

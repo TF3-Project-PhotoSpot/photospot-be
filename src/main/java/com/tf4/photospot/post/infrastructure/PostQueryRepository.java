@@ -47,7 +47,7 @@ public class PostQueryRepository {
 			);
 		return PageUtils.toSlice(pageable, QueryDslUtils.orderBy(query, post, pageable)
 			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize() + 1)
+			.limit(pageable.getPageSize() + 1L)
 			.fetch());
 	}
 
