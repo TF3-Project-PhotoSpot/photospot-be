@@ -1,3 +1,12 @@
+=== 방명록 미리보기 목록 조회
+
+'''
+
+include::{snippets}/post-controller-docs-test/get-post-previews/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/get-post-previews/query-parameters.adoc[]
+include::{snippets}/post-controller-docs-test/get-post-previews/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/get-post-previews/response-fields-data.adoc[]
+
 === 방명록 상세 목록 조회
 
 '''
