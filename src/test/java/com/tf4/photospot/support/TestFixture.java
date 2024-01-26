@@ -77,7 +77,7 @@ public class TestFixture {
 	}
 
 	public static Photo createPhoto() {
-		return createPhoto(("photoUrl"));
+		return createPhoto("photoUrl");
 	}
 
 	public static User createUser(String nickname, String account, String providerType) {
