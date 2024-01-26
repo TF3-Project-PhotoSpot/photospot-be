@@ -54,7 +54,7 @@ class PostServiceTest extends IntegrationTestSupport {
 		List<Post> posts = createList(() -> createPost(spot, writer), 15);
 		postRepository.saveAll(posts);
 		// 마지막에 추가된 포스트는 태그, 좋아요 정보를 가지고 있다.
-		Post lastPost = createPost(spot, writer, createPhoto("firstPhotoUrl"), createPoint());
+		Post lastPost = createPost(spot, writer, createPhoto("firstPhotoUrl"));
 		postRepository.save(lastPost);
 		List<Tag> tags = tagRepository.saveAll(createTags("tagA", "tagB", "tagC"));
 		postTagRepository.saveAll(createPostTags(spot, lastPost, tags));

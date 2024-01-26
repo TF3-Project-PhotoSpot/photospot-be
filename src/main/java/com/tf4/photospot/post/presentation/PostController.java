@@ -47,4 +47,13 @@ public class PostController {
 	) {
 		return ApiResponse.success(postService.getPosts(new PostListRequest(spotId, userId, pageable)));
 	}
+
+	@GetMapping("/preview")
+	public ApiResponse<SlicePageDto<PostDetailResponse>> getPostPreviews(
+		@RequestParam(name = "spotId") Long spotId,
+		@AuthUserId Long userId,
+		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		return ApiResponse.success(postService.getPosts(new PostListRequest(spotId, userId, pageable)));
+	}
 }
