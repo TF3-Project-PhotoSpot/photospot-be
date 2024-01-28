@@ -16,9 +16,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
@@ -39,25 +37,16 @@ import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
-@Transactional
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 class SpotServiceTest extends IntegrationTestSupport {
-	@Autowired
-	private SpotService spotService;
-
-	@Autowired
-	private SpotRepository spotRepository;
-
-	@Autowired
-	private PostRepository postRepository;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private SpotBookmarkRepository spotBookmarkRepository;
-
-	@Autowired
-	private BookmarFolderRepository bookmarFolderRepository;
+	private final SpotService spotService;
+	private final SpotRepository spotRepository;
+	private final PostRepository postRepository;
+	private final UserRepository userRepository;
+	private final SpotBookmarkRepository spotBookmarkRepository;
+	private final BookmarFolderRepository bookmarFolderRepository;
 
 	@DisplayName("특정 스팟을 조회한다.")
 	@TestFactory
@@ -139,8 +128,8 @@ class SpotServiceTest extends IntegrationTestSupport {
 			dynamicTest("스팟에 비공개 처리 된 방명록은 제외 된다.", () -> {
 				//given
 				spotRepository.saveAll(List.of(spotWithMostPosts, spotWithMiddlePosts, spotWithLeastPosts));
-				postRepository.save(createPost(spotWithMostPosts, user, createPhoto(), createPoint(), true));
-				postRepository.save(createPost(spotWithMiddlePosts, user, createPhoto(), createPoint(), false));
+				postRepository.save(createPost(spotWithMostPosts, user, true));
+				postRepository.save(createPost(spotWithMiddlePosts, user, false));
 				//when
 				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);
 				//then
@@ -150,9 +139,9 @@ class SpotServiceTest extends IntegrationTestSupport {
 			dynamicTest("스팟은 방명록 개수가 많은 순서로 정렬이 된다.", () -> {
 				//given
 				postRepository.saveAll(Stream.of(
-					createList(() -> createPost(spotWithMostPosts, user, createPhoto(), createPoint()), 15),
-					createList(() -> createPost(spotWithMiddlePosts, user, createPhoto(), createPoint()), 10),
-					createList(() -> createPost(spotWithLeastPosts, user, createPhoto(), createPoint()), 15)
+					createList(() -> createPost(spotWithMostPosts, user), 15),
+					createList(() -> createPost(spotWithMiddlePosts, user), 10),
+					createList(() -> createPost(spotWithLeastPosts, user), 15)
 				).flatMap(Collection::stream).toList());
 				//when
 				RecommendedSpotListResponse response = spotService.getRecommendedSpotList(request);

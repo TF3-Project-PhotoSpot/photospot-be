@@ -7,8 +7,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Tag extends BaseEntity {
@@ -19,4 +22,10 @@ public class Tag extends BaseEntity {
 	private String name;
 
 	private String iconUrl;
+
+	@Builder
+	public Tag(String name, String iconUrl) {
+		this.name = name;
+		this.iconUrl = iconUrl;
+	}
 }

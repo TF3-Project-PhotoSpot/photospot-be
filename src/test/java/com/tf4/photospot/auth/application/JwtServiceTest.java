@@ -14,8 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
@@ -29,21 +27,14 @@ import com.tf4.photospot.user.domain.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 
-@Transactional
+@RequiredArgsConstructor
 public class JwtServiceTest extends IntegrationTestSupport {
-
-	@Autowired
-	private JwtService jwtService;
-
-	@Autowired
-	private JwtProperties jwtProperties;
-
-	@Autowired
-	private JwtRepository jwtRepository;
-
-	@Autowired
-	private UserRepository userRepository;
+	private final JwtService jwtService;
+	private final JwtProperties jwtProperties;
+	private final JwtRepository jwtRepository;
+	private final UserRepository userRepository;
 
 	@DisplayName("리프레시 토큰을 발급하고 DB에 저장한다.")
 	@Test

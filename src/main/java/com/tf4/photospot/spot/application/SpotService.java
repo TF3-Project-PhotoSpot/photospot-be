@@ -18,7 +18,6 @@ import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.SpotResponse;
 import com.tf4.photospot.spot.domain.Spot;
-import com.tf4.photospot.spot.domain.SpotBookmarkRepository;
 import com.tf4.photospot.spot.domain.SpotRepository;
 import com.tf4.photospot.spot.infrastructure.SpotQueryRepository;
 
@@ -30,7 +29,6 @@ import lombok.RequiredArgsConstructor;
 public class SpotService {
 	private final SpotRepository spotRepository;
 	private final SpotQueryRepository spotQueryRepository;
-	private final SpotBookmarkRepository spotBookmarkRepository;
 	private final PostJdbcRepository postJdbcRepository;
 	private final PostQueryRepository postQueryRepository;
 

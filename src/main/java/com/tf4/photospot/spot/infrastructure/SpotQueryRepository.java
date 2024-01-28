@@ -8,7 +8,6 @@ import java.util.List;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -16,6 +15,7 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.spatial.GeometryExpressions;
 import com.querydsl.spatial.SpatialOps;
+import com.tf4.photospot.global.util.PageUtils;
 import com.tf4.photospot.spot.domain.Spot;
 
 import lombok.RequiredArgsConstructor;
@@ -37,14 +37,7 @@ public class SpotQueryRepository {
 			.limit(pageable.getPageSize() + 1L)
 			.fetch();
 
-		return createSlice(pageable, recommendedSpots);
-	}
-
-	private <T> Slice<T> createSlice(Pageable pageable, List<T> contents) {
-		if (contents.size() > pageable.getPageSize()) {
-			return new SliceImpl<>(contents.subList(0, pageable.getPageSize()), pageable, true);
-		}
-		return new SliceImpl<>(contents, pageable, false);
+		return PageUtils.toSlice(pageable, recommendedSpots);
 	}
 
 	private static BooleanExpression canVisible() {

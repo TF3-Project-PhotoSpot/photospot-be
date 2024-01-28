@@ -11,8 +11,9 @@ import jakarta.persistence.EntityManager;
 @EnableJpaAuditing
 @Configuration
 public class JpaConfig {
+
 	@Bean
 	public JPAQueryFactory jpaQueryFactory(EntityManager em) {
-		return new JPAQueryFactory(em);
+		return new JPAQueryFactory(new CustomHibernate5Templates(), em);
 	}
 }

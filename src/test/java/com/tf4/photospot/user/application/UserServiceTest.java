@@ -10,28 +10,22 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.mockobject.MockS3Config;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
+import lombok.RequiredArgsConstructor;
+
 @Import(MockS3Config.class)
-@Transactional
+@RequiredArgsConstructor
 public class UserServiceTest extends IntegrationTestSupport {
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private UserRepository userRepository;
-
-	@Autowired
-	private MockS3Config mockS3Config;
+	private final UserService userService;
+	private final UserRepository userRepository;
+	private final MockS3Config mockS3Config;
 
 	@DisplayName("사용자 등록 시나리오")
 	@TestFactory

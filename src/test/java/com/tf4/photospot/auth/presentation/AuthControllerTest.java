@@ -7,14 +7,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.tf4.photospot.auth.application.JwtService;
-import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.mockobject.WithCustomMockUser;
@@ -22,22 +20,14 @@ import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.application.UserService;
 
 import jakarta.servlet.http.Cookie;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class AuthControllerTest extends IntegrationTestSupport {
-
+	private final WebApplicationContext context;
+	private final JwtService jwtService;
+	private final UserService userService;
 	private MockMvc mockMvc;
-
-	@Autowired
-	private WebApplicationContext context;
-
-	@Autowired
-	private JwtService jwtService;
-
-	@Autowired
-	private UserService userService;
-
-	@Autowired
-	private JwtRepository jwtRepository;
 
 	@BeforeEach
 	void setUp() {

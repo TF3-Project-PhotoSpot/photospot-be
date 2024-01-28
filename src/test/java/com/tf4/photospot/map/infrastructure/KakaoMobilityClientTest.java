@@ -8,11 +8,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -21,11 +18,9 @@ import com.tf4.photospot.global.config.maps.KakaoMapProperties;
 import com.tf4.photospot.global.config.maps.MapApiConfig;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.map.application.response.kakao.KakaoDistanceResponse;
+import com.tf4.photospot.support.RestClientTestSupport;
 
-@EnableConfigurationProperties(value = KakaoMapProperties.class)
-@TestPropertySource("classpath:application.yml")
-@RestClientTest
-class KakaoMobilityClientTest {
+class KakaoMobilityClientTest extends RestClientTestSupport {
 	private final MockRestServiceServer mockServer;
 	private final KakaoMobilityClient kakaoMobilityClient;
 

@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.tf4.photospot.global.exception.ApiException;
@@ -18,12 +17,13 @@ import com.tf4.photospot.map.application.response.kakao.KakaoSearchAddressRespon
 import com.tf4.photospot.map.infrastructure.KakaoMapClient;
 import com.tf4.photospot.support.IntegrationTestSupport;
 
-class MapServiceTest extends IntegrationTestSupport {
-	@Autowired
-	private MapService mapService;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
+class MapServiceTest extends IntegrationTestSupport {
+	private final MapService mapService;
 	@MockBean
-	private KakaoMapClient kakaoMapClient;
+	private final KakaoMapClient kakaoMapClient;
 
 	@TestFactory
 	Stream<DynamicTest> searchByAddressStreamCountTest() {
