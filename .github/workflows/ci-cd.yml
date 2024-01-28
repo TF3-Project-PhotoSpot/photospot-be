@@ -83,15 +83,16 @@ jobs:
           touch start.sh
           echo "cd /home/ubuntu/app" >> start.sh
           echo "aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REGISTRY" >> start.sh
-          echo "docker pull $REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG" >> start.sh
-          echo "export PHOTOSPOT_IMAGE=$REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG" >> start.sh
-          echo "export PROFILE=$PROFILE_NAME" >> start.sh
+          echo "docker pull $REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG" >> start.sh 
           echo "docker-compose up -d" >> start.sh
           mv start.sh scripts/start.sh
+          touch .env
+          echo "PHOTOSPOT_IMAGE=$REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG" >> .env
+          echo "PROFILE=$PROFILE_NAME" >> .env
 
       - name: Upload to S3
         run: |
-          zip -r $PROFILE_NAME-$IMAGE_TAG.zip ./scripts docker-compose.yml appspec.yml
+          zip -r $PROFILE_NAME-$IMAGE_TAG.zip ./scripts docker-compose.yml appspec.yml .env
           aws s3 cp --region $REGION --acl private ./$PROFILE_NAME-$IMAGE_TAG.zip s3://photospot-bucket/deploy/
 
       - name: Trigger CodeDeploy
