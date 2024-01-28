@@ -55,3 +55,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  cloud:
+    aws:
+      credentials:
+        instance-profile: true
+        access-key:
+        secret-key:
