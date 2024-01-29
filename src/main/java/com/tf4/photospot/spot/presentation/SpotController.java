@@ -25,6 +25,7 @@ import com.tf4.photospot.spot.application.response.SpotResponse;
 import com.tf4.photospot.spot.presentation.response.RecommendedSpotHttpResponse;
 import com.tf4.photospot.spot.presentation.response.RecommendedSpotListHttpResponse;
 import com.tf4.photospot.spot.presentation.response.SpotHttpResponse;
+import com.tf4.photospot.spot.presentation.response.UserSpotListHttpResponse;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -33,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Validated
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/spots")
 @RestController
 @RequiredArgsConstructor
 public class SpotController {
@@ -41,7 +42,7 @@ public class SpotController {
 	private final SpotService spotService;
 	private final MapService mapService;
 
-	@GetMapping("/spots/recommended")
+	@GetMapping("/recommended")
 	public ApiResponse<RecommendedSpotListHttpResponse> getSpotList(
 		@ModelAttribute @Valid CoordinateDto coord,
 		@RequestParam(name = "radius") @Positive(message = "반경(m)은 0보다 커야 됩니다.") Integer radius,
@@ -60,7 +61,7 @@ public class SpotController {
 			.build());
 	}
 
-	@GetMapping("/spots")
+	@GetMapping
 	public ApiResponse<NearbySpotListResponse> getNearbySpotList(
 		@ModelAttribute @Valid CoordinateDto coord,
 		@RequestParam(name = "radius") @Positive(message = "반경(m)은 0보다 커야 됩니다.") Integer radius
@@ -68,7 +69,7 @@ public class SpotController {
 		return ApiResponse.success(spotService.getNearbySpotList(new NearbySpotRequest(coord.toCoord(), radius)));
 	}
 
-	@GetMapping("/spots/{spotId}")
+	@GetMapping("/{spotId}")
 	public ApiResponse<SpotHttpResponse> getSpot(
 		@PathVariable(name = "spotId") Long spotId,
 		@ModelAttribute @Valid CoordinateDto startingCoord,
@@ -84,5 +85,12 @@ public class SpotController {
 			distance = mapService.searchDistanceBetween(startingCoord.toCoord(), spotResponse.coord());
 		}
 		return ApiResponse.success(SpotHttpResponse.of(distance, spotResponse));
+	}
+
+	@GetMapping("/mine")
+	public ApiResponse<UserSpotListHttpResponse> getSpotsOfMyPosts(
+		@AuthUserId Long userId
+	) {
+		return ApiResponse.success(UserSpotListHttpResponse.from(spotService.findSpotsOfMyPosts(userId)));
 	}
 }

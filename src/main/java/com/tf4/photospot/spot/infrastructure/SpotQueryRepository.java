@@ -1,5 +1,6 @@
 package com.tf4.photospot.spot.infrastructure;
 
+import static com.tf4.photospot.post.domain.QPost.*;
 import static com.tf4.photospot.spot.domain.QSpot.*;
 import static com.tf4.photospot.spot.domain.QSpotBookmark.*;
 
@@ -16,6 +17,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.spatial.GeometryExpressions;
 import com.querydsl.spatial.SpatialOps;
 import com.tf4.photospot.global.util.PageUtils;
+import com.tf4.photospot.spot.application.response.QSpotCoordResponse;
+import com.tf4.photospot.spot.application.response.SpotCoordResponse;
 import com.tf4.photospot.spot.domain.Spot;
 
 import lombok.RequiredArgsConstructor;
@@ -67,5 +70,15 @@ public class SpotQueryRepository {
 			.where(spotBookmark.spot.id.eq(spotId).and(spotBookmark.user.id.eq(userId)))
 			.fetchFirst();
 		return exists != null;
+	}
+
+	public List<SpotCoordResponse> findSpotsOfMyPosts(Long userId) {
+		return queryFactory.selectDistinct(new QSpotCoordResponse(
+				spot.id,
+				spot.coord))
+			.from(spot)
+			.join(post).on(post.spot.eq(spot))
+			.where(post.writer.id.eq(userId))
+			.fetch();
 	}
 }
