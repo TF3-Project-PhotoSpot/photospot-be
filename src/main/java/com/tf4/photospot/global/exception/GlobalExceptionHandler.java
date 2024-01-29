@@ -38,7 +38,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		@NotNull HttpStatusCode status,
 		@NotNull WebRequest request
 	) {
-
+		log.error(ex.getMessage());
 		final List<ValidationError> errors = ex.getBindingResult().getFieldErrors()
 			.stream()
 			.map(ValidationError::from)
@@ -47,7 +47,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<Object> handleIllegalArgumentException() {
+	public ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException ex) {
+		log.error(ex.getMessage());
 		return createResponse(CommonErrorCode.INVALID_PARAMETER);
 	}
 
@@ -55,6 +56,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleConstraintViolationException(
 		ConstraintViolationException ex
 	) {
+		log.error(ex.getMessage());
 		final List<ValidationError> errors = ex.getConstraintViolations().stream()
 			.map(violation -> ValidationError.builder()
 				.field(violation.getPropertyPath().toString())
@@ -69,6 +71,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleMethodArgumentTypeMismatchException(
 		MethodArgumentTypeMismatchException ex
 	) {
+		log.error(ex.getMessage());
 		final ValidationError error = ValidationError.builder()
 			.field(ex.getName())
 			.value(ex.getValue())
@@ -84,6 +87,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		@NotNull HttpStatusCode status,
 		@NotNull WebRequest request
 	) {
+		log.error(ex.getMessage());
 		return createResponse(CommonErrorCode.MISSING_REQUEST_PARAMETER);
 	}
 
@@ -94,6 +98,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		@NotNull HttpStatusCode status,
 		@NotNull WebRequest request
 	) {
+		log.error(ex.getMessage());
 		return createResponse(CommonErrorCode.MISSING_REQUEST_PARAMETER);
 	}
 
@@ -105,7 +110,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 		@NotNull HttpStatusCode statusCode,
 		@NotNull WebRequest request
 	) {
-		log.error(CommonErrorCode.UNEXPECTED_ERROR.getMessage(), ex);
+		log.error(ex.getMessage());
 		return createResponse(CommonErrorCode.UNEXPECTED_ERROR);
 	}
 
