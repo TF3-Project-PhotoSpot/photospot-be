@@ -19,7 +19,6 @@ import com.tf4.photospot.mockobject.WithCustomMockUser;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.application.UserService;
 
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -101,8 +100,7 @@ public class AuthControllerTest extends IntegrationTestSupport {
 	@WithCustomMockUser
 	@DisplayName("리프레시 토큰 없이 액세스 토큰 재발급을 요청하면 예외를 응답한다.")
 	void reissueWithNoRefreshToken() throws Exception {
-		mockMvc.perform(get("/api/v1/auth/reissue")
-				.cookie(new Cookie("RefreshToken", "")))
+		mockMvc.perform(get("/api/v1/auth/reissue"))
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
 			.andExpect(jsonPath("$.code").value(AuthErrorCode.UNAUTHORIZED_USER.name()))
