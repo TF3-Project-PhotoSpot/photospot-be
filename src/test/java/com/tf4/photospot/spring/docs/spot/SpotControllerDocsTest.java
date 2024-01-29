@@ -1,9 +1,9 @@
 package com.tf4.photospot.spring.docs.spot;
 
 import static org.mockito.BDDMockito.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
@@ -11,7 +11,6 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Point;
-import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
@@ -25,6 +24,7 @@ import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
+import com.tf4.photospot.spot.application.response.SpotCoordResponse;
 import com.tf4.photospot.spot.application.response.SpotResponse;
 import com.tf4.photospot.spot.presentation.SpotController;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
@@ -40,6 +40,28 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 		return new SpotController(spotService, mapService);
 	}
 
+	@DisplayName("내가 작성한 방명록의 스팟 목록을 조회한다.")
+	@Test
+	void getSpotsOfMyPosts() throws Exception {
+		//given
+		final List<SpotCoordResponse> spotCoordResponses = List.of(
+			new SpotCoordResponse(1L, DEFAULT_COORD.toCoord()),
+			new SpotCoordResponse(2L, DEFAULT_COORD.toCoord()));
+		given(spotService.findSpotsOfMyPosts(anyLong())).willReturn(spotCoordResponses);
+		//when then
+		mockMvc.perform(get("/api/v1/spots/mine", 1L))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(
+					beneathPath("data").withSubsectionId("data"),
+					fieldWithPath("spots[]").type(JsonFieldType.ARRAY).description("스팟 목록")
+						.optional().attributes(defaultValue("emptyList")),
+					fieldWithPath("spots[].id").type(JsonFieldType.NUMBER).description("스팟 ID"),
+					fieldWithPath("spots[].coord.lat").type(JsonFieldType.NUMBER).description("위도"),
+					fieldWithPath("spots[].coord.lon").type(JsonFieldType.NUMBER).description("경도")
+				)));
+	}
+
 	@DisplayName("스팟을 조회한다.")
 	@Test
 	void getSpot() throws Exception {
@@ -48,9 +70,10 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 		given(mapService.searchDistanceBetween(any(Point.class), any(Point.class))).willReturn(100);
 		given(spotService.findSpot(anyLong(), anyLong(), anyInt())).willReturn(spotResponse);
 		//when
-		mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/spots/{spotId}", spotResponse.id())
+		mockMvc.perform(get("/api/v1/spots/{spotId}", spotResponse.id())
 				.queryParam("lon", String.valueOf(DEFAULT_COORD.lon()))
-				.queryParam("lat", String.valueOf(DEFAULT_COORD.lat())))
+				.queryParam("lat", String.valueOf(DEFAULT_COORD.lat()))
+			)
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
 				pathParameters(parameterWithName("spotId").description("스팟 ID")),
