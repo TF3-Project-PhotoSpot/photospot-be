@@ -3,7 +3,6 @@ package com.tf4.photospot.global.config.security;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,8 +34,7 @@ public class SecurityConfig {
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		// 정적 리소스 경로에 대해서 시큐리티 필터 제외
-		return (web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations())
-			.requestMatchers(HttpMethod.GET));
+		return (web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
 	}
 
 	// Todo : Https 연결 시 CSRF 활성화 & PermitAll 수정
@@ -52,8 +50,8 @@ public class SecurityConfig {
 			.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(new JwtTokenValidatorFilter(jwtService), CustomAuthenticationFilter.class)
 			.addFilterBefore(new CustomExceptionFilter(), JwtTokenValidatorFilter.class)
-			.authorizeHttpRequests(requests -> requests
-				.anyRequest().permitAll())
+			// .authorizeHttpRequests(requests -> requests
+			// 	.anyRequest().permitAll())
 			.exceptionHandling(exceptionHandling -> exceptionHandling
 				.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		return http.build();
