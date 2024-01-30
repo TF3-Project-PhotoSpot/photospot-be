@@ -131,20 +131,35 @@ tasks.named('test') {
 
 // Jacoco
 jacocoTestReport {
+    excludedClassFilesForReport(classDirectories)
     reports {
         xml.required = true
     }
+    finalizedBy 'jacocoTestCoverageVerification'
+}
 
-    afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, exclude: [
-                    "**/*Request*",
-                    "**/*Response*",
-                    "**/*Dto*",
-                    "**/*Exception*"
-            ])
-        }))
+jacocoTestCoverageVerification {
+    excludedClassFilesForReport(classDirectories)
+    violationRules {
+        rule {
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+        }
     }
+}
+
+private excludedClassFilesForReport(classDirectories) {
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: [
+                "**/*Request*",
+                "**/*Response*",
+                "**/*Dto*",
+                "**/*Exception*"
+        ])
+    }))
 }
 
 checkstyle {
