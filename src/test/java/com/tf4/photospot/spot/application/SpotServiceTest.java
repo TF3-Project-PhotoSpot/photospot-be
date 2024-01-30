@@ -34,6 +34,7 @@ import com.tf4.photospot.spot.domain.SpotBookmark;
 import com.tf4.photospot.spot.domain.SpotBookmarkRepository;
 import com.tf4.photospot.spot.domain.SpotRepository;
 import com.tf4.photospot.support.IntegrationTestSupport;
+import com.tf4.photospot.support.TestFixture;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
@@ -47,6 +48,38 @@ class SpotServiceTest extends IntegrationTestSupport {
 	private final UserRepository userRepository;
 	private final SpotBookmarkRepository spotBookmarkRepository;
 	private final BookmarFolderRepository bookmarFolderRepository;
+
+	@DisplayName("내가 쓴 방명록의 스팟 목록 조회")
+	@TestFactory
+	Stream<DynamicTest> findSpotsOfMyPost() {
+		//given
+		final int totalSpot = 5;
+		final List<Spot> spots = createList(TestFixture::createSpot, totalSpot);
+		final User writer = createUser("작성자");
+		spotRepository.saveAll(spots);
+		userRepository.save(writer);
+		postRepository.saveAll(spots.stream()
+			.map(spot -> createPost(spot, writer))
+			.toList());
+
+		return Stream.of(
+			dynamicTest("작성한 방명록이 없으면 빈 리스트가 반환된다.", () -> {
+				User nonWriter = createUser("이성빈");
+				userRepository.save(nonWriter);
+				assertThat(spotService.findSpotsOfMyPosts(nonWriter.getId())).isEmpty();
+			}),
+			dynamicTest("내가 쓴 방명록의 스팟을 조회한다.", () -> {
+				assertThatList(spotService.findSpotsOfMyPosts(writer.getId()))
+					.hasSize(totalSpot);
+			}),
+			dynamicTest("한 스팟에 여러 방명록을 써도 하나만 조회된다.", () -> {
+				final Spot spot = spots.get(0);
+				final List<Post> postsOfSameSpot = createList(() -> createPost(spot, writer), 3);
+				postRepository.saveAll(postsOfSameSpot);
+				assertThatList(spotService.findSpotsOfMyPosts(writer.getId())).hasSize(totalSpot);
+			})
+		);
+	}
 
 	@DisplayName("특정 스팟을 조회한다.")
 	@TestFactory

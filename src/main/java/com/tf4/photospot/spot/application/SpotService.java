@@ -17,6 +17,7 @@ import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
+import com.tf4.photospot.spot.application.response.SpotCoordResponse;
 import com.tf4.photospot.spot.application.response.SpotResponse;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
@@ -59,5 +60,9 @@ public class SpotService {
 		Slice<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(
 			PostPreviewListRequest.createLatestPostsRequest(spotId, postPreviewCount));
 		return SpotResponse.of(spot, bookmarked, postPreviews.getContent());
+	}
+
+	public List<SpotCoordResponse> findSpotsOfMyPosts(Long userId) {
+		return spotQueryRepository.findSpotsOfMyPosts(userId);
 	}
 }

@@ -41,7 +41,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.mysql:mysql-connector-j'
     compileOnly 'org.projectlombok:lombok'
-    
+
     // Spatial
     implementation 'org.hibernate.orm:hibernate-spatial'
     implementation 'com.querydsl:querydsl-spatial'
@@ -85,17 +85,15 @@ def querydslSrcDir = 'src/main/generated'
 clean {
     delete file(querydslSrcDir)
 }
-tasks.withType(JavaCompile) {
-    options.generatedSourceOutputDirectory = file(querydslSrcDir)
+
+tasks.withType(JavaCompile).configureEach {
+    options.getGeneratedSourceOutputDirectory().set(file(querydslSrcDir))
 }
 
+
+// Rest Docs
 ext {
     set('snippetsDir', file("build/generated-snippets"))
-}
-
-tasks.named('test') {
-    outputs.dir snippetsDir
-    useJUnitPlatform()
 }
 
 tasks.named('asciidoctor') {
@@ -112,9 +110,8 @@ asciidoctor.doFirst {
     delete file('src/main/resources/static/docs')
 }
 
-task createDocs(type: Copy) {
+tasks.register('createDocs', Copy) {
     dependsOn asciidoctor
-
     from file("build/docs/asciidoc")
     into file("src/main/resources/static/docs")
 }
@@ -126,6 +123,51 @@ bootJar {
     }
 }
 
+tasks.named('test') {
+    outputs.dir snippetsDir
+    useJUnitPlatform()
+    finalizedBy 'jacocoTestReport'
+}
+
+// Jacoco
+jacocoTestReport {
+    reports {
+        xml.required = true
+    }
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "**/*Request*",
+                    "**/*Response*",
+                    "**/*Dto*",
+                    "**/*Exception*"
+            ])
+        }))
+    }
+    finalizedBy 'jacocoTestCoverageVerification'
+}
+
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            enabled = true
+
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.80
+            }
+
+            excludes = [
+                    "**/*Request*",
+                    "**/*Response*",
+                    "**/*Dto*",
+                    "**/*Exception*"
+            ]
+        }
+    }
+}
+
 checkstyle {
     maxWarnings = 0
     toolVersion = "10.4"
@@ -133,17 +175,13 @@ checkstyle {
     configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
     sourceSets = [sourceSets.main] // CompileQuerydsl 오류 해결
 }
-jacocoTestReport {
-    reports {
-        xml.required = true
-    }
-}
+
 sonar {
     properties {
         property "sonar.projectKey", "TF3-Project-PhotoSpot_photospot-be"
         property "sonar.organization", "tf4project-f1bean-f2donghun-f3jaii-tjeegu-f4yana-photospot"
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
-        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.csv'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
     }
 }
