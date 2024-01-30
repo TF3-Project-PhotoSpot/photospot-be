@@ -137,7 +137,7 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "**/GlobalExceptionHandler.class",
+                    "**/GlobalExceptionHandler.java",
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
@@ -160,7 +160,7 @@ jacocoTestCoverageVerification {
             }
 
             excludes = [
-                    "**/GlobalExceptionHandler.class",
+                    "**/GlobalExceptionHandler.java",
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
