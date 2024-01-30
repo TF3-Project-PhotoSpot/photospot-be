@@ -37,7 +37,6 @@ public class SecurityControllerDocsTest extends RestDocsSupport {
 					cookieWithName(JwtConstant.REFRESH_COOKIE_NAME).description("리프레시 토큰")
 				),
 				responseFields(
-					beneathPath("data").withSubsectionId("data"),
 					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("액세스 토큰"),
 					fieldWithPath("hasLoggedInBefore").type(JsonFieldType.BOOLEAN).description("최초 로그인 여부")
 				)

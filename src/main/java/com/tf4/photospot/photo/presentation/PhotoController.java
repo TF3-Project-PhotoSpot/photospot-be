@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.photo.application.PhotoService;
 import com.tf4.photospot.photo.application.response.PhotoSaveResponse;
 import com.tf4.photospot.photo.application.response.PhotoUploadResponse;
@@ -23,13 +22,13 @@ public class PhotoController {
 	private final PhotoService photoService;
 
 	@PostMapping("/s3")
-	public ApiResponse<PhotoUploadResponse> uploadPhoto(@RequestPart("file") MultipartFile file) {
-		return ApiResponse.success(photoService.upload(file));
+	public PhotoUploadResponse uploadPhoto(@RequestPart("file") MultipartFile file) {
+		return photoService.upload(file);
 	}
 
 	@PostMapping
-	public ApiResponse<PhotoSaveResponse> savePhoto(@RequestBody PostPhotoSaveRequest request) {
-		return ApiResponse.success(photoService.save(request.photoUrl(), request.toCoord(), request.toDate()));
+	public PhotoSaveResponse savePhoto(@RequestBody PostPhotoSaveRequest request) {
+		return photoService.save(request.photoUrl(), request.toCoord(), request.toDate());
 	}
 
 }

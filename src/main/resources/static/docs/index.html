@@ -449,9 +449,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#_common">Common</a>
 <ul class="sectlevel2">
-<li><a href="#_success_example">Success Example</a></li>
+<li><a href="#_default_success_example">Default Success Example</a></li>
 <li><a href="#_error_example">Error Example</a></li>
-<li><a href="#_enums">Enums</a></li>
+<li><a href="#_exception">Exception</a></li>
 </ul>
 </li>
 <li><a href="#_auth_api">Auth API</a>
@@ -462,8 +462,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_spot_api">Spot API</a>
 <ul class="sectlevel2">
-<li><a href="#_주변_장소_리스트_조회">주변 장소 리스트 조회</a></li>
-<li><a href="#_주변_추천_장소_리스트_조회">주변 추천 장소 리스트 조회</a></li>
+<li><a href="#_주변_스팟_리스트_조회">주변 스팟 리스트 조회</a></li>
+<li><a href="#_주변_추천_스팟_리스트_조회">주변 추천 스팟 리스트 조회</a></li>
 <li><a href="#_특정_장소_조회">특정 장소 조회</a></li>
 <li><a href="#_내가_쓴_방명록의_장소_리스트_조회">내가 쓴 방명록의 장소 리스트 조회</a></li>
 </ul>
@@ -487,7 +487,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_common"><a class="link" href="#_common">Common</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_success_example"><a class="link" href="#_success_example">Success Example</a></h3>
+<h3 id="_default_success_example"><a class="link" href="#_default_success_example">Default Success Example</a></h3>
 <hr>
 <div class="sect3">
 <h4 id="_response_fields"><a class="link" href="#_response_fields">Response Fields</a></h4>
@@ -508,31 +508,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>code</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">200</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">응답 코드</p></td>
-</tr>
-<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">OK</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">응답 메시지</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>data</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">응답 데이터</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">데이터가 없는 경우 default response</p></td>
 </tr>
 </tbody>
 </table>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : "data"
+  "message" : "성공"
 }</code></pre>
 </div>
 </div>
@@ -572,10 +558,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-top"><p class="tableblock">응답 메시지</p></td>
 </tr>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>errors</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>errors[]</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">emptyList</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">에러 데이터</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">에러 상세 정보</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>errors[].field</code></p></td>
@@ -617,7 +603,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_enums"><a class="link" href="#_enums">Enums</a></h3>
+<h3 id="_exception"><a class="link" href="#_exception">Exception</a></h3>
 <hr>
 <div class="sect3">
 <h4 id="_error_codes"><a class="link" href="#_error_codes">Error Codes</a></h4>
@@ -830,48 +816,14 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "accessToken" : "access_token",
-    "hasLoggedInBefore" : false
-  }
+  "accessToken" : "access_token",
+  "hasLoggedInBefore" : false
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/auth/auth.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/security-controller-docs-test/login/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_3"><a class="link" href="#_response_fields_3">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>accessToken</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">액세스 토큰</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hasLoggedInBefore</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">최초 로그인 여부</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="sect2">
@@ -905,40 +857,12 @@ Cookie: RefreshToken=refresh_token_value</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "accessToken" : "new_access_token_value"
-  }
+  "accessToken" : "new_access_token_value"
 }</code></pre>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_4"><a class="link" href="#_response_fields_4">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>accessToken</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">재발급 된 액세스 토큰</p></td>
-</tr>
-</tbody>
-</table>
+<div class="paragraph">
+<p>Unresolved directive in api/auth/auth.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/auth-controller-docs-test/reissue-token/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -947,7 +871,7 @@ Cookie: RefreshToken=refresh_token_value</code></pre>
 <h2 id="_spot_api"><a class="link" href="#_spot_api">Spot API</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_주변_장소_리스트_조회"><a class="link" href="#_주변_장소_리스트_조회">주변 장소 리스트 조회</a></h3>
+<h3 id="_주변_스팟_리스트_조회"><a class="link" href="#_주변_스팟_리스트_조회">주변 스팟 리스트 조회</a></h3>
 <hr>
 <div class="listingblock">
 <div class="content">
@@ -1003,70 +927,24 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "spots" : [ {
-      "id" : 1,
-      "coord" : {
-        "lon" : 127.0468177,
-        "lat" : 37.6676198
-      }
-    } ]
-  }
+  "spots" : [ {
+    "id" : 1,
+    "coord" : {
+      "lon" : 127.0468177,
+      "lat" : 37.6676198
+    }
+  } ]
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-nearby-spots/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_5"><a class="link" href="#_response_fields_5">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 id</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 좌표 정보</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord.lat</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 위도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord.lon</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 경도</p></td>
-</tr>
-</tbody>
-</table>
 <hr>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_주변_추천_장소_리스트_조회"><a class="link" href="#_주변_추천_장소_리스트_조회">주변 추천 장소 리스트 조회</a></h3>
+<h3 id="_주변_추천_스팟_리스트_조회"><a class="link" href="#_주변_추천_스팟_리스트_조회">주변 추천 스팟 리스트 조회</a></h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/spots/recommended?lat=37.6676198&amp;lon=127.0468177&amp;radius=200&amp;postPreviewCount=5&amp;page=0&amp;size=10 HTTP/1.1
@@ -1142,113 +1020,25 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "centerAddress" : "서울시 도봉구 마들로 643",
-    "centerRoadAddress" : "서울시 도봉구 마들로 643",
-    "recommendedSpots" : [ {
-      "id" : 1,
-      "address" : "서울시 도봉구 마들로 643",
-      "postCount" : 10,
-      "coord" : {
-        "lon" : 127.0468177,
-        "lat" : 37.6676198
-      },
-      "photoUrls" : [ "http://image3.com" ]
-    } ],
-    "hasNext" : true
-  }
+  "centerAddress" : "서울시 도봉구 마들로 643",
+  "centerRoadAddress" : "서울시 도봉구 마들로 643",
+  "recommendedSpots" : [ {
+    "id" : 1,
+    "address" : "서울시 도봉구 마들로 643",
+    "postCount" : 10,
+    "coord" : {
+      "lon" : 127.0468177,
+      "lat" : 37.6676198
+    },
+    "photoUrls" : [ "http://image3.com" ]
+  } ],
+  "hasNext" : true
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-recommended-spot-list/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_6"><a class="link" href="#_response_fields_6">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>centerAddress</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">중심 좌표의 지면 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>centerRoadAddress</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">중심 좌표의 도로면 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">emptyList</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">주변 추천 스팟 리스트</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].address</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].postCount</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 방명록수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].coord</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 좌표</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].coord.lat</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].coord.lon</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>recommendedSpots[].photoUrls</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">emptyList</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">최신 방명록 사진</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hasNext</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">다음 페이지 여부</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="sect2">
@@ -1305,7 +1095,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>distance</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">O</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">{default=true, name=distance, description=거리 정보 필요 여부, optional=true}</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">true</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">거리 정보 필요 여부</p></td>
 </tr>
@@ -1328,92 +1118,22 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "distance" : 100,
-    "id" : 1,
-    "address" : "주소",
-    "coord" : {
-      "lon" : 127.0468177,
-      "lat" : 37.6676198
-    },
-    "postCount" : 2,
-    "photoUrls" : [ "photoUrl2", "photoUrl1" ],
-    "bookmarked" : false
-  }
+  "distance" : 100,
+  "id" : 1,
+  "address" : "주소",
+  "coord" : {
+    "lon" : 127.0468177,
+    "lat" : 37.6676198
+  },
+  "postCount" : 2,
+  "photoUrls" : [ "photoUrl2", "photoUrl1" ],
+  "bookmarked" : false
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-spot/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_7"><a class="link" href="#_response_fields_7">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>distance</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">0</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">현재 위치에서 스팟 거리</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>address</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>coord.lat</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>coord.lon</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>postCount</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 개수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>photoUrls</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">emptyList</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">최신 방명록 사진</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>bookmarked</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">북마크 등록 여부</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="sect2">
@@ -1427,70 +1147,24 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "spots" : [ {
-      "id" : 1,
-      "coord" : {
-        "lon" : 127.0468177,
-        "lat" : 37.6676198
-      }
-    }, {
-      "id" : 2,
-      "coord" : {
-        "lon" : 127.0468177,
-        "lat" : 37.6676198
-      }
-    } ]
-  }
+  "spots" : [ {
+    "id" : 1,
+    "coord" : {
+      "lon" : 127.0468177,
+      "lat" : 37.6676198
+    }
+  }, {
+    "id" : 2,
+    "coord" : {
+      "lon" : 127.0468177,
+      "lat" : 37.6676198
+    }
+  } ]
 }</code></pre>
 </div>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_8"><a class="link" href="#_response_fields_8">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[]</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">emptyList</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 목록</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord.lat</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord.lon</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
-</tr>
-</tbody>
-</table>
+<div class="paragraph">
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-spots-of-my-posts/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1561,63 +1235,17 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "content" : [ {
-      "postId" : 1,
-      "photoUrl" : "photoUrl"
-    } ],
-    "hasNext" : false
-  }
+  "content" : [ {
+    "postId" : 1,
+    "photoUrl" : "photoUrl"
+  } ],
+  "hasNext" : false
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/post/post.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/post-controller-docs-test/get-post-previews/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_9"><a class="link" href="#_response_fields_9">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.springframework.restdocs.snippet.Attributes$Attribute@6a33d081</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 상세 목록 리스트</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].postId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].photoUrl</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 photo url</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hasNext</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">다음 방명록 여부</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 <div class="sect2">
@@ -1683,143 +1311,31 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "content" : [ {
+  "content" : [ {
+    "id" : 1,
+    "detailAddress" : "detail address",
+    "likeCount" : 10,
+    "photoUrl" : "photoUrl",
+    "isLiked" : true,
+    "createdAt" : "2024-01-10T12:30:00",
+    "writer" : {
       "id" : 1,
-      "detailAddress" : "detail address",
-      "likeCount" : 10,
-      "photoUrl" : "photoUrl",
-      "isLiked" : true,
-      "createdAt" : "2024-01-10T12:30:00",
-      "writer" : {
-        "id" : 1,
-        "nickname" : "nickname",
-        "profileUrl" : "profileUrl"
-      },
-      "tags" : [ {
-        "tagId" : 1,
-        "iconUrl" : "iconUrl",
-        "tagName" : "tagName"
-      } ]
-    } ],
-    "hasNext" : false
-  }
+      "nickname" : "nickname",
+      "profileUrl" : "profileUrl"
+    },
+    "tags" : [ {
+      "tagId" : 1,
+      "iconUrl" : "iconUrl",
+      "tagName" : "tagName"
+    } ]
+  } ],
+  "hasNext" : false
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/post/post.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/post-controller-docs-test/get-posts/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_10"><a class="link" href="#_response_fields_10">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.springframework.restdocs.snippet.Attributes$Attribute@1b28e48e</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 상세 목록 리스트</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].detailAddress</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 상세 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].likeCount</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 좋아요 개수</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].photoUrl</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 photo url</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].isLiked</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록을 조회하는 유저의 방명록 좋아요 여부</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].createdAt</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">yyyy-MM-dd</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.id</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.nickname</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 닉네임</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.profileUrl</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">방명록 작성자 profile url</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].tags</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">태그 리스트</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].tags[].tagId</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">태그 ID</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].tags[].iconUrl</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">태그 icon url</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].tags[].tagName</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">태그 이름</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>hasNext</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">다음 방명록 여부</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 </div>
@@ -1877,92 +1393,22 @@ Host: localhost:8080</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
-  "code" : "200",
-  "message" : "OK",
-  "data" : {
-    "address" : "전북 익산시 부송동 100",
-    "addressCoord" : {
-      "lon" : 126.99,
-      "lat" : 35.97
-    },
-    "roadAddress" : "전북 익산시 망산길 11-17",
-    "roadAddressCoord" : {
-      "lon" : 126.99,
-      "lat" : 35.97
-    }
+  "address" : "전북 익산시 부송동 100",
+  "addressCoord" : {
+    "lon" : 126.99,
+    "lat" : 35.97
+  },
+  "roadAddress" : "전북 익산시 망산길 11-17",
+  "roadAddressCoord" : {
+    "lon" : 126.99,
+    "lat" : 35.97
   }
 }</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Unresolved directive in api/map/map.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/map-controller-docs-test/find-registered-spot/response-fields-data.adoc[]</p>
 </div>
-<div class="sect3">
-<h4 id="_response_fields_11"><a class="link" href="#_response_fields_11">Response Fields</a></h4>
-<table class="tableblock frame-all grid-all stretch">
-<colgroup>
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-<col style="width: 25%;">
-</colgroup>
-<thead>
-<tr>
-<th class="tableblock halign-left valign-top">Path</th>
-<th class="tableblock halign-left valign-top">Type</th>
-<th class="tableblock halign-left valign-top">Default</th>
-<th class="tableblock halign-left valign-top">Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>address</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">지번 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>addressCoord</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">지번 주소 좌표</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>addressCoord.lat</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">지번 주소 위도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>addressCoord.lon</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">지번 주소 경도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>roadAddress</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">도로명 주소</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>roadAddressCoord</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Object</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">도로명 주소 좌표</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>roadAddressCoord.lat</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">도로명 주소 위도</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>roadAddressCoord.lon</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
-<td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">도로명 주소 경도</p></td>
-</tr>
-</tbody>
-</table>
 </div>
 </div>
 </div>

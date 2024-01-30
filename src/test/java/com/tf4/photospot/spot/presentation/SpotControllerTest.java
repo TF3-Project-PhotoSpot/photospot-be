@@ -102,11 +102,9 @@ class SpotControllerTest {
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").isNotEmpty())
-			.andExpect(jsonPath("$.message").isNotEmpty())
-			.andExpect(jsonPath("$.data.centerAddress").value(firstRecommendedSpotAddress))
-			.andExpect(jsonPath("$.data.centerRoadAddress").value(firstRecommendedSpotAddress))
-			.andExpect(jsonPath("$.data.recommendedSpots[0].address").value(firstRecommendedSpotAddress));
+			.andExpect(jsonPath("$.centerAddress").value(firstRecommendedSpotAddress))
+			.andExpect(jsonPath("$.centerRoadAddress").value(firstRecommendedSpotAddress))
+			.andExpect(jsonPath("$.recommendedSpots[0].address").value(firstRecommendedSpotAddress));
 	}
 
 	private static RecommendedSpotResponse createRecommenedSpotResponse(String address) {
@@ -136,9 +134,7 @@ class SpotControllerTest {
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").isNotEmpty())
-			.andExpect(jsonPath("$.message").isNotEmpty())
-			.andExpect(jsonPath("$.data.spots").isArray());
+			.andExpect(jsonPath("$.spots").isArray());
 	}
 
 	@DisplayName("주변 스팟 조회 반경은 0보다 큰 수만 가능하다.")

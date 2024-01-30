@@ -29,6 +29,7 @@ import com.tf4.photospot.mockobject.RestDocsAuthenticationPrincipalArgumentResol
 @ExtendWith(RestDocumentationExtension.class)
 public abstract class RestDocsSupport {
 	private static final String DOCUMENT_AUTO_FORMAT = "{class-name}/{method-name}";
+
 	protected MockMvc mockMvc;
 	protected ObjectMapper mapper;
 

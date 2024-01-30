@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.global.argument.CoordinateValidator;
 import com.tf4.photospot.global.dto.ApiResponse;
-import com.tf4.photospot.global.dto.ErrorResponse;
 import com.tf4.photospot.global.dto.ValidationError;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.CommonErrorCode;
@@ -27,14 +26,14 @@ import com.tf4.photospot.global.exception.domain.UserErrorCode;
 @RestController
 public class CommonController {
 	@GetMapping("/success")
-	public ApiResponse<String> success() {
-		return ApiResponse.success("data");
+	public ApiResponse success() {
+		return ApiResponse.SUCCESS;
 	}
 
 	@GetMapping("/error")
-	public ResponseEntity<ErrorResponse> error() {
+	public ResponseEntity<ApiResponse> error() {
 		return ResponseEntity.badRequest()
-			.body(ErrorResponse.builder()
+			.body(ApiResponse.builder()
 				.code(CommonErrorCode.INVALID_PARAMETER.name())
 				.message(CommonErrorCode.INVALID_PARAMETER.getMessage())
 				.errors(List.of(

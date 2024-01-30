@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.LoginUserDto;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.response.UserProfileResponse;
@@ -25,8 +24,8 @@ public class UserController {
 	private final UserService userService;
 
 	@PostMapping("/profile")
-	public ApiResponse<UserProfileResponse> updateProfile(@RequestPart("file") MultipartFile file,
+	public UserProfileResponse updateProfile(@RequestPart("file") MultipartFile file,
 		@RequestPart("request") UpdateProfileRequest request, @AuthenticationPrincipal LoginUserDto loginUser) {
-		return ApiResponse.success(userService.updateProfile(loginUser.getId(), file, request.type()));
+		return userService.updateProfile(loginUser.getId(), file, request.type());
 	}
 }

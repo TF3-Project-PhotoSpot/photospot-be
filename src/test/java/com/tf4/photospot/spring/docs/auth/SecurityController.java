@@ -15,9 +15,9 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityController {
 
 	@PostMapping("/login")
-	public ApiResponse<LoginResponse> login(HttpServletResponse response) {
+	public LoginResponse login(HttpServletResponse response) {
 		Cookie cookie = new Cookie("RefreshToken", "refresh_token_value");
 		response.addCookie(cookie);
-		return ApiResponse.success(new LoginResponse("access_token", false));
+		return new LoginResponse("access_token", false);
 	}
 }
