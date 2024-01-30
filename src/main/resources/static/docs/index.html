@@ -465,6 +465,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_주변_장소_리스트_조회">주변 장소 리스트 조회</a></li>
 <li><a href="#_주변_추천_장소_리스트_조회">주변 추천 장소 리스트 조회</a></li>
 <li><a href="#_특정_장소_조회">특정 장소 조회</a></li>
+<li><a href="#_내가_쓴_방명록의_장소_리스트_조회">내가 쓴 방명록의 장소 리스트 조회</a></li>
 </ul>
 </li>
 <li><a href="#_post_api">Post API</a>
@@ -1415,6 +1416,83 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_내가_쓴_방명록의_장소_리스트_조회"><a class="link" href="#_내가_쓴_방명록의_장소_리스트_조회">내가 쓴 방명록의 장소 리스트 조회</a></h3>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/spots/mine HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "code" : "200",
+  "message" : "OK",
+  "data" : {
+    "spots" : [ {
+      "id" : 1,
+      "coord" : {
+        "lon" : 127.0468177,
+        "lat" : 37.6676198
+      }
+    }, {
+      "id" : 2,
+      "coord" : {
+        "lon" : 127.0468177,
+        "lat" : 37.6676198
+      }
+    } ]
+  }
+}</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_8"><a class="link" href="#_response_fields_8">Response Fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[]</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">emptyList</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].id</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord.lat</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">위도</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>spots[].coord.lon</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">경도</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1497,7 +1575,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_8"><a class="link" href="#_response_fields_8">Response Fields</a></h4>
+<h4 id="_response_fields_9"><a class="link" href="#_response_fields_9">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1517,7 +1595,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.springframework.restdocs.snippet.Attributes$Attribute@75bdb6b5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.springframework.restdocs.snippet.Attributes$Attribute@6a33d081</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">방명록 상세 목록 리스트</p></td>
 </tr>
 <tr>
@@ -1633,7 +1711,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_9"><a class="link" href="#_response_fields_9">Response Fields</a></h4>
+<h4 id="_response_fields_10"><a class="link" href="#_response_fields_10">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -1653,7 +1731,7 @@ Host: localhost:8080</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">org.springframework.restdocs.snippet.Attributes$Attribute@1821b9f5</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">org.springframework.restdocs.snippet.Attributes$Attribute@1b28e48e</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">방명록 상세 목록 리스트</p></td>
 </tr>
 <tr>
@@ -1818,7 +1896,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_10"><a class="link" href="#_response_fields_10">Response Fields</a></h4>
+<h4 id="_response_fields_11"><a class="link" href="#_response_fields_11">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
