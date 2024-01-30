@@ -16,7 +16,9 @@ import org.springframework.data.domain.Sort;
 
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.request.PostListRequest;
+import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
@@ -41,6 +43,66 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
 
+	@DisplayName("방명록 미리보기 목록 조회")
+	@TestFactory
+	Stream<DynamicTest> getPostPreviews() {
+		//given
+		Spot spot = createSpot();
+		User writer = createUser("작성자");
+		spotRepository.save(spot);
+		userRepository.save(writer);
+		// Dummy posts
+		List<Post> posts = createList(() -> createPost(spot, writer), 15);
+		postRepository.saveAll(posts);
+		// Common Request
+		var firstPageRequest = new PostPreviewListRequest(spot.getId(),
+			PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+
+		return Stream.of(
+			dynamicTest("슬라이스 페이징으로 조회한다.", () -> {
+				//given
+				var lastPageRequest = new PostPreviewListRequest(spot.getId(),
+					PageRequest.of(1, 10, Sort.by(Sort.Order.desc("id"))));
+				//when
+				SlicePageDto<PostPreviewResponse> firstResponse = postService.getPostPreviews(firstPageRequest);
+				SlicePageDto<PostPreviewResponse> lastResponse = postService.getPostPreviews(lastPageRequest);
+				//then
+				assertThat(firstResponse.hasNext()).isTrue();
+				assertThat(firstResponse.content().size()).isEqualTo(firstPageRequest.pageable().getPageSize());
+				assertThat(lastResponse.hasNext()).isFalse();
+				assertThat(lastResponse.content().size()).isLessThan(lastPageRequest.pageable().getPageSize());
+			}),
+			dynamicTest("좋아요순으로 조회할 수 있다.", () -> {
+				//given
+				var allPostRequest = new PostPreviewListRequest(spot.getId(),
+					PageRequest.of(0, 15, Sort.by(Sort.Order.desc("likeCount"))));
+				//when
+				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(allPostRequest);
+				final List<Long> postIdsSortedLikeCountDesc = posts.stream()
+					.sorted(comparing(Post::getLikeCount).reversed())
+					.map(Post::getId)
+					.toList();
+				//then
+				assertThatList(response.content().stream().map(PostPreviewResponse::postId).toList())
+					.isEqualTo(postIdsSortedLikeCountDesc);
+			}),
+			dynamicTest("삭제 되었거나 비공개 방명록은 조회할 수 없다.", () -> {
+				//given
+				Post privatePost = createPost(spot, writer, true);
+				Post deletePost = createPost(spot, writer);
+				deletePost.delete();
+				postRepository.saveAll(List.of(privatePost, deletePost));
+
+				var latestPostRequest = new PostPreviewListRequest(spot.getId(),
+					PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+				//when
+				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(latestPostRequest);
+				//then
+				assertThat(response.content().get(0).postId()).isNotIn(privatePost.getId(), deletePost.getId());
+			})
+		);
+	}
+
 	@DisplayName("방명록 상세 목록 조회")
 	@TestFactory
 	Stream<DynamicTest> getPosts() {
@@ -54,7 +116,7 @@ class PostServiceTest extends IntegrationTestSupport {
 		List<Post> posts = createList(() -> createPost(spot, writer), 15);
 		postRepository.saveAll(posts);
 		// 마지막에 추가된 포스트는 태그, 좋아요 정보를 가지고 있다.
-		Post lastPost = createPost(spot, writer, createPhoto("firstPhotoUrl"), createPoint());
+		Post lastPost = createPost(spot, writer, createPhoto("firstPhotoUrl"));
 		postRepository.save(lastPost);
 		List<Tag> tags = tagRepository.saveAll(createTags("tagA", "tagB", "tagC"));
 		postTagRepository.saveAll(createPostTags(spot, lastPost, tags));
