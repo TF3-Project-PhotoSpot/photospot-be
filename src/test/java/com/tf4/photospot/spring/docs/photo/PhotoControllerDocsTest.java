@@ -59,7 +59,6 @@ public class PhotoControllerDocsTest extends RestDocsSupport {
 					partWithName("file").description("사용자가 업로드한 사진 파일")
 				),
 				responseFields(
-					beneathPath("data").withSubsectionId("data"),
 					fieldWithPath("photoUrl").type(JsonFieldType.STRING).description("S3 Temp 폴더에 업로드한 사진 URL")
 				)
 			));
@@ -91,7 +90,6 @@ public class PhotoControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("takenAt").description("사진이 찍힌 시각")
 				),
 				responseFields(
-					beneathPath("data").withSubsectionId("data"),
 					fieldWithPath("photoId").type(JsonFieldType.NUMBER).description("저장 성공한 사진 아이디")
 				)
 			));

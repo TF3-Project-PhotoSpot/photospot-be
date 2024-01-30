@@ -26,11 +26,8 @@ class CommonDocsTest extends RestDocsSupport {
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
 				responseFields(
-					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드")
-						.attributes(defaultValue("200")),
-					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
-						.attributes(defaultValue("OK")),
-					fieldWithPath("data").type(JsonFieldType.STRING).description("응답 데이터")
+					fieldWithPath("message").type(JsonFieldType.STRING)
+						.description("데이터가 없는 경우 default response")
 				)));
 	}
 
@@ -42,7 +39,7 @@ class CommonDocsTest extends RestDocsSupport {
 				responseFields(
 					fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
 					fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-					fieldWithPath("errors").type(JsonFieldType.ARRAY).description("에러 데이터")
+					fieldWithPath("errors[]").type(JsonFieldType.ARRAY).description("에러 상세 정보")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("errors[].field").type(JsonFieldType.STRING).description("에러 필드")
 						.attributes(defaultValue("\"\"")),

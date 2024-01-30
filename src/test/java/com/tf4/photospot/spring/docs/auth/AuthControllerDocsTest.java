@@ -44,7 +44,6 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 					cookieWithName("RefreshToken").description("리프레시 토큰")
 				),
 				responseFields(
-					beneathPath("data").withSubsectionId("data"),
 					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰")
 				)));
 	}

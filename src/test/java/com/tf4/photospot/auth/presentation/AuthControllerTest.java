@@ -50,9 +50,7 @@ public class AuthControllerTest extends IntegrationTestSupport {
 			)
 			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value(200))
-			.andExpect(jsonPath("$.message").value("OK"))
-			.andExpect(jsonPath("$.data.accessToken").isNotEmpty())
+			.andExpect(jsonPath("$.accessToken").isNotEmpty())
 			.andExpect(cookie().exists(JwtConstant.REFRESH_COOKIE_NAME));
 	}
 

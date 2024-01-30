@@ -61,7 +61,6 @@ public class UserControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("type").description("프로필 사진에 대한 요청임을 명시")
 				),
 				responseFields(
-					beneathPath("data").withSubsectionId("data"),
 					fieldWithPath("imageUrl").type(JsonFieldType.STRING).description("업로드 성공한 이미지 URL")
 				)
 			));

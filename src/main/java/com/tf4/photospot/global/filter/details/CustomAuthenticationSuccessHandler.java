@@ -9,7 +9,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.auth.application.response.LoginResponse;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
-import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.LoginUserDto;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
@@ -47,8 +46,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 	}
 
-	private ApiResponse<LoginResponse> createBody(String accessToken, Boolean hasLoggedInBefore) {
-		return ApiResponse.success(new LoginResponse(accessToken, hasLoggedInBefore));
+	private LoginResponse createBody(String accessToken, Boolean hasLoggedInBefore) {
+		return new LoginResponse(accessToken, hasLoggedInBefore);
 	}
 
 	// Todo : https 연결 후 setSecure(true)로 변경하기

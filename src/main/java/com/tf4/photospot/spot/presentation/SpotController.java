@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.global.argument.AuthUserId;
-import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.map.application.MapService;
@@ -38,12 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequiredArgsConstructor
 public class SpotController {
-
 	private final SpotService spotService;
 	private final MapService mapService;
 
 	@GetMapping("/recommended")
-	public ApiResponse<RecommendedSpotListHttpResponse> getSpotList(
+	public RecommendedSpotListHttpResponse getSpotList(
 		@ModelAttribute @Valid CoordinateDto coord,
 		@RequestParam(name = "radius") @Positive(message = "반경(m)은 0보다 커야 됩니다.") Integer radius,
 		@RequestParam(name = "postPreviewCount", defaultValue = "5")
@@ -53,24 +51,24 @@ public class SpotController {
 		SearchByCoordResponse searchByCoordResponse = mapService.searchByCoord(PointConverter.convert(coord));
 		RecommendedSpotListResponse recommendedSpotsResponse = spotService.getRecommendedSpotList(
 			new RecommendedSpotsRequest(coord.toCoord(), radius, postPreviewCount, pageable));
-		return ApiResponse.success(RecommendedSpotListHttpResponse.builder()
+		return RecommendedSpotListHttpResponse.builder()
 			.centerAddress(searchByCoordResponse.address())
 			.centerRoadAddress(searchByCoordResponse.roadAddress())
 			.recommendedSpots(RecommendedSpotHttpResponse.convert(recommendedSpotsResponse.recommendedSpots()))
 			.hasNext(recommendedSpotsResponse.hasNext())
-			.build());
+			.build();
 	}
 
 	@GetMapping
-	public ApiResponse<NearbySpotListResponse> getNearbySpotList(
+	public NearbySpotListResponse getNearbySpotList(
 		@ModelAttribute @Valid CoordinateDto coord,
 		@RequestParam(name = "radius") @Positive(message = "반경(m)은 0보다 커야 됩니다.") Integer radius
 	) {
-		return ApiResponse.success(spotService.getNearbySpotList(new NearbySpotRequest(coord.toCoord(), radius)));
+		return spotService.getNearbySpotList(new NearbySpotRequest(coord.toCoord(), radius));
 	}
 
 	@GetMapping("/{spotId}")
-	public ApiResponse<SpotHttpResponse> getSpot(
+	public SpotHttpResponse getSpot(
 		@PathVariable(name = "spotId") Long spotId,
 		@ModelAttribute @Valid CoordinateDto startingCoord,
 		@RequestParam(name = "postPreviewCount", defaultValue = "5")
@@ -84,13 +82,13 @@ public class SpotController {
 		if (requireDistance) {
 			distance = mapService.searchDistanceBetween(startingCoord.toCoord(), spotResponse.coord());
 		}
-		return ApiResponse.success(SpotHttpResponse.of(distance, spotResponse));
+		return SpotHttpResponse.of(distance, spotResponse);
 	}
 
 	@GetMapping("/mine")
-	public ApiResponse<UserSpotListHttpResponse> getSpotsOfMyPosts(
+	public UserSpotListHttpResponse getSpotsOfMyPosts(
 		@AuthUserId Long userId
 	) {
-		return ApiResponse.success(UserSpotListHttpResponse.from(spotService.findSpotsOfMyPosts(userId)));
+		return UserSpotListHttpResponse.from(spotService.findSpotsOfMyPosts(userId));
 	}
 }

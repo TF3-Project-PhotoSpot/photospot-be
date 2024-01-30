@@ -43,13 +43,10 @@ class MapControllerDocsTest extends RestDocsSupport {
 					parameterWithName("lon").description("경도").attributes(coordConstraints())
 				),
 				responseFields(
-					beneathPath("data").withSubsectionId("data"),
 					fieldWithPath("address").type(JsonFieldType.STRING).description("지번 주소"),
-					fieldWithPath("addressCoord").type(JsonFieldType.OBJECT).description("지번 주소 좌표"),
 					fieldWithPath("addressCoord.lat").type(JsonFieldType.NUMBER).description("지번 주소 위도"),
 					fieldWithPath("addressCoord.lon").type(JsonFieldType.NUMBER).description("지번 주소 경도"),
 					fieldWithPath("roadAddress").type(JsonFieldType.STRING).description("도로명 주소"),
-					fieldWithPath("roadAddressCoord").type(JsonFieldType.OBJECT).description("도로명 주소 좌표"),
 					fieldWithPath("roadAddressCoord.lat").type(JsonFieldType.NUMBER).description("도로명 주소 위도"),
 					fieldWithPath("roadAddressCoord.lon").type(JsonFieldType.NUMBER).description("도로명 주소 경도")
 				)));

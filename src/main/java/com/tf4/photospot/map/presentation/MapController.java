@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.map.application.MapService;
@@ -22,13 +21,11 @@ public class MapController {
 	private final MapService mapService;
 
 	@GetMapping("/search/location")
-	public ApiResponse<SearchByAddressResponse> searchLocation(
+	public SearchByAddressResponse searchLocation(
 		@ModelAttribute @Valid CoordinateDto coord
 	) {
 		SearchByCoordResponse searchByCoordResponse = mapService.searchByCoord(PointConverter.convert(coord));
-		return ApiResponse.success(mapService.searchByAddress(
-			searchByCoordResponse.address(),
-			searchByCoordResponse.roadAddress()));
+		return mapService.searchByAddress(searchByCoordResponse.address(), searchByCoordResponse.roadAddress());
 	}
 
 }

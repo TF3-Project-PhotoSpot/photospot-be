@@ -15,7 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.tf4.photospot.global.dto.ErrorResponse;
+import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.ValidationError;
 import com.tf4.photospot.global.exception.domain.CommonErrorCode;
 
@@ -115,12 +115,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	private ResponseEntity<Object> createResponse(ApiErrorCode errorCode, List<ValidationError> errors) {
-		final ErrorResponse errorResponse = ErrorResponse.builder()
+		final ApiResponse apiResponse = ApiResponse.builder()
 			.code(errorCode.name())
 			.message(errorCode.getMessage())
 			.errors(errors)
 			.build();
-		return ResponseEntity.status(errorCode.getStatusCode()).body(errorResponse);
+		return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
 	}
 
 	private ResponseEntity<Object> createResponse(ApiErrorCode errorCode) {
