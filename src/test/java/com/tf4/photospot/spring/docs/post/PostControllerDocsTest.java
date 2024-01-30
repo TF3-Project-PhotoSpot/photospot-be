@@ -15,7 +15,9 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostListRequest;
+import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
@@ -27,6 +29,40 @@ public class PostControllerDocsTest extends RestDocsSupport {
 	@Override
 	protected Object initController() {
 		return new PostController(postService);
+	}
+
+	@Test
+	void getPostPreviews() throws Exception {
+		//given
+		var response = SlicePageDto.wrap(List.of(
+			new PostPreviewResponse(1L, 1L, "photoUrl")), false);
+		given(postService.getPostPreviews(any(PostPreviewListRequest.class))).willReturn(response);
+		//when
+		mockMvc.perform(get("/api/v1/posts/preview")
+				.queryParam("spotId", "1")
+				.queryParam("page", "0")
+				.queryParam("size", "10")
+				.queryParam("sort", "id,desc")
+				.queryParam("sort", "likeCount,desc")
+			)
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				queryParameters(
+					parameterWithName("spotId").description("스팟 ID").attributes(coordConstraints()),
+					parameterWithName("page").description("페이지").optional()
+						.attributes(constraints("0부터 시작"), defaultValue(0)),
+					parameterWithName("size").description("페이지당 개수").optional().attributes(defaultValue(10)),
+					parameterWithName("sort").description("정렬 옵션").optional()
+						.attributes(constraints("id, likeCount"), defaultValue("id,desc"))
+				),
+				responseFields(
+					beneathPath("data").withSubsectionId("data"),
+					fieldWithPath("content").type(JsonFieldType.ARRAY).description("방명록 상세 목록 리스트")
+						.attributes(defaultValue(defaultValue("emptyList"))),
+					fieldWithPath("content[].postId").type(JsonFieldType.NUMBER).description("방명록 ID"),
+					fieldWithPath("content[].photoUrl").type(JsonFieldType.STRING).description("방명록 photo url"),
+					fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 방명록 여부")
+				)));
 	}
 
 	@Test

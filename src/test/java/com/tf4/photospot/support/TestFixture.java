@@ -43,23 +43,22 @@ public class TestFixture {
 	}
 
 	public static Post createPost(Spot spot, User user, boolean isPrivate) {
-		return createPost(spot, user, createPhoto(), createPoint(), getRandomLikeCount(), isPrivate);
+		return createPost(spot, user, createPhoto(), getRandomLikeCount(), isPrivate);
 	}
 
 	public static Post createPost(Spot spot, User user, Long likeCount) {
-		return createPost(spot, user, createPhoto(), createPoint(), likeCount, false);
+		return createPost(spot, user, createPhoto(), likeCount, false);
 	}
 
-	public static Post createPost(Spot spot, User user, Photo photo, Point coord) {
-		return createPost(spot, user, photo, coord, getRandomLikeCount(), false);
+	public static Post createPost(Spot spot, User user, Photo photo) {
+		return createPost(spot, user, photo, getRandomLikeCount(), false);
 	}
 
-	public static Post createPost(Spot spot, User user, Photo photo, Point coord, Long likeCount, boolean isPrivate) {
+	public static Post createPost(Spot spot, User user, Photo photo, Long likeCount, boolean isPrivate) {
 		return Post.builder()
 			.spot(spot)
 			.writer(user)
 			.photo(photo)
-			.coord(coord)
 			.detailAddress("디테일 주소")
 			.likeCount(likeCount)
 			.isPrivate(isPrivate)
@@ -71,11 +70,14 @@ public class TestFixture {
 	}
 
 	public static Photo createPhoto(String photoUrl) {
-		return Photo.builder().photoUrl(photoUrl).build();
+		return Photo.builder()
+			.photoUrl(photoUrl)
+			.coord(createPoint())
+			.build();
 	}
 
 	public static Photo createPhoto() {
-		return createPhoto(("photoUrl"));
+		return createPhoto("photoUrl");
 	}
 
 	public static User createUser(String nickname, String account, String providerType) {

@@ -19,6 +19,9 @@ import com.tf4.photospot.global.dto.ValidationError;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.CommonErrorCode;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
+import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
+import com.tf4.photospot.global.exception.domain.SpotErrorCode;
+import com.tf4.photospot.global.exception.domain.UserErrorCode;
 
 @RequestMapping("/common")
 @RestController
@@ -50,7 +53,10 @@ public class CommonController {
 		var errorCodeGroups = Stream.of(
 			CommonErrorCode.values(),
 			MapErrorCode.values(),
-			AuthErrorCode.values()
+			AuthErrorCode.values(),
+			S3UploaderErrorCode.values(),
+			SpotErrorCode.values(),
+			UserErrorCode.values()
 		);
 		return errorCodeGroups.flatMap(Arrays::stream)
 			.collect(Collectors.toMap(

@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.locationtech.jts.geom.Point;
-
 import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.spot.domain.Spot;
@@ -58,8 +56,6 @@ public class Post extends BaseEntity {
 	@OneToMany(mappedBy = "post")
 	private List<Mention> mentions = new ArrayList<>();
 
-	private Point coord;
-
 	private String detailAddress;
 
 	private Long likeCount;
@@ -69,14 +65,19 @@ public class Post extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Post(User writer, Photo photo, Spot spot, Point coord, String detailAddress, Long likeCount,
+	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount,
 		boolean isPrivate) {
 		this.writer = writer;
 		this.photo = photo;
 		this.spot = spot;
-		this.coord = coord;
 		this.detailAddress = detailAddress;
 		this.likeCount = likeCount;
 		this.isPrivate = isPrivate;
+	}
+
+	public void delete() {
+		if (deletedAt == null) {
+			deletedAt = LocalDateTime.now();
+		}
 	}
 }

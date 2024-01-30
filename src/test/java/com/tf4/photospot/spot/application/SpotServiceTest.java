@@ -127,7 +127,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("최신 방명록 미리보기를 조회한다.", () -> {
 				//given
-				List<Post> posts = createList(() -> createPost(spot, user, createPhoto("photoUrl"), createPoint()),
+				List<Post> posts = createList(() -> createPost(spot, user, createPhoto("photoUrl")),
 					5);
 				postRepository.saveAll(posts);
 				//when
