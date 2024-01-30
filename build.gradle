@@ -132,7 +132,7 @@ tasks.named('test') {
 // Jacoco
 jacocoTestReport {
     reports {
-        csv.required = false
+        xml.required = true
     }
 
     afterEvaluate {
