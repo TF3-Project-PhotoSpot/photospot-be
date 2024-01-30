@@ -27,14 +27,15 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-
 	private final JwtService jwtService;
 	private final UserService userService;
 
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
 		// 정적 리소스 경로에 대해서 시큐리티 필터 제외
-		return (web -> web.ignoring().requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
+		return (web -> web.ignoring()
+			.requestMatchers("/docs/index.html")
+			.requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
 	}
 
 	// Todo : Https 연결 시 CSRF 활성화 & PermitAll 수정
