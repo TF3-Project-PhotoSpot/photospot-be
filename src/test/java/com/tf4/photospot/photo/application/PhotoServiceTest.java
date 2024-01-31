@@ -14,7 +14,6 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.tf4.photospot.global.exception.ApiException;
@@ -25,7 +24,6 @@ import com.tf4.photospot.photo.domain.PhotoRepository;
 import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.support.IntegrationTestSupport;
 
-@Import(MockS3Config.class)
 public class PhotoServiceTest extends IntegrationTestSupport {
 
 	@Autowired

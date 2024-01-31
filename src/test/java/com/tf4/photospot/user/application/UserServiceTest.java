@@ -10,7 +10,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.tf4.photospot.mockobject.MockS3Config;
@@ -20,7 +19,6 @@ import com.tf4.photospot.user.domain.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Import(MockS3Config.class)
 @RequiredArgsConstructor
 public class UserServiceTest extends IntegrationTestSupport {
 	private final UserService userService;
