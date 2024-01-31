@@ -26,8 +26,8 @@ public class UserService {
 	private final S3Uploader s3Uploader;
 
 	@Transactional
-	public UserProfileResponse updateProfile(Long userId, MultipartFile file, String request) {
-		String imageUrl = s3Uploader.upload(file, request);
+	public UserProfileResponse updateProfile(Long userId, MultipartFile file, String requestType) {
+		String imageUrl = s3Uploader.upload(file, requestType);
 		User loginUser = userRepository.findById(userId)
 			.orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
 		loginUser.updateProfile(imageUrl);
