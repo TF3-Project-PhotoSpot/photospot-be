@@ -94,6 +94,24 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 					() -> assertThat(savedPhoto.getTakenAt()).isEqualTo(date),
 					() -> assertThat(savedPhoto.getCoord()).isEqualTo(coord)
 				);
+			}),
+			DynamicTest.dynamicTest("파일 삭제 시 오류가 발생하는 경우 예외를 던진다", () -> {
+				// when
+				PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
+				mockS3Config.mockThrowExceptionOnDelete();
+
+				// then
+				assertThatThrownBy(() -> photoService.save(request)).isInstanceOf(ApiException.class)
+					.hasMessage(S3UploaderErrorCode.UNEXPECTED_DELETE_FAIL.getMessage());
+			}),
+			DynamicTest.dynamicTest("파일 복사 시 오류가 발생하는 경우 예외를 던진다", () -> {
+				// when
+				PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
+				mockS3Config.mockThrowExceptionOnCopy();
+
+				// then
+				assertThatThrownBy(() -> photoService.save(request)).isInstanceOf(ApiException.class)
+					.hasMessage(S3UploaderErrorCode.UNEXPECTED_COPY_FAIL.getMessage());
 			})
 		);
 	}

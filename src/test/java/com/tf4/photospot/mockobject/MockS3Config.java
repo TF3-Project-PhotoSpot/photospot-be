@@ -11,6 +11,9 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
+
 import io.awspring.cloud.s3.S3Resource;
 import io.awspring.cloud.s3.S3Template;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -24,6 +27,7 @@ public class MockS3Config {
 
 	private URL url;
 	private String fileName;
+	private S3Client s3Client = Mockito.mock(S3Client.class);
 	private static final String URL_PREFIX = "https://bucket_name.s3.ap-northeast-2.amazonaws.com/";
 
 	@Bean
@@ -44,8 +48,6 @@ public class MockS3Config {
 	@Bean
 	@Primary
 	public S3Client mockS3Client() {
-		S3Client s3Client = Mockito.mock(S3Client.class);
-
 		given(s3Client.copyObject(any(CopyObjectRequest.class))).willAnswer(invocation -> {
 			fileName = "post_images/example.webp";
 			return CopyObjectResponse.builder().build();
@@ -56,6 +58,16 @@ public class MockS3Config {
 
 	public String getDummyUrl() {
 		return url.toString();
+	}
+
+	public void mockThrowExceptionOnCopy() {
+		given(s3Client.copyObject(any(CopyObjectRequest.class))).willThrow(
+			new ApiException(S3UploaderErrorCode.UNEXPECTED_COPY_FAIL));
+	}
+
+	public void mockThrowExceptionOnDelete() {
+		given(s3Client.deleteObject(any(DeleteObjectRequest.class))).willThrow(
+			new ApiException(S3UploaderErrorCode.UNEXPECTED_DELETE_FAIL));
 	}
 
 }

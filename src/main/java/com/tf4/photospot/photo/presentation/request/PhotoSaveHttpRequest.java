@@ -6,7 +6,6 @@ import java.time.OffsetDateTime;
 import com.tf4.photospot.global.argument.KoreaCoordinate;
 import com.tf4.photospot.global.dto.CoordinateDto;
 
-// Todo : 중심 좌표 validate 어떻게 할 건지
 public record PhotoSaveHttpRequest(
 
 	String photoUrl,
