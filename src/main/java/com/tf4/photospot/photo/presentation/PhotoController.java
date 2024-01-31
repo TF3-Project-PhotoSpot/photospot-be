@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tf4.photospot.photo.application.PhotoService;
+import com.tf4.photospot.photo.application.request.PhotoSaveRequest;
 import com.tf4.photospot.photo.application.response.PhotoSaveResponse;
 import com.tf4.photospot.photo.application.response.PhotoUploadResponse;
-import com.tf4.photospot.photo.presentation.request.PostPhotoSaveRequest;
+import com.tf4.photospot.photo.presentation.request.PhotoSaveHttpRequest;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,8 +28,7 @@ public class PhotoController {
 	}
 
 	@PostMapping
-	public PhotoSaveResponse savePhoto(@RequestBody PostPhotoSaveRequest request) {
-		return photoService.save(request.photoUrl(), request.toCoord(), request.toDate());
+	public PhotoSaveResponse savePhoto(@RequestBody PhotoSaveHttpRequest request) {
+		return photoService.save(new PhotoSaveRequest(request.photoUrl(), request.coord().toCoord(), request.toDate()));
 	}
-
 }

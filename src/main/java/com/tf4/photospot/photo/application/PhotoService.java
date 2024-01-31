@@ -1,12 +1,10 @@
 package com.tf4.photospot.photo.application;
 
-import java.time.LocalDate;
-
-import org.locationtech.jts.geom.Point;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.tf4.photospot.photo.application.request.PhotoSaveRequest;
 import com.tf4.photospot.photo.application.response.PhotoSaveResponse;
 import com.tf4.photospot.photo.application.response.PhotoUploadResponse;
 import com.tf4.photospot.photo.domain.Photo;
@@ -29,15 +27,15 @@ public class PhotoService {
 	}
 
 	@Transactional
-	public PhotoSaveResponse save(String photoUrl, Point point, LocalDate takenAt) {
-		String renewalUrl = moveFromTempToPostFolder(photoUrl);
+	public PhotoSaveResponse save(PhotoSaveRequest request) {
+		String renewalUrl = moveFromTempToPostFolder(request.photoUrl());
 		Photo photo = Photo.builder()
 			.photoUrl(renewalUrl)
-			.coord(point)
-			.takenAt(takenAt)
+			.coord(request.point())
+			.takenAt(request.takenAt())
 			.build();
-		Long postPhotoId = photoRepository.save(photo).getId();
-		return new PhotoSaveResponse(postPhotoId);
+		Long photoId = photoRepository.save(photo).getId();
+		return new PhotoSaveResponse(photoId);
 	}
 
 	private String moveFromTempToPostFolder(String originKey) {

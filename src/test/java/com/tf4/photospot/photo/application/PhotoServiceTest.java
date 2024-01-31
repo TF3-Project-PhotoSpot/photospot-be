@@ -19,6 +19,7 @@ import org.springframework.mock.web.MockMultipartFile;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 import com.tf4.photospot.mockobject.MockS3Config;
+import com.tf4.photospot.photo.application.request.PhotoSaveRequest;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.PhotoRepository;
 import com.tf4.photospot.photo.domain.S3Directory;
@@ -81,7 +82,8 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 		return List.of(
 			DynamicTest.dynamicTest("S3 temp 폴더에 저장된 사진을 post_images 폴더로 옮기고 사진 정보를 db에 저장한다.", () -> {
 				// when
-				Long photoId = photoService.save(photoUrl, coord, date).photoId();
+				PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
+				Long photoId = photoService.save(request).photoId();
 				Photo savedPhoto = photoRepository.findById(photoId).get();
 
 				// then
