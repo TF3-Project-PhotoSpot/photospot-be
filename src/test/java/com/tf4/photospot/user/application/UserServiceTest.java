@@ -64,7 +64,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 		// given
 		var user = new User("nickname", "kakao", "account_value");
 		var userId = userRepository.save(user).getId();
-		var file = new MockMultipartFile("file", "profile.jpeg", "image/jpeg", "<<jpeg data>>".getBytes());
+		var file = new MockMultipartFile("file", "profile.webp", "image/webp", "<<webp data>>".getBytes());
 		var request = "profile";
 
 		// when

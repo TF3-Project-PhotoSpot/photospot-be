@@ -41,8 +41,8 @@ public class PhotoControllerDocsTest extends RestDocsSupport {
 	@DisplayName("사진 S3 업로드")
 	void uploadPhoto() throws Exception {
 		// given
-		var image = new MockMultipartFile("file", "image.jpeg", "image/jpeg", "<<image.jpeg>>".getBytes());
-		var photoUrl = "https://example.com/temp/image.jpeg";
+		var image = new MockMultipartFile("file", "image.webp", "image/webp", "<<image.webp>>".getBytes());
+		var photoUrl = "https://example.com/temp/image.webp";
 		var response = new PhotoUploadResponse(photoUrl);
 
 		given(s3Uploader.upload(any(MultipartFile.class), anyString())).willReturn(photoUrl);
@@ -68,9 +68,9 @@ public class PhotoControllerDocsTest extends RestDocsSupport {
 	@DisplayName("사진 DB 저장")
 	void savePhoto() throws Exception {
 		// given
-		var prePhotoUrl = "https://example.com/temp/image.jpeg";
+		var prePhotoUrl = "https://example.com/temp/image.webp";
 		var request = new PostPhotoSaveRequest(prePhotoUrl, 26.31, 27.14, "2024-01-13T05:20:18.981+09:00");
-		var postPhotoUrl = "https://example.com/post_images/image.jpeg";
+		var postPhotoUrl = "https://example.com/post_images/image.webp";
 		var response = new PhotoSaveResponse(1L);
 
 		given(s3Uploader.moveFolder(anyString(), anyString())).willReturn(postPhotoUrl);

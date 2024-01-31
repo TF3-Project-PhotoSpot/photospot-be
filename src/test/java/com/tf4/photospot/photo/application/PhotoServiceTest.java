@@ -39,7 +39,7 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 	@DisplayName("사진 업로드 시나리오")
 	Collection<DynamicTest> uploadPhoto() {
 		// given
-		var file = new MockMultipartFile("file", "test.jpeg", "image/jpeg", "<<jpeg data>>".getBytes());
+		var file = new MockMultipartFile("file", "test.webp", "image/webp", "<<webp data>>".getBytes());
 
 		return List.of(
 			DynamicTest.dynamicTest("사진 업로드에 성공한다", () -> {
@@ -59,7 +59,7 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("비어있는 파일을 받으면 예외를 던진다.", () -> {
 				// given
-				var emptyFile = new MockMultipartFile("empty_file", "empty.jpeg", "image/jpeg", new byte[0]);
+				var emptyFile = new MockMultipartFile("empty_file", "empty.webp", "image/webp", new byte[0]);
 
 				// when & then
 				assertThatThrownBy(() -> photoService.upload(emptyFile)).isInstanceOf(ApiException.class)
@@ -72,7 +72,7 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 	@DisplayName("사진 저장 시나리오")
 	Collection<DynamicTest> savePhoto() {
 		// given
-		var file = new MockMultipartFile("file", "test.jpeg", "image/jpeg", "<<jpg data>>".getBytes());
+		var file = new MockMultipartFile("file", "test.webp", "image/webp", "<<webp data>>".getBytes());
 		String photoUrl = photoService.upload(file).photoUrl();
 		Point coord = new GeometryFactory().createPoint(new Coordinate(23.0, 45.0));
 		coord.setSRID(4326);

@@ -29,7 +29,7 @@ public class MockS3Config {
 	@Bean
 	@Primary
 	public S3Template mockS3Template() throws IOException {
-		fileName = "temp/example.jpeg";
+		fileName = "temp/example.webp";
 		S3Template s3Template = Mockito.mock(S3Template.class);
 		S3Resource s3Resource = Mockito.mock(S3Resource.class);
 
@@ -47,7 +47,7 @@ public class MockS3Config {
 		S3Client s3Client = Mockito.mock(S3Client.class);
 
 		given(s3Client.copyObject(any(CopyObjectRequest.class))).willAnswer(invocation -> {
-			fileName = "post_images/example.jpeg";
+			fileName = "post_images/example.webp";
 			return CopyObjectResponse.builder().build();
 		});
 		given(s3Client.deleteObject(any(DeleteObjectRequest.class))).willReturn(DeleteObjectResponse.builder().build());
