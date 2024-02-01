@@ -50,7 +50,7 @@ dependencies {
     //AWS
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
-    implementation group: 'com.amazonaws', name: 'aws-java-sdk-s3', version: '1.12.641'
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
 
     // RestDocs
     asciidoctorExtensions 'org.springframework.restdocs:spring-restdocs-asciidoctor'

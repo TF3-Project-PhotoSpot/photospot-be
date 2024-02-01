@@ -10,22 +10,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
-import org.springframework.context.annotation.Import;
-import org.springframework.mock.web.MockMultipartFile;
 
-import com.tf4.photospot.mockobject.MockS3Config;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Import(MockS3Config.class)
 @RequiredArgsConstructor
 public class UserServiceTest extends IntegrationTestSupport {
 	private final UserService userService;
 	private final UserRepository userRepository;
-	private final MockS3Config mockS3Config;
 
 	@DisplayName("사용자 등록 시나리오")
 	@TestFactory
@@ -66,17 +61,14 @@ public class UserServiceTest extends IntegrationTestSupport {
 		// given
 		var user = new User("nickname", "kakao", "account_value");
 		var userId = userRepository.save(user).getId();
-		var file = new MockMultipartFile("file", "profile.jpeg", "image/jpeg", "<<jpeg data>>".getBytes());
-		var request = "profile";
+		var imageUrl = "https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp";
+		// var file = new MockMultipartFile("file", "example.webp", "image/webp", "<<webp data>>".getBytes());
+		// var request = "profile";
 
 		// when
-		var response = userService.updateProfile(userId, file, request);
+		userService.updateProfile(userId, imageUrl);
 
 		// then
-		assertAll(
-			() -> assertThat(response.imageUrl()).isEqualTo(mockS3Config.getDummyUrl()),
-			() -> assertThat(userRepository.findById(userId).get().getProfileUrl()).isEqualTo(
-				mockS3Config.getDummyUrl())
-		);
+		assertThat(userRepository.findById(userId).get().getProfileUrl()).isEqualTo(imageUrl);
 	}
 }

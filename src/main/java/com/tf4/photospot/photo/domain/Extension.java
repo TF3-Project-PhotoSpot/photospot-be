@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 public enum Extension {
 
 	JPEG("jpeg"),
-	PNG("png");
+	WEBP("webp");
 
 	private final String type;
 

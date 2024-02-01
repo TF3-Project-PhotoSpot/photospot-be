@@ -29,7 +29,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 
 	@Override
 	protected Object initController() {
-		return new UserController(userService);
+		return new UserController(userService, s3Uploader);
 	}
 
 	@Test
@@ -37,14 +37,14 @@ public class UserControllerDocsTest extends RestDocsSupport {
 	@WithCustomMockUser
 	void updateProfile() throws Exception {
 		// given
-		var profile = new MockMultipartFile("file", "image.jpg", "image/jpg", "<<image.jpg>>".getBytes());
+		var profile = new MockMultipartFile("file", "image.webp", "image/webp", "<<image.webp>>".getBytes());
 		var requestContent = "{\"type\" : \"profile\"}";
 		var request = new MockMultipartFile("request", "", "application/json", requestContent.getBytes());
-		var imageUrl = "https://example.com/image.jpg";
+		var imageUrl = "https://example.com/image.webp";
 		var response = new UserProfileResponse("imageUrl");
 
 		given(s3Uploader.upload(any(MultipartFile.class), anyString())).willReturn(imageUrl);
-		given(userService.updateProfile(anyLong(), any(MultipartFile.class), anyString())).willReturn(response);
+		given(userService.updateProfile(anyLong(), anyString())).willReturn(response);
 
 		// when & then
 		mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.POST, "/api/v1/user/profile")

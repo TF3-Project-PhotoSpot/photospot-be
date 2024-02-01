@@ -13,35 +13,33 @@ import org.junit.jupiter.api.TestFactory;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 import com.tf4.photospot.mockobject.MockS3Config;
+import com.tf4.photospot.photo.application.request.PhotoSaveRequest;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.PhotoRepository;
 import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.support.IntegrationTestSupport;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Import(MockS3Config.class)
 public class PhotoServiceTest extends IntegrationTestSupport {
 
-	@Autowired
-	private PhotoService photoService;
-
-	@Autowired
-	private PhotoRepository photoRepository;
-
-	@Autowired
-	private MockS3Config mockS3Config;
+	private final PhotoService photoService;
+	private final PhotoRepository photoRepository;
+	private final MockS3Config mockS3Config;
 
 	@TestFactory
 	@DisplayName("사진 업로드 시나리오")
 	Collection<DynamicTest> uploadPhoto() {
 		// given
-		var file = new MockMultipartFile("file", "test.jpeg", "image/jpeg", "<<jpeg data>>".getBytes());
+		var file = new MockMultipartFile("file", "test.webp", "image/webp", "<<webp data>>".getBytes());
 
 		return List.of(
 			DynamicTest.dynamicTest("사진 업로드에 성공한다", () -> {
@@ -61,7 +59,7 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("비어있는 파일을 받으면 예외를 던진다.", () -> {
 				// given
-				var emptyFile = new MockMultipartFile("empty_file", "empty.jpeg", "image/jpeg", new byte[0]);
+				var emptyFile = new MockMultipartFile("empty_file", "empty.webp", "image/webp", new byte[0]);
 
 				// when & then
 				assertThatThrownBy(() -> photoService.upload(emptyFile)).isInstanceOf(ApiException.class)
@@ -74,7 +72,7 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 	@DisplayName("사진 저장 시나리오")
 	Collection<DynamicTest> savePhoto() {
 		// given
-		var file = new MockMultipartFile("file", "test.jpeg", "image/jpeg", "<<jpg data>>".getBytes());
+		var file = new MockMultipartFile("file", "test.webp", "image/webp", "<<webp data>>".getBytes());
 		String photoUrl = photoService.upload(file).photoUrl();
 		Point coord = new GeometryFactory().createPoint(new Coordinate(23.0, 45.0));
 		coord.setSRID(4326);
@@ -83,7 +81,8 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 		return List.of(
 			DynamicTest.dynamicTest("S3 temp 폴더에 저장된 사진을 post_images 폴더로 옮기고 사진 정보를 db에 저장한다.", () -> {
 				// when
-				Long photoId = photoService.save(photoUrl, coord, date).photoId();
+				PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
+				Long photoId = photoService.save(request).photoId();
 				Photo savedPhoto = photoRepository.findById(photoId).get();
 
 				// then
@@ -94,6 +93,24 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 					() -> assertThat(savedPhoto.getTakenAt()).isEqualTo(date),
 					() -> assertThat(savedPhoto.getCoord()).isEqualTo(coord)
 				);
+			}),
+			DynamicTest.dynamicTest("파일 삭제 시 오류가 발생하는 경우 예외를 던진다", () -> {
+				// when
+				PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
+				mockS3Config.mockThrowExceptionOnDelete();
+
+				// then
+				assertThatThrownBy(() -> photoService.save(request)).isInstanceOf(ApiException.class)
+					.hasMessage(S3UploaderErrorCode.UNEXPECTED_DELETE_FAIL.getMessage());
+			}),
+			DynamicTest.dynamicTest("파일 복사 시 오류가 발생하는 경우 예외를 던진다", () -> {
+				// when
+				PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
+				mockS3Config.mockThrowExceptionOnCopy();
+
+				// then
+				assertThatThrownBy(() -> photoService.save(request)).isInstanceOf(ApiException.class)
+					.hasMessage(S3UploaderErrorCode.UNEXPECTED_COPY_FAIL.getMessage());
 			})
 		);
 	}
