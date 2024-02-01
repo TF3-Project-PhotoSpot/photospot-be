@@ -28,35 +28,43 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 public class MockS3Config {
 
 	private URL url;
-	private String fileName;
 	private S3Client s3Client = Mockito.mock(S3Client.class);
-	private static final String URL_PREFIX = "https://bucket_name.s3.ap-northeast-2.amazonaws.com/";
+	private static final String URL_PREFIX = "https://bucket.s3.ap-northeast-2.amazonaws.com/";
 
 	@Bean
 	@Primary
-	public S3Template mockS3Template() throws IOException {
-		fileName = "temp/example.webp";
+	public S3Template mockS3Template() {
 		S3Template s3Template = Mockito.mock(S3Template.class);
-		S3Resource s3Resource = Mockito.mock(S3Resource.class);
 
-		given(
-			s3Template.upload(anyString(), anyString(), any(InputStream.class), any(ObjectMetadata.class))).willReturn(
-			s3Resource);
-		given(s3Template.download(anyString(), anyString())).willReturn(s3Resource);
+		given(s3Template.upload(anyString(), anyString(), any(InputStream.class), any(ObjectMetadata.class)))
+			.willAnswer(
+				invocation -> {
+					String key = invocation.getArgument(1);
+					return createS3ResourceWithUrl(key);
+				});
+
+		given(s3Template.download(anyString(), anyString())).willAnswer(
+			invocation -> {
+				String key = invocation.getArgument(1);
+				return createS3ResourceWithUrl(key);
+			});
+
+		return s3Template;
+	}
+
+	public S3Resource createS3ResourceWithUrl(String key) throws IOException {
+		S3Resource s3Resource = Mockito.mock(S3Resource.class);
 		given(s3Resource.getURL()).willAnswer(invocation -> {
-			url = new URL(URL_PREFIX + fileName);
+			url = new URL(URL_PREFIX + key);
 			return url;
 		});
-		return s3Template;
+		return s3Resource;
 	}
 
 	@Bean
 	@Primary
 	public S3Client mockS3Client() {
-		given(s3Client.copyObject(any(CopyObjectRequest.class))).willAnswer(invocation -> {
-			fileName = "post_images/example.webp";
-			return CopyObjectResponse.builder().build();
-		});
+		given(s3Client.copyObject(any(CopyObjectRequest.class))).willReturn(CopyObjectResponse.builder().build());
 		given(s3Client.deleteObject(any(DeleteObjectRequest.class))).willReturn(DeleteObjectResponse.builder().build());
 		return s3Client;
 	}

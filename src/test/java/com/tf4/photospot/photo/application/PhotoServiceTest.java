@@ -13,7 +13,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 
 import com.tf4.photospot.global.exception.ApiException;
@@ -25,16 +25,15 @@ import com.tf4.photospot.photo.domain.PhotoRepository;
 import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.support.IntegrationTestSupport;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
+@Import(MockS3Config.class)
 public class PhotoServiceTest extends IntegrationTestSupport {
 
-	@Autowired
-	private PhotoService photoService;
-
-	@Autowired
-	private PhotoRepository photoRepository;
-
-	@Autowired
-	private MockS3Config mockS3Config;
+	private final PhotoService photoService;
+	private final PhotoRepository photoRepository;
+	private final MockS3Config mockS3Config;
 
 	@TestFactory
 	@DisplayName("사진 업로드 시나리오")
