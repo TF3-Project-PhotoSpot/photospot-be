@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.mockito.Mockito;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Primary;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 
+import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Resource;
 import io.awspring.cloud.s3.S3Template;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -37,6 +39,9 @@ public class MockS3Config {
 		S3Template s3Template = Mockito.mock(S3Template.class);
 		S3Resource s3Resource = Mockito.mock(S3Resource.class);
 
+		given(
+			s3Template.upload(anyString(), anyString(), any(InputStream.class), any(ObjectMetadata.class))).willReturn(
+			s3Resource);
 		given(s3Template.download(anyString(), anyString())).willReturn(s3Resource);
 		given(s3Resource.getURL()).willAnswer(invocation -> {
 			url = new URL(URL_PREFIX + fileName);

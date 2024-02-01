@@ -42,8 +42,7 @@ public class S3Uploader {
 		String fileKey = s3Directory.getPath() + generateNewFileName(file.getContentType());
 		try {
 			ObjectMetadata objectMetadata = generateObjectMetadata(file);
-			s3Template.upload(bucket, fileKey, file.getInputStream(), objectMetadata);
-			return s3Template.download(bucket, fileKey).getURL().toString();
+			return s3Template.upload(bucket, fileKey, file.getInputStream(), objectMetadata).getURL().toString();
 		} catch (IOException ex) {
 			throw new ApiException(S3UploaderErrorCode.UNEXPECTED_GET_URL_FAIL);
 		} catch (Exception ex) {
