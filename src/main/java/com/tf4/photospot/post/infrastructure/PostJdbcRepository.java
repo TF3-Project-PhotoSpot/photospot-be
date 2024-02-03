@@ -42,5 +42,26 @@ public class PostJdbcRepository {
 			rs.getString("photo_url"))
 		);
 	}
+
+	public int savePostTags(Long postId, Long spotId, String tags) {
+		MapSqlParameterSource params = new MapSqlParameterSource()
+			.addValue("postId", postId)
+			.addValue("spotId", spotId)
+			.addValue("tags", tags);
+		return jdbcTemplate.update("""
+			insert into post_tag (post_id, tag_id, spot_id)
+			select :postId, :spotId, id from tag where id in (:tags)
+			""", params);
+	}
+
+	public int saveMentions(Long postId, String mentionedUsers) {
+		MapSqlParameterSource params = new MapSqlParameterSource()
+			.addValue("postId", postId)
+			.addValue("mentionedUsers", mentionedUsers);
+		return jdbcTemplate.update("""
+			insert into mention (post_id, user_id)
+			select :postId, id from users where id in (:mentionsUsers)
+			""", params);
+	}
 }
 

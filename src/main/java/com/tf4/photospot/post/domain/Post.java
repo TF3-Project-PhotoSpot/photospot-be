@@ -80,4 +80,12 @@ public class Post extends BaseEntity {
 			deletedAt = LocalDateTime.now();
 		}
 	}
+
+	public void addTags(List<PostTag> tags) {
+		this.postTags.addAll(tags);
+	}
+
+	public void addMentions(List<Mention> mentions) {
+		this.mentions.addAll(mentions);
+	}
 }

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface PostTagRepository extends JpaRepository<PostTag, Long> {
+public interface MentionRepository extends JpaRepository<Mention, Long> {
 
-	List<PostTag> findByPostId(Long postId);
+	List<Mention> findByPostId(Long postId);
 }
