@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.global.exception.ApiErrorCode;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
@@ -42,11 +43,11 @@ public class PostService {
 
 	private final PostQueryRepository postQueryRepository;
 	private final PostJdbcRepository postJdbcRepository;
-	private final PostTagRepository postTagRepository;
-	private final MentionRepository mentionRepository;
 	private final PostRepository postRepository;
+	private final PostTagRepository postTagRepository;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
+	private final MentionRepository mentionRepository;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
 		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(request);
@@ -85,7 +86,7 @@ public class PostService {
 			.build();
 
 		Long postId = postRepository.save(post).getId();
-		savePostTags(post, spot.getId(), request.getTags());
+		savePostTags(post, spot, request.getTags());
 		saveMentions(post, request.getMentions());
 		return postId;
 	}
@@ -95,31 +96,27 @@ public class PostService {
 			.orElseGet(() -> spotRepository.save(spotInfoDto.toSpot()));
 	}
 
-	public void savePostTags(Post post, Long spotId, List<Long> tags) {
-		if (tags == null || tags.isEmpty()) {
+	public void savePostTags(Post post, Spot spot, List<Long> tagIds) {
+		if (tagIds == null || tagIds.isEmpty()) {
 			return;
 		}
-		int rowNum = postJdbcRepository.savePostTags(post.getId(), spotId, convertListToString(tags));
-		if (rowNum != tags.size()) {
-			throw new ApiException(PostErrorCode.NOT_FOUND_TAG);
-		}
-		post.addTags(postTagRepository.findByPostId(post.getId()));
+		int rowNum = postJdbcRepository.savePostTags(post.getId(), spot.getId(), tagIds);
+		validateRecordCount(rowNum, tagIds.size(), PostErrorCode.NOT_FOUND_TAG);
+		post.addPostTags(postTagRepository.findByPostId(post.getId()));
 	}
 
-	public void saveMentions(Post post, List<Long> mentionedUsers) {
-		if (mentionedUsers == null || mentionedUsers.isEmpty()) {
+	public void saveMentions(Post post, List<Long> mentionedUserIds) {
+		if (mentionedUserIds == null || mentionedUserIds.isEmpty()) {
 			return;
 		}
-		int rowNum = postJdbcRepository.saveMentions(post.getId(), convertListToString(mentionedUsers));
-		if (rowNum != mentionedUsers.size()) {
-			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
-		}
+		int rowNum = postJdbcRepository.saveMentions(post.getId(), mentionedUserIds);
+		validateRecordCount(rowNum, mentionedUserIds.size(), UserErrorCode.NOT_FOUND_USER);
 		post.addMentions(mentionRepository.findByPostId(post.getId()));
 	}
 
-	private String convertListToString(List<Long> longValues) {
-		return longValues.stream()
-			.map(String::valueOf)
-			.collect(Collectors.joining(","));
+	private void validateRecordCount(int rowNum, int idNum, ApiErrorCode errorCode) {
+		if (rowNum != idNum) {
+			throw new ApiException(errorCode);
+		}
 	}
 }

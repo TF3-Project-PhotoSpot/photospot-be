@@ -4,6 +4,7 @@ import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.user.domain.User;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,7 +24,7 @@ public class Mention extends BaseEntity {
 	@JoinColumn(name = "post_id")
 	private Post post;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User mentionedUser;
 }

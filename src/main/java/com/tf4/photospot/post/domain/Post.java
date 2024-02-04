@@ -81,8 +81,8 @@ public class Post extends BaseEntity {
 		}
 	}
 
-	public void addTags(List<PostTag> tags) {
-		this.postTags.addAll(tags);
+	public void addPostTags(List<PostTag> postTags) {
+		this.postTags.addAll(postTags);
 	}
 
 	public void addMentions(List<Mention> mentions) {
