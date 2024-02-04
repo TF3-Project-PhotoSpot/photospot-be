@@ -10,17 +10,24 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
+import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
+import com.tf4.photospot.post.presentation.request.PhotoInfoDto;
+import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
+import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class PostControllerDocsTest extends RestDocsSupport {
@@ -118,5 +125,51 @@ public class PostControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content[].tags[].tagName").type(JsonFieldType.STRING).description("태그 이름"),
 					fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 방명록 여부")
 				)));
+	}
+
+	@Test
+	void uploadPost() throws Exception {
+		// given
+		var photoCoord = new CoordinateDto(35.512, 126.912);
+		var spotCoord = new CoordinateDto(35.557, 126.923);
+		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp", photoCoord,
+			"2024-01-13T05:20:18.981+09:00");
+		var spotInfo = new SpotInfoDto(spotCoord, "서울 마포구 동교동 158-26");
+		var tags = List.of(1L, 2L, 3L);
+		var mentions = List.of(4L, 5L, 6L);
+		var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tags, mentions, false);
+		var response = new PostUploadResponse(1L);
+
+		given(postService.upload(any(PostUploadRequest.class))).willReturn(response);
+
+		// when & then
+		mockMvc.perform(post("/api/v1/posts")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(httpRequest))
+				.accept(MediaType.APPLICATION_JSON)
+			)
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				requestFields(
+					fieldWithPath("photoInfo").description("사진 정보"),
+					fieldWithPath("photoInfo.photoUrl").description("사진 주소"),
+					fieldWithPath("photoInfo.coord").description("사진 좌표"),
+					fieldWithPath("photoInfo.coord.lat").description("위도"),
+					fieldWithPath("photoInfo.coord.lon").description("경도"),
+					fieldWithPath("photoInfo.takenAt").description("사진이 찍힌 날짜 및 시간"),
+					fieldWithPath("spotInfo").description("장소 정보"),
+					fieldWithPath("spotInfo.coord").description("장소 중심 좌표"),
+					fieldWithPath("spotInfo.coord.lat").description("위도"),
+					fieldWithPath("spotInfo.coord.lon").description("경도"),
+					fieldWithPath("spotInfo.address").description("장소 중심 주소"),
+					fieldWithPath("detailAddress").description("작성자가 직접 입력한 상세 주소"),
+					fieldWithPath("tags").description("작성자가 선택한 태그 아이디 리스트"),
+					fieldWithPath("mentions").description("작성자가 언급한 유저 아이디 리스트"),
+					fieldWithPath("isPrivate").description("사진 비공개 설정 유무").optional().attributes(defaultValue(false))
+				),
+				responseFields(
+					fieldWithPath("postId").type(JsonFieldType.NUMBER).description("업로드 된 방명록 id 반환")
+				)
+			));
 	}
 }
