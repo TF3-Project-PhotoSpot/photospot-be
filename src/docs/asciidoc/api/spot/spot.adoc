@@ -5,7 +5,7 @@
 include::{snippets}/spot-controller-docs-test/get-nearby-spots/http-request.adoc[]
 include::{snippets}/spot-controller-docs-test/get-nearby-spots/query-parameters.adoc[]
 include::{snippets}/spot-controller-docs-test/get-nearby-spots/response-body.adoc[]
-include::{snippets}/spot-controller-docs-test/get-nearby-spots/response-fields-data.adoc[]
+include::{snippets}/spot-controller-docs-test/get-nearby-spots/response-fields.adoc[]
 
 '''
 
@@ -14,17 +14,17 @@ include::{snippets}/spot-controller-docs-test/get-nearby-spots/response-fields-d
 include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/http-request.adoc[]
 include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/query-parameters.adoc[]
 include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-body.adoc[]
-include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-fields-data.adoc[]
+include::{snippets}/spot-controller-docs-test/get-recommended-spot-list/response-fields.adoc[]
 
 === 특정 장소 조회
 
 include::{snippets}/spot-controller-docs-test/get-spot/http-request.adoc[]
 include::{snippets}/spot-controller-docs-test/get-spot/query-parameters.adoc[]
 include::{snippets}/spot-controller-docs-test/get-spot/response-body.adoc[]
-include::{snippets}/spot-controller-docs-test/get-spot/response-fields-data.adoc[]
+include::{snippets}/spot-controller-docs-test/get-spot/response-fields.adoc[]
 
 === 내가 쓴 방명록의 장소 리스트 조회
 
 include::{snippets}/spot-controller-docs-test/get-spots-of-my-posts/http-request.adoc[]
 include::{snippets}/spot-controller-docs-test/get-spots-of-my-posts/response-body.adoc[]
-include::{snippets}/spot-controller-docs-test/get-spots-of-my-posts/response-fields-data.adoc[]
+include::{snippets}/spot-controller-docs-test/get-spots-of-my-posts/response-fields.adoc[]

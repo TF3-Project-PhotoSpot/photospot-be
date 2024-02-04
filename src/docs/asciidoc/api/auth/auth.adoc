@@ -5,7 +5,7 @@
 include::{snippets}/security-controller-docs-test/login/http-request.adoc[]
 include::{snippets}/security-controller-docs-test/login/query-parameters.adoc[]
 include::{snippets}/security-controller-docs-test/login/response-body.adoc[]
-include::{snippets}/security-controller-docs-test/login/response-fields-data.adoc[]
+include::{snippets}/security-controller-docs-test/login/response-fields.adoc[]
 
 === 액세트 토큰 재발급
 
@@ -14,4 +14,4 @@ include::{snippets}/security-controller-docs-test/login/response-fields-data.ado
 include::{snippets}/auth-controller-docs-test/reissue-token/http-request.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/request-cookies.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-body.adoc[]
-include::{snippets}/auth-controller-docs-test/reissue-token/response-fields-data.adoc[]
+include::{snippets}/auth-controller-docs-test/reissue-token/response-fields.adoc[]

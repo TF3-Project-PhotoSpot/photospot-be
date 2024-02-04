@@ -449,9 +449,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel1">
 <li><a href="#_common">Common</a>
 <ul class="sectlevel2">
-<li><a href="#_default_success_example">Default Success Example</a></li>
+<li><a href="#_success_example">Success Example</a></li>
 <li><a href="#_error_example">Error Example</a></li>
-<li><a href="#_exception">Exception</a></li>
+<li><a href="#_enums">Enums</a></li>
 </ul>
 </li>
 <li><a href="#_auth_api">Auth API</a>
@@ -462,8 +462,8 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 <li><a href="#_spot_api">Spot API</a>
 <ul class="sectlevel2">
-<li><a href="#_주변_스팟_리스트_조회">주변 스팟 리스트 조회</a></li>
-<li><a href="#_주변_추천_스팟_리스트_조회">주변 추천 스팟 리스트 조회</a></li>
+<li><a href="#_주변_장소_리스트_조회">주변 장소 리스트 조회</a></li>
+<li><a href="#_주변_추천_장소_리스트_조회">주변 추천 장소 리스트 조회</a></li>
 <li><a href="#_특정_장소_조회">특정 장소 조회</a></li>
 <li><a href="#_내가_쓴_방명록의_장소_리스트_조회">내가 쓴 방명록의 장소 리스트 조회</a></li>
 </ul>
@@ -487,7 +487,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="_common"><a class="link" href="#_common">Common</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_default_success_example"><a class="link" href="#_default_success_example">Default Success Example</a></h3>
+<h3 id="_success_example"><a class="link" href="#_success_example">Success Example</a></h3>
 <hr>
 <div class="sect3">
 <h4 id="_response_fields"><a class="link" href="#_response_fields">Response Fields</a></h4>
@@ -603,7 +603,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 </div>
 <div class="sect2">
-<h3 id="_exception"><a class="link" href="#_exception">Exception</a></h3>
+<h3 id="_enums"><a class="link" href="#_enums">Enums</a></h3>
 <hr>
 <div class="sect3">
 <h4 id="_error_codes"><a class="link" href="#_error_codes">Error Codes</a></h4>
@@ -746,10 +746,38 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>NOT_FOUND_FILE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NOT_FOUND_FILE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">404</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">지정된 경로에 파일이 존재하지 않습니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>UNEXPECTED_UPLOAD_FAIL</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">UNEXPECTED_UPLOAD_FAIL</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">예상치 못한 오류로 업로드를 실패했습니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>UNEXPECTED_COPY_FAIL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNEXPECTED_COPY_FAIL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">예상치 못한 오류로 파일 복사를 실패했습니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>UNEXPECTED_DELETE_FAIL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNEXPECTED_DELETE_FAIL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">예상치 못한 오류로 파일 삭제를 실패했습니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>UNEXPECTED_GET_URL_FAIL</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">UNEXPECTED_GET_URL_FAIL</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">예상치 못한 오류로 이미지 URL 조회를 실패했습니다.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">SpotErrorCode</p></td>
@@ -822,7 +850,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/auth/auth.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/security-controller-docs-test/login/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/auth/auth.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/security-controller-docs-test/login/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -862,7 +890,7 @@ Cookie: RefreshToken=refresh_token_value</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/auth/auth.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/auth-controller-docs-test/reissue-token/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/auth/auth.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/auth-controller-docs-test/reissue-token/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -871,7 +899,7 @@ Cookie: RefreshToken=refresh_token_value</code></pre>
 <h2 id="_spot_api"><a class="link" href="#_spot_api">Spot API</a></h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_주변_스팟_리스트_조회"><a class="link" href="#_주변_스팟_리스트_조회">주변 스팟 리스트 조회</a></h3>
+<h3 id="_주변_장소_리스트_조회"><a class="link" href="#_주변_장소_리스트_조회">주변 장소 리스트 조회</a></h3>
 <hr>
 <div class="listingblock">
 <div class="content">
@@ -938,13 +966,13 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-nearby-spots/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/spot-controller-docs-test/get-nearby-spots/response-fields-data.adoc[]</p>
 </div>
 <hr>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_주변_추천_스팟_리스트_조회"><a class="link" href="#_주변_추천_스팟_리스트_조회">주변 추천 스팟 리스트 조회</a></h3>
+<h3 id="_주변_추천_장소_리스트_조회"><a class="link" href="#_주변_추천_장소_리스트_조회">주변 추천 장소 리스트 조회</a></h3>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/spots/recommended?lat=37.6676198&amp;lon=127.0468177&amp;radius=200&amp;postPreviewCount=5&amp;page=0&amp;size=10 HTTP/1.1
@@ -1037,7 +1065,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-recommended-spot-list/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/spot-controller-docs-test/get-recommended-spot-list/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1132,7 +1160,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-spot/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/spot-controller-docs-test/get-spot/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1164,7 +1192,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/spot/spot.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/spot-controller-docs-test/get-spots-of-my-posts/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/spot/spot.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/spot-controller-docs-test/get-spots-of-my-posts/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1244,7 +1272,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/post/post.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/post-controller-docs-test/get-post-previews/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/post/post.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/post-controller-docs-test/get-post-previews/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1334,7 +1362,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/post/post.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/post-controller-docs-test/get-posts/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/post/post.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/post-controller-docs-test/get-posts/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1407,7 +1435,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Unresolved directive in api/map/map.adoc - include::/Users/sungblee/dev/photo-spot/build/generated-snippets/map-controller-docs-test/find-registered-spot/response-fields-data.adoc[]</p>
+<p>Unresolved directive in api/map/map.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/map-controller-docs-test/find-registered-spot/response-fields-data.adoc[]</p>
 </div>
 </div>
 </div>
@@ -1417,7 +1445,7 @@ Host: localhost:8080</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-01-29 00:53:38 +0900
+Last updated 2024-01-31 16:11:23 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
