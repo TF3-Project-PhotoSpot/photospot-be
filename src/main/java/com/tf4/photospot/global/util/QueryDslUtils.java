@@ -24,11 +24,11 @@ public abstract class QueryDslUtils {
 
 	@SuppressWarnings({"rawtypes, unchecked"})
 	private static <T> OrderSpecifier toOrderSpecifier(EntityPathBase<T> qEntity, Sort.Order order) {
-		return new OrderSpecifier(getDeriction(order),
+		return new OrderSpecifier(getDirection(order),
 			new PathBuilder<>(qEntity.getType(), qEntity.getMetadata()).get(order.getProperty()));
 	}
 
-	private static Order getDeriction(Sort.Order order) {
+	private static Order getDirection(Sort.Order order) {
 		if (order.isAscending()) {
 			return Order.ASC;
 		}
