@@ -5,7 +5,7 @@
 include::{snippets}/post-controller-docs-test/get-post-previews/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/get-post-previews/query-parameters.adoc[]
 include::{snippets}/post-controller-docs-test/get-post-previews/response-body.adoc[]
-include::{snippets}/post-controller-docs-test/get-post-previews/response-fields-data.adoc[]
+include::{snippets}/post-controller-docs-test/get-post-previews/response-fields.adoc[]
 
 === 방명록 상세 목록 조회
 
@@ -14,4 +14,13 @@ include::{snippets}/post-controller-docs-test/get-post-previews/response-fields-
 include::{snippets}/post-controller-docs-test/get-posts/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/get-posts/query-parameters.adoc[]
 include::{snippets}/post-controller-docs-test/get-posts/response-body.adoc[]
-include::{snippets}/post-controller-docs-test/get-posts/response-fields-data.adoc[]
+include::{snippets}/post-controller-docs-test/get-posts/response-fields.adoc[]
+
+=== 방명록 등록
+
+'''
+
+include::{snippets}/post-controller-docs-test/upload-post/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/upload-post/request-fields.adoc[]
+include::{snippets}/post-controller-docs-test/upload-post/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/upload-post/response-fields.adoc[]
