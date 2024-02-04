@@ -18,8 +18,8 @@ import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
-import com.tf4.photospot.post.presentation.response.PostUploadResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +50,6 @@ public class PostController {
 
 	@PostMapping
 	public PostUploadResponse uploadPost(@AuthUserId Long userId, @RequestBody @Valid PostUploadHttpRequest request) {
-		return new PostUploadResponse(postService.upload(PostUploadRequest.of(userId, request)));
+		return postService.upload(PostUploadRequest.of(userId, request));
 	}
 }

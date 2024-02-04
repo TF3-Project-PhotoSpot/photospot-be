@@ -14,6 +14,7 @@ public enum S3UploaderErrorCode implements ApiErrorCode {
 
 	EMPTY_FILE(HttpStatus.BAD_REQUEST, "비어있는 파일입니다."),
 	INVALID_PHOTO_EXTENSION(HttpStatus.BAD_REQUEST, "유효하지 않은 이미지 확장자입니다"),
+	NOT_FOUND_FILE(HttpStatus.NOT_FOUND, "지정된 경로에 파일이 존재하지 않습니다."),
 	UNEXPECTED_UPLOAD_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예상치 못한 오류로 업로드를 실패했습니다."),
 	UNEXPECTED_COPY_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예상치 못한 오류로 파일 복사를 실패했습니다."),
 	UNEXPECTED_DELETE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "예상치 못한 오류로 파일 삭제를 실패했습니다."),

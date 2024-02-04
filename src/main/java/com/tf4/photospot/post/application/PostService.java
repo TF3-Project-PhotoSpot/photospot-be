@@ -14,12 +14,15 @@ import com.tf4.photospot.global.exception.ApiErrorCode;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
+import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.photo.domain.Photo;
+import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
@@ -48,6 +51,7 @@ public class PostService {
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
 	private final MentionRepository mentionRepository;
+	private final S3Uploader s3Uploader;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
 		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(request);
@@ -67,28 +71,38 @@ public class PostService {
 	}
 
 	@Transactional
-	public Long upload(PostUploadRequest request) {
-		// Todo : bubble
-		Photo photo = Photo.builder()
-			.photoUrl(request.getPhotoUrl())
-			.coord(request.getPhotoCoord())
-			.takenAt(request.getPhotoTakenAt())
-			.build();
+	public PostUploadResponse upload(PostUploadRequest request) {
 		User writer = userRepository.findById(request.getUserId())
 			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 		Spot spot = findSpotOrCreate(request.getSpotInfoDto());
-		Post post = Post.builder()
-			.photo(photo)
+		// Todo : bubble
+		Photo photoBuild = Photo.builder()
+			.photoUrl(s3Uploader.copyToOtherDirectory(request.getPhotoUrl(), S3Directory.TEMP_FOLDER,
+				S3Directory.POST_FOLDER))
+			.coord(request.getPhotoCoord())
+			.takenAt(request.getPhotoTakenAt())
+			.build();
+		Post postBuild = Post.builder()
+			.photo(photoBuild)
 			.spot(spot)
 			.writer(writer)
 			.detailAddress(request.getDetailAddress())
 			.isPrivate(request.getIsPrivate())
 			.build();
+		return savePostAndRelatedEntities(postBuild, spot.getId(), request.getTags(), request.getMentions());
+	}
 
-		Long postId = postRepository.save(post).getId();
-		savePostTags(post, spot, request.getTags());
-		saveMentions(post, request.getMentions());
-		return postId;
+	private PostUploadResponse savePostAndRelatedEntities(Post postBuild, Long spotId, List<Long> tagIds,
+		List<Long> mentionIds) {
+		try {
+			Post post = postRepository.save(postBuild);
+			savePostTags(post, spotId, tagIds);
+			saveMentions(post, mentionIds);
+			return new PostUploadResponse(post.getId());
+		} catch (Exception ex) {
+			s3Uploader.deleteFile(postBuild.getPhoto().getPhotoUrl(), S3Directory.POST_FOLDER);
+			throw ex;
+		}
 	}
 
 	private Spot findSpotOrCreate(SpotInfoDto spotInfoDto) {
@@ -96,11 +110,11 @@ public class PostService {
 			.orElseGet(() -> spotRepository.save(spotInfoDto.toSpot()));
 	}
 
-	public void savePostTags(Post post, Spot spot, List<Long> tagIds) {
+	public void savePostTags(Post post, Long spotId, List<Long> tagIds) {
 		if (tagIds == null || tagIds.isEmpty()) {
 			return;
 		}
-		int rowNum = postJdbcRepository.savePostTags(post.getId(), spot.getId(), tagIds);
+		int rowNum = postJdbcRepository.savePostTags(post.getId(), spotId, tagIds);
 		validateRecordCount(rowNum, tagIds.size(), PostErrorCode.NOT_FOUND_TAG);
 		post.addPostTags(postTagRepository.findByPostId(post.getId()));
 	}
