@@ -27,4 +27,9 @@ public class Mention extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User mentionedUser;
+
+	public Mention(Post post, User mentionedUser) {
+		this.post = post;
+		this.mentionedUser = mentionedUser;
+	}
 }
