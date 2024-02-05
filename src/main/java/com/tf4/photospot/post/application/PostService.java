@@ -76,31 +76,31 @@ public class PostService {
 			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 		Spot spot = findSpotOrCreate(request.getSpotInfoDto());
 		// Todo : bubble
-		Photo photoBuild = Photo.builder()
+		Photo photo = Photo.builder()
 			.photoUrl(s3Uploader.copyToOtherDirectory(request.getPhotoUrl(), S3Directory.TEMP_FOLDER,
 				S3Directory.POST_FOLDER))
 			.coord(request.getPhotoCoord())
 			.takenAt(request.getPhotoTakenAt())
 			.build();
-		Post postBuild = Post.builder()
-			.photo(photoBuild)
+		Post post = Post.builder()
+			.photo(photo)
 			.spot(spot)
 			.writer(writer)
 			.detailAddress(request.getDetailAddress())
 			.isPrivate(request.getIsPrivate())
 			.build();
-		return savePostAndRelatedEntities(postBuild, spot.getId(), request.getTags(), request.getMentions());
+		return savePostAndRelatedEntities(post, spot.getId(), request.getTags(), request.getMentions());
 	}
 
-	private PostUploadResponse savePostAndRelatedEntities(Post postBuild, Long spotId, List<Long> tagIds,
+	private PostUploadResponse savePostAndRelatedEntities(Post post, Long spotId, List<Long> tagIds,
 		List<Long> mentionIds) {
 		try {
-			Post post = postRepository.save(postBuild);
+			postRepository.save(post);
 			savePostTags(post, spotId, tagIds);
 			saveMentions(post, mentionIds);
 			return new PostUploadResponse(post.getId());
 		} catch (Exception ex) {
-			s3Uploader.deleteFile(postBuild.getPhoto().getPhotoUrl(), S3Directory.POST_FOLDER);
+			s3Uploader.deleteFile(post.getPhoto().getPhotoUrl(), S3Directory.POST_FOLDER);
 			throw ex;
 		}
 	}
