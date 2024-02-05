@@ -13,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
+import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.global.filter.CustomAuthenticationFilter;
 import com.tf4.photospot.global.filter.CustomExceptionFilter;
@@ -20,7 +21,6 @@ import com.tf4.photospot.global.filter.JwtTokenValidatorFilter;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationEntryPoint;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationProvider;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationSuccessHandler;
-import com.tf4.photospot.user.application.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 	private final JwtService jwtService;
-	private final UserService userService;
+	private final AuthService authService;
 
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
@@ -73,7 +73,7 @@ public class SecurityConfig {
 
 	@Bean
 	public CustomAuthenticationProvider customAuthenticationProvider() {
-		return new CustomAuthenticationProvider(userService);
+		return new CustomAuthenticationProvider(authService);
 	}
 
 	@Bean

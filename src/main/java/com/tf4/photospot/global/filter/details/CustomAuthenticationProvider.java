@@ -9,9 +9,9 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.global.dto.LoginUserDto;
 import com.tf4.photospot.global.util.AuthorityConverter;
-import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
 
 import lombok.RequiredArgsConstructor;
@@ -20,13 +20,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-	private final UserService userService;
+	private final AuthService authService;
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
 		String account = authentication.getPrincipal().toString();
 		String providerType = authentication.getCredentials().toString();
-		OauthLoginUserResponse loginUser = userService.oauthLogin(providerType, account);
+		OauthLoginUserResponse loginUser = authService.oauthLogin(providerType, account);
 		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(
 			loginUser.getRole().type);
 		return new UsernamePasswordAuthenticationToken(

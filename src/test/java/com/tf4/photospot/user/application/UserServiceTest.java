@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
+import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceTest extends IntegrationTestSupport {
 	private final UserService userService;
+	private final AuthService authService;
 	private final UserRepository userRepository;
 
 	@DisplayName("사용자 등록 시나리오")
@@ -32,7 +34,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 		return List.of(
 			DynamicTest.dynamicTest("최초 로그인 시 사용자 정보를 DB에 저장한다.", () -> {
 				//when
-				var loginResponse = userService.oauthLogin(providerType, account);
+				var loginResponse = authService.oauthLogin(providerType, account);
 
 				//then
 				assertAll(
@@ -42,7 +44,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("기존에 로그인 했던 사용자는 DB에 저장하지 않는다.", () -> {
 				//when
-				var loginResponse2 = userService.oauthLogin(providerType, account);
+				var loginResponse2 = authService.oauthLogin(providerType, account);
 				User savedUser = userRepository.findUserByProviderTypeAndAccount(providerType, account).orElseThrow();
 
 				//then
@@ -62,13 +64,11 @@ public class UserServiceTest extends IntegrationTestSupport {
 		var user = new User("nickname", "kakao", "account_value");
 		var userId = userRepository.save(user).getId();
 		var imageUrl = "https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp";
-		// var file = new MockMultipartFile("file", "example.webp", "image/webp", "<<webp data>>".getBytes());
-		// var request = "profile";
 
 		// when
 		userService.updateProfile(userId, imageUrl);
 
 		// then
-		assertThat(userRepository.findById(userId).get().getProfileUrl()).isEqualTo(imageUrl);
+		assertThat(userRepository.findById(userId).orElseThrow().getProfileUrl()).isEqualTo(imageUrl);
 	}
 }
