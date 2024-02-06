@@ -43,25 +43,27 @@ public class PostJdbcRepository {
 		);
 	}
 
-	public int savePostTags(Long postId, Long spotId, List<Long> tags) {
+	public boolean savePostTags(Long postId, Long spotId, List<Long> tags) {
 		MapSqlParameterSource params = new MapSqlParameterSource()
 			.addValue("postId", postId)
 			.addValue("spotId", spotId)
 			.addValue("tags", tags);
-		return jdbcTemplate.update("""
+		int rowNum = jdbcTemplate.update("""
 			insert into post_tag (post_id, spot_id, tag_id)
 			select :postId, :spotId, id from tag where id in (:tags)
 			""", params);
+		return rowNum == tags.size();
 	}
 
-	public int saveMentions(Long postId, List<Long> mentionedUsers) {
+	public boolean saveMentions(Long postId, List<Long> mentionedUsers) {
 		MapSqlParameterSource params = new MapSqlParameterSource()
 			.addValue("postId", postId)
 			.addValue("mentionedUsers", mentionedUsers);
-		return jdbcTemplate.update("""
+		int rowNum = jdbcTemplate.update("""
 			insert into mention (post_id, user_id)
 			select :postId, id from users where id in (:mentionedUsers)
 			""", params);
+		return rowNum == mentionedUsers.size();
 	}
 }
 
