@@ -1,6 +1,7 @@
 package com.tf4.photospot.global.filter.details;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,11 +25,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
 	@Override
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		String account = authentication.getPrincipal().toString();
+		Map<String, String> identityInfo = (Map<String, String>)authentication.getPrincipal();
 		String providerType = authentication.getCredentials().toString();
-		OauthLoginUserResponse loginUser = authService.oauthLogin(providerType, account);
+		OauthLoginUserResponse loginUser = authService.oauthLogin(providerType, identityInfo);
 		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(
-			loginUser.getRole().type);
+			loginUser.getRole().getType());
 		return new UsernamePasswordAuthenticationToken(
 			new LoginUserDto(loginUser.getId(), loginUser.hasLoggedInBefore()), null, authorities);
 	}

@@ -2,10 +2,13 @@ package com.tf4.photospot.auth.application;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
+import com.tf4.photospot.global.config.security.SecurityConstant;
 import com.tf4.photospot.support.IntegrationTestSupport;
 
 import lombok.RequiredArgsConstructor;
@@ -20,8 +23,8 @@ public class AuthServiceTest extends IntegrationTestSupport {
 	void reissue() {
 		// given
 		String providerType = "kakao";
-		String account = "account";
-		Long loginUser = authService.oauthLogin(providerType, account).getId();
+		Map<String, String> identityInfo = Map.of(SecurityConstant.ACCOUNT_PARAM, "account_value");
+		Long loginUser = authService.oauthLogin(providerType, identityInfo).getId();
 		String refreshToken = jwtService.issueRefreshToken(loginUser);
 
 		// when

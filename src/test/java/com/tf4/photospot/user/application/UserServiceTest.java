@@ -1,10 +1,12 @@
 package com.tf4.photospot.user.application;
 
+import static com.tf4.photospot.global.config.security.SecurityConstant.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
@@ -29,12 +31,13 @@ public class UserServiceTest extends IntegrationTestSupport {
 	Collection<DynamicTest> saveUser() {
 		// given
 		String providerType = "kakao";
-		String account = "account";
+		String account = "account_value";
+		Map<String, String> identityInfo = Map.of(ACCOUNT_PARAM, account);
 
 		return List.of(
 			DynamicTest.dynamicTest("최초 로그인 시 사용자 정보를 DB에 저장한다.", () -> {
 				//when
-				var loginResponse = authService.oauthLogin(providerType, account);
+				var loginResponse = authService.oauthLogin(providerType, identityInfo);
 
 				//then
 				assertAll(
@@ -44,7 +47,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("기존에 로그인 했던 사용자는 DB에 저장하지 않는다.", () -> {
 				//when
-				var loginResponse2 = authService.oauthLogin(providerType, account);
+				var loginResponse2 = authService.oauthLogin(providerType, identityInfo);
 				User savedUser = userRepository.findUserByProviderTypeAndAccount(providerType, account).orElseThrow();
 
 				//then

@@ -24,7 +24,9 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
 	private final JwtService jwtService;
 
-	// Todo : 상수 처리
+	private static final String CONTENT_TYPE = "application/json";
+	private static final String CHARACTER_ENCODING = "UTF-8";
+
 	@Override
 	public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
 		Authentication authentication) throws IOException {
@@ -34,8 +36,8 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 		String refreshToken = jwtService.issueRefreshToken(loginUser.getId());
 
 		response.addCookie(createCookie(refreshToken));
-		response.setContentType("application/json");
-		response.setCharacterEncoding("UTF-8");
+		response.setContentType(CONTENT_TYPE);
+		response.setCharacterEncoding(CHARACTER_ENCODING);
 		new ObjectMapper().writeValue(response.getWriter(), createBody(accessToken, loginUser.hasLoggedInBefore()));
 	}
 

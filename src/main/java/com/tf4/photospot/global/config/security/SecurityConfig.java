@@ -51,8 +51,6 @@ public class SecurityConfig {
 			.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(new JwtTokenValidatorFilter(jwtService), CustomAuthenticationFilter.class)
 			.addFilterBefore(new CustomExceptionFilter(), JwtTokenValidatorFilter.class)
-			// .authorizeHttpRequests(requests -> requests
-			// 	.anyRequest().permitAll())
 			.exceptionHandling(exceptionHandling -> exceptionHandling
 				.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		return http.build();

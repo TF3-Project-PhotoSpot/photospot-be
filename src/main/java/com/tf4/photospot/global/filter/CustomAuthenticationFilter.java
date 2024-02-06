@@ -1,5 +1,8 @@
 package com.tf4.photospot.global.filter;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -23,12 +26,17 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
 		AuthenticationException {
-		String account = request.getParameter(SecurityConstant.ACCOUNT_PARAM);
-		String providerType = request.getParameter(SecurityConstant.PROVIDER_TYPE_PARAM);
-		OauthAttributes.findByType(providerType)
-			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_PROVIDER_TYPE));
-
-		CustomAuthenticationToken authToken = new CustomAuthenticationToken(account, providerType);
+		String providerType = OauthAttributes.findByType(request.getParameter(SecurityConstant.PROVIDER_TYPE_PARAM))
+			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_PROVIDER_TYPE)).getType();
+		Map<String, String> identityInfo = new HashMap<>();
+		if (providerType.equals(OauthAttributes.KAKAO.getType())) {
+			identityInfo.put(SecurityConstant.ACCOUNT_PARAM, request.getParameter(SecurityConstant.ACCOUNT_PARAM));
+		} else if (providerType.equals(OauthAttributes.APPLE.getType())) {
+			identityInfo.put(SecurityConstant.IDENTITY_TOKEN_PARAM,
+				request.getParameter(SecurityConstant.IDENTITY_TOKEN_PARAM));
+			identityInfo.put(SecurityConstant.NONCE_PARAM, request.getParameter(SecurityConstant.NONCE_PARAM));
+		}
+		CustomAuthenticationToken authToken = new CustomAuthenticationToken(identityInfo, providerType);
 		authToken.setDetails(this.authenticationDetailsSource.buildDetails(request));
 		return this.getAuthenticationManager().authenticate(authToken);
 	}
