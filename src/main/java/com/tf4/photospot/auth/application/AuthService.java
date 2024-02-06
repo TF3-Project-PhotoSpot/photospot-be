@@ -22,12 +22,6 @@ public class AuthService {
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 
-	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
-		jwtService.validRefreshToken(userId, refreshToken);
-		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().type));
-	}
-
 	public OauthLoginUserResponse oauthLogin(String providerType, String account) {
 		return userRepository.findUserByProviderTypeAndAccount(providerType, account)
 			.map(findUser -> OauthLoginUserResponse.from(true, findUser))
@@ -45,5 +39,11 @@ public class AuthService {
 			generatedRandomNickname = NicknameGenerator.generatorRandomNickname();
 		}
 		return generatedRandomNickname;
+	}
+
+	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
+		jwtService.validRefreshToken(userId, refreshToken);
+		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().type));
 	}
 }
