@@ -31,6 +31,7 @@ public class JwtService {
 
 	private final JwtRepository jwtRepository;
 	private final JwtProperties jwtProperties;
+
 	private final SecretKey key;
 
 	public JwtService(JwtRepository jwtRepository, JwtProperties jwtProperties) {
@@ -72,23 +73,17 @@ public class JwtService {
 
 	public Claims parseAccessToken(String authorizationHeader) {
 		String token = removePrefix(authorizationHeader);
-		try {
-			return Jwts.parserBuilder()
-				.setSigningKey(jwtProperties.getSecretKey().getBytes())
-				.build()
-				.parseClaimsJws(token)
-				.getBody();
-		} catch (ExpiredJwtException ex) {
-			throw new ApiException(AuthErrorCode.EXPIRED_ACCESS_TOKEN);
-		} catch (UnsupportedJwtException | MalformedJwtException | SecurityException ex) {
-			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
-		}
+		return parseToken(token, true);
 	}
 
 	public Claims parseRefreshToken(String token) {
 		if (token == null) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
+		return parseToken(token, false);
+	}
+
+	private Claims parseToken(String token, boolean isAccessToken) {
 		try {
 			return Jwts.parserBuilder()
 				.setSigningKey(jwtProperties.getSecretKey().getBytes())
@@ -96,9 +91,11 @@ public class JwtService {
 				.parseClaimsJws(token)
 				.getBody();
 		} catch (ExpiredJwtException ex) {
-			throw new ApiException(AuthErrorCode.EXPIRED_REFRESH_TOKEN);
+			throw new ApiException(
+				isAccessToken ? AuthErrorCode.EXPIRED_ACCESS_TOKEN : AuthErrorCode.EXPIRED_REFRESH_TOKEN);
 		} catch (UnsupportedJwtException | MalformedJwtException | SecurityException ex) {
-			throw new ApiException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+			throw new ApiException(
+				isAccessToken ? AuthErrorCode.INVALID_ACCESS_TOKEN : AuthErrorCode.INVALID_REFRESH_TOKEN);
 		}
 	}
 
@@ -122,5 +119,4 @@ public class JwtService {
 	public void removeRefreshToken(Long userId) {
 		jwtRepository.deleteById(userId);
 	}
-
 }
