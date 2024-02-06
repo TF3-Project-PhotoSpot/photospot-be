@@ -15,7 +15,6 @@ import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
-import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.SpotCoordResponse;
 import com.tf4.photospot.spot.application.response.SpotResponse;
@@ -50,8 +49,7 @@ public class SpotService {
 	}
 
 	public NearbySpotListResponse getNearbySpotList(NearbySpotRequest request) {
-		List<NearbySpotResponse> nearbySpots = spotRepository.findNearbySpots(request.coord(), request.radius());
-		return new NearbySpotListResponse(nearbySpots);
+		return new NearbySpotListResponse(spotQueryRepository.findNearbySpots(request.coord(), request.radius()));
 	}
 
 	public SpotResponse findSpot(Long spotId, Long userId, int postPreviewCount) {
