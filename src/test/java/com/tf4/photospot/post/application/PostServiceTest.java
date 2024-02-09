@@ -29,7 +29,6 @@ import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
@@ -57,7 +56,6 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final PostLikeRepository postLikeRepository;
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
-	private final MentionRepository mentionRepository;
 
 	@DisplayName("방명록 미리보기 목록 조회")
 	@TestFactory
@@ -243,10 +241,6 @@ class PostServiceTest extends IntegrationTestSupport {
 
 				// then
 				assertAll(
-					() -> assertThat(post.getPostTags()).containsExactlyInAnyOrderElementsOf(
-						postTagRepository.findByPostId(post.getId())),
-					() -> assertThat(post.getMentions()).containsExactlyInAnyOrderElementsOf(
-						mentionRepository.findByPostId(post.getId())),
 					() -> assertThat(post.getPhoto().getPhotoUrl()).contains(S3Directory.POST_FOLDER.getPath())
 						.doesNotContain(S3Directory.TEMP_FOLDER.getPath()),
 					() -> assertThat(post.getDetailAddress()).isEqualTo("할리스"),

@@ -23,11 +23,9 @@ import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
-import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
-import com.tf4.photospot.post.domain.PostTagRepository;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
@@ -47,10 +45,8 @@ public class PostService {
 	private final PostQueryRepository postQueryRepository;
 	private final PostJdbcRepository postJdbcRepository;
 	private final PostRepository postRepository;
-	private final PostTagRepository postTagRepository;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
-	private final MentionRepository mentionRepository;
 	private final S3Uploader s3Uploader;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
@@ -117,7 +113,6 @@ public class PostService {
 		if (!postJdbcRepository.savePostTags(post.getId(), spotId, tagIds)) {
 			throw new ApiException(PostErrorCode.NOT_FOUND_TAG);
 		}
-		post.addPostTags(postTagRepository.findByPostId(post.getId()));
 	}
 
 	public void saveMentions(Post post, List<Long> mentionedUserIds) {
@@ -127,6 +122,5 @@ public class PostService {
 		if (!postJdbcRepository.saveMentions(post.getId(), mentionedUserIds)) {
 			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
 		}
-		post.addMentions(mentionRepository.findByPostId(post.getId()));
 	}
 }
