@@ -20,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 @Component
 @RequiredArgsConstructor
@@ -69,9 +70,15 @@ public class S3Uploader {
 		return new ObjectMetadata.Builder().contentType(file.getContentType()).contentLength(file.getSize()).build();
 	}
 
-	public String moveFolder(String sourceKey, String destinationKey) {
-		copyFiles(sourceKey, destinationKey);
-		deleteFiles(sourceKey);
+	public String copyToOtherDirectory(String photoUrl, S3Directory fromDirectory, S3Directory toDirectory) {
+		String fileName = extractFileName(photoUrl);
+		String sourceKey = fromDirectory.getPath() + fileName;
+		String destinationKey = toDirectory.getPath() + fileName;
+		return copyToOtherDirectory(sourceKey, destinationKey);
+	}
+
+	private String copyToOtherDirectory(String sourceKey, String destinationKey) {
+		executeS3Copy(sourceKey, destinationKey);
 		try {
 			return s3Template.download(bucket, destinationKey).getURL().toString();
 		} catch (Exception ex) {
@@ -79,7 +86,12 @@ public class S3Uploader {
 		}
 	}
 
-	private void copyFiles(String sourceKey, String destinationKey) {
+	private String extractFileName(String photoUrl) {
+		int lastSeparateIndex = photoUrl.lastIndexOf("/");
+		return photoUrl.substring(lastSeparateIndex + 1);
+	}
+
+	private void executeS3Copy(String sourceKey, String destinationKey) {
 		try {
 			s3Client.copyObject(CopyObjectRequest.builder()
 				.sourceBucket(bucket)
@@ -87,14 +99,22 @@ public class S3Uploader {
 				.destinationBucket(bucket)
 				.destinationKey(destinationKey)
 				.build());
+		} catch (NoSuchKeyException ex) {
+			throw new ApiException(S3UploaderErrorCode.NOT_FOUND_FILE);
 		} catch (Exception ex) {
 			throw new ApiException(S3UploaderErrorCode.UNEXPECTED_COPY_FAIL);
 		}
 	}
 
-	private void deleteFiles(String sourceKey) {
+	public void deleteFile(String photoUrl, S3Directory directory) {
+		delete(directory.getPath() + extractFileName(photoUrl));
+	}
+
+	private void delete(String sourceKey) {
 		try {
 			s3Client.deleteObject(DeleteObjectRequest.builder().bucket(bucket).key(sourceKey).build());
+		} catch (NoSuchKeyException ex) {
+			throw new ApiException(S3UploaderErrorCode.NOT_FOUND_FILE);
 		} catch (Exception ex) {
 			throw new ApiException(S3UploaderErrorCode.UNEXPECTED_DELETE_FAIL);
 		}

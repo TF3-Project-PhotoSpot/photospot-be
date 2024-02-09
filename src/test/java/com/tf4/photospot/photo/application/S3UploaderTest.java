@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
@@ -22,8 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class S3UploaderTest extends IntegrationTestSupport {
 
 	private final S3Uploader s3Uploader;
-
-	private final MockS3Config mockS3Config;
 
 	@TestFactory
 	@DisplayName("요청 유형에 따른 사진 업로드 시나리오")
@@ -59,4 +58,17 @@ public class S3UploaderTest extends IntegrationTestSupport {
 		);
 	}
 
+	@Test
+	void copyFile() {
+		// given
+		var photoUrl = "https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp";
+		var from = S3Directory.TEMP_FOLDER;
+		var to = S3Directory.POST_FOLDER;
+
+		// when
+		String renewalUrl = s3Uploader.copyToOtherDirectory(photoUrl, from, to);
+
+		// then
+		assertThat(renewalUrl).contains(to.getPath()).doesNotContain(from.getPath());
+	}
 }

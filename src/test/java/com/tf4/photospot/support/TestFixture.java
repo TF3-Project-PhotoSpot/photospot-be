@@ -9,8 +9,10 @@ import java.util.stream.IntStream;
 
 import org.locationtech.jts.geom.Point;
 
+import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.photo.domain.Photo;
+import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
@@ -36,6 +38,13 @@ public class TestFixture {
 
 	public static Spot createSpot() {
 		return createSpot("주소", createPoint(), getRandomLikeCount());
+	}
+
+	public static Spot createSpot(CoordinateDto coord) {
+		return Spot.builder()
+			.address("주소")
+			.coord(coord.toCoord())
+			.build();
 	}
 
 	public static Post createPost(Spot spot, User user) {
@@ -145,5 +154,15 @@ public class TestFixture {
 			.post(post)
 			.user(user)
 			.build();
+	}
+
+	public static Mention createMention(Post post, User mentionedUser) {
+		return new Mention(post, mentionedUser);
+	}
+
+	public static List<Mention> createMentions(Post post, List<User> mentionedUsers) {
+		return mentionedUsers.stream()
+			.map(user -> createMention(post, user))
+			.toList();
 	}
 }

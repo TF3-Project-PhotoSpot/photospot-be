@@ -1,4 +1,4 @@
-package com.tf4.photospot.photo.presentation.request;
+package com.tf4.photospot.post.presentation.request;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -6,8 +6,7 @@ import java.time.OffsetDateTime;
 import com.tf4.photospot.global.argument.KoreaCoordinate;
 import com.tf4.photospot.global.dto.CoordinateDto;
 
-public record PhotoSaveHttpRequest(
-
+public record PhotoInfoDto(
 	String photoUrl,
 
 	@KoreaCoordinate
