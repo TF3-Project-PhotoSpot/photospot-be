@@ -4,26 +4,26 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.locationtech.jts.geom.Point;
+import org.springframework.util.StringUtils;
 
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+public record PostUploadRequest(
+	Long userId,
+	SpotInfoDto spotInfoDto,
+	String photoUrl,
+	Point photoCoord,
+	LocalDate photoTakenAt,
+	String detailAddress,
+	List<Long> tags,
+	List<Long> mentions,
+	Boolean isPrivate
+) {
 
-@Getter
-@AllArgsConstructor
-public class PostUploadRequest {
-
-	private Long userId;
-	private SpotInfoDto spotInfoDto;
-	private String photoUrl;
-	private Point photoCoord;
-	private LocalDate photoTakenAt;
-	private String detailAddress;
-	private List<Long> tags;
-	private List<Long> mentions;
-	private Boolean isPrivate;
+	public PostUploadRequest {
+		detailAddress = convertBlankToNull(detailAddress);
+	}
 
 	public static PostUploadRequest of(Long userId, PostUploadHttpRequest request) {
 		return new PostUploadRequest(
@@ -40,9 +40,9 @@ public class PostUploadRequest {
 	}
 
 	private static String convertBlankToNull(String str) {
-		if (str != null && str.isBlank()) {
-			return null;
+		if (StringUtils.hasText(str)) {
+			return str;
 		}
-		return str;
+		return null;
 	}
 }

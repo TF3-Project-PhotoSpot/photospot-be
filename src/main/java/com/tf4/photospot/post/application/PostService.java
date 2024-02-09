@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.global.dto.SlicePageDto;
-import com.tf4.photospot.global.exception.ApiErrorCode;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
@@ -24,11 +23,9 @@ import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
-import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
-import com.tf4.photospot.post.domain.PostTagRepository;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
@@ -38,6 +35,7 @@ import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
 import lombok.RequiredArgsConstructor;
+import software.amazon.awssdk.utils.CollectionUtils;
 
 @Transactional(readOnly = true)
 @Service
@@ -47,10 +45,8 @@ public class PostService {
 	private final PostQueryRepository postQueryRepository;
 	private final PostJdbcRepository postJdbcRepository;
 	private final PostRepository postRepository;
-	private final PostTagRepository postTagRepository;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
-	private final MentionRepository mentionRepository;
 	private final S3Uploader s3Uploader;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
@@ -72,24 +68,24 @@ public class PostService {
 
 	@Transactional
 	public PostUploadResponse upload(PostUploadRequest request) {
-		User writer = userRepository.findById(request.getUserId())
+		User writer = userRepository.findById(request.userId())
 			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		Spot spot = findSpotOrCreate(request.getSpotInfoDto());
+		Spot spot = findSpotOrCreate(request.spotInfoDto());
 		// Todo : bubble
 		Photo photo = Photo.builder()
-			.photoUrl(s3Uploader.copyToOtherDirectory(request.getPhotoUrl(), S3Directory.TEMP_FOLDER,
+			.photoUrl(s3Uploader.copyToOtherDirectory(request.photoUrl(), S3Directory.TEMP_FOLDER,
 				S3Directory.POST_FOLDER))
-			.coord(request.getPhotoCoord())
-			.takenAt(request.getPhotoTakenAt())
+			.coord(request.photoCoord())
+			.takenAt(request.photoTakenAt())
 			.build();
 		Post post = Post.builder()
 			.photo(photo)
 			.spot(spot)
 			.writer(writer)
-			.detailAddress(request.getDetailAddress())
-			.isPrivate(request.getIsPrivate())
+			.detailAddress(request.detailAddress())
+			.isPrivate(request.isPrivate())
 			.build();
-		return savePostAndRelatedEntities(post, spot.getId(), request.getTags(), request.getMentions());
+		return savePostAndRelatedEntities(post, spot.getId(), request.tags(), request.mentions());
 	}
 
 	private PostUploadResponse savePostAndRelatedEntities(Post post, Long spotId, List<Long> tagIds,
@@ -111,26 +107,20 @@ public class PostService {
 	}
 
 	public void savePostTags(Post post, Long spotId, List<Long> tagIds) {
-		if (tagIds == null || tagIds.isEmpty()) {
+		if (CollectionUtils.isNullOrEmpty(tagIds)) {
 			return;
 		}
-		int rowNum = postJdbcRepository.savePostTags(post.getId(), spotId, tagIds);
-		validateRecordCount(rowNum, tagIds.size(), PostErrorCode.NOT_FOUND_TAG);
-		post.addPostTags(postTagRepository.findByPostId(post.getId()));
+		if (!postJdbcRepository.savePostTags(post.getId(), spotId, tagIds)) {
+			throw new ApiException(PostErrorCode.NOT_FOUND_TAG);
+		}
 	}
 
 	public void saveMentions(Post post, List<Long> mentionedUserIds) {
-		if (mentionedUserIds == null || mentionedUserIds.isEmpty()) {
+		if (CollectionUtils.isNullOrEmpty(mentionedUserIds)) {
 			return;
 		}
-		int rowNum = postJdbcRepository.saveMentions(post.getId(), mentionedUserIds);
-		validateRecordCount(rowNum, mentionedUserIds.size(), UserErrorCode.NOT_FOUND_USER);
-		post.addMentions(mentionRepository.findByPostId(post.getId()));
-	}
-
-	private void validateRecordCount(int rowNum, int idNum, ApiErrorCode errorCode) {
-		if (rowNum != idNum) {
-			throw new ApiException(errorCode);
+		if (!postJdbcRepository.saveMentions(post.getId(), mentionedUserIds)) {
+			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
 		}
 	}
 }
