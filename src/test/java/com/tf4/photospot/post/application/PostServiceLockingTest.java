@@ -2,24 +2,27 @@ package com.tf4.photospot.post.application;
 
 import static com.tf4.photospot.support.TestFixture.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.*;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.tf4.photospot.global.exception.ApiException;
-import com.tf4.photospot.global.exception.domain.CommonErrorCode;
+import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostLikeRepository;
@@ -82,36 +85,62 @@ class PostServiceLockingTest {
 			.containsExactly(beforeVersion + 1, beforeLikeCount + 1L);
 	}
 
-	@DisplayName("여러 유저가 특정 방명록의 좋아요를 동시에 누르면 retry가 발생한다.")
-	@Test
-	void postLikeLockTest() throws InterruptedException {
+	@DisplayName("방명록 좋아요 동시성 테스트")
+	@TestFactory
+	Stream<DynamicTest> postLikeLockTest() {
 		//given
-		final int postLikeCount = 5;
+		final int postLikeCount = 2;
 		final Spot spot = spotRepository.save(createSpot());
 		final User writer = userRepository.save(createUser("이성빈"));
 		final Post post = postRepository.save(createPost(spot, writer, 0L));
-		final List<User> postLikeUsers = userRepository.saveAll(createList(() -> createUser("user"), postLikeCount));
+		final List<User> users = userRepository.saveAll(createList(() -> createUser("user"), postLikeCount));
 		final ExecutorService executorService = Executors.newFixedThreadPool(postLikeCount);
-		final CountDownLatch completeLatch = new CountDownLatch(postLikeCount);
-		var expectPostLikeSuccessCount = new AtomicLong(postLikeCount);
-		//when
-		postLikeUsers.forEach(user -> executorService.submit(() -> {
-			try {
-				postService.likePost(post.getId(), user.getId());
-			} catch (Exception ex) {
-				assertThat(ex).isInstanceOf(ApiException.class)
-					.extracting("errorCode")
-					.isEqualTo(CommonErrorCode.FAILED_BECAUSE_OF_CONCURRENCY_UPDATE);
-				expectPostLikeSuccessCount.decrementAndGet();
-			}
-			completeLatch.countDown();
-		}));
-		completeLatch.await();
 
-		//then
-		assertThat(postRepository.findById(post.getId())).isPresent().get()
-			.extracting("likeCount")
-			.isEqualTo(expectPostLikeSuccessCount.get());
+		return Stream.of(
+			dynamicTest("여러 유저가 좋아요를 동시에 누르면 retry로 성공한다.", () -> {
+				//given
+				final CountDownLatch completeLatch = new CountDownLatch(postLikeCount);
+				//when
+				users.forEach(user -> executorService.submit(() -> {
+					postService.likePost(post.getId(), user.getId());
+					completeLatch.countDown();
+				}));
+				completeLatch.await();
+				//then
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(postLikeCount));
+			}),
+			dynamicTest("여러 유저가 좋아요 취소를 동시에 누르면 retry로 성공한다.", () -> {
+				//given
+				final CountDownLatch completeLatch = new CountDownLatch(postLikeCount);
+				//when
+				users.forEach(user -> executorService.submit(() -> {
+					postService.canclePostLike(post.getId(), user.getId());
+					completeLatch.countDown();
+				}));
+				completeLatch.await();
+				//then
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isZero());
+			}),
+			dynamicTest("좋아요를 누르고 바로 취소를 누르면 좋아요만 적용이 되고 취소는 NO_EXISTS_LIKE 예외가 발생한다.", () -> {
+				//given
+				final User user = userRepository.save(createUser("user"));
+				final Long beforeLikes = post.getLikeCount();
+				//when
+				var likeWorker = CompletableFuture.runAsync(() -> postService.likePost(post.getId(), user.getId()));
+				var likeCancelWorker = CompletableFuture.runAsync(
+					() -> postService.canclePostLike(post.getId(), user.getId()));
+				//then
+				assertThatThrownBy(likeCancelWorker::join)
+					.extracting(Throwable::getCause)
+					.isInstanceOf(ApiException.class)
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.NO_EXISTS_LIKE);
+				likeWorker.join();
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes + 1));
+			}));
 	}
 
 	void likePostWaitWithNoRetry(Post post, User user, CountDownLatch waitingLatch) {

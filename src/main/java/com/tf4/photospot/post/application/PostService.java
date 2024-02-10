@@ -140,4 +140,17 @@ public class PostService {
 		final PostLike postLike = post.likeFrom(user);
 		postLikeRepository.save(postLike);
 	}
+
+	@Retry
+	@Transactional
+	public void canclePostLike(Long postId, Long userId) {
+		final User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		final Post post = postRepository.findById(postId)
+			.orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+		final PostLike postLike = postQueryRepository.findPostLike(post, user)
+			.orElseThrow(() -> new ApiException(PostErrorCode.NO_EXISTS_LIKE));
+		post.cancelLike(postLike);
+		postLikeRepository.delete(postLike);
+	}
 }

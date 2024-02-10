@@ -48,11 +48,11 @@ public class TestFixture {
 	}
 
 	public static Post createPost(Spot spot, User user) {
-		return createPost(spot, user, getRandomLikeCount());
+		return createPost(spot, user, 0L);
 	}
 
 	public static Post createPost(Spot spot, User user, boolean isPrivate) {
-		return createPost(spot, user, createPhoto(), getRandomLikeCount(), isPrivate);
+		return createPost(spot, user, createPhoto(), 0L, isPrivate);
 	}
 
 	public static Post createPost(Spot spot, User user, Long likeCount) {
@@ -60,7 +60,7 @@ public class TestFixture {
 	}
 
 	public static Post createPost(Spot spot, User user, Photo photo) {
-		return createPost(spot, user, photo, getRandomLikeCount(), false);
+		return createPost(spot, user, photo, 0L, false);
 	}
 
 	public static Post createPost(Spot spot, User user, Photo photo, Long likeCount, boolean isPrivate) {
@@ -74,7 +74,7 @@ public class TestFixture {
 			.build();
 	}
 
-	private static long getRandomLikeCount() {
+	public static long createRandomLikeCount() {
 		return RANDOM.nextInt(LIKE_COUNT_RANGE);
 	}
 

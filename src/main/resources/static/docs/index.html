@@ -473,6 +473,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_방명록_미리보기_목록_조회">방명록 미리보기 목록 조회</a></li>
 <li><a href="#_방명록_상세_목록_조회">방명록 상세 목록 조회</a></li>
 <li><a href="#_방명록_등록">방명록 등록</a></li>
+<li><a href="#_방명록_좋아요">방명록 좋아요</a></li>
 </ul>
 </li>
 <li><a href="#_map_api">Map API</a>
@@ -653,6 +654,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-top"><p class="tableblock">MISSING_REQUEST_PARAMETER</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">400</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">요청 파라미터를 추가해주세요.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">CommonErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>FAILED_BECAUSE_OF_CONCURRENCY_UPDATE</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">FAILED_BECAUSE_OF_CONCURRENCY_UPDATE</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">동시에 많은 업데이트로 인해 실패했습니다.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">MapErrorCode</p></td>
@@ -1973,6 +1981,51 @@ Host: localhost:8080
 </table>
 </div>
 </div>
+<div class="sect2">
+<h3 id="_방명록_좋아요"><a class="link" href="#_방명록_좋아요">방명록 좋아요</a></h3>
+<hr>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">POST /api/v1/posts/1/likes HTTP/1.1
+Host: localhost:8080
+Content-Type: application/x-www-form-urlencoded</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "message" : "성공"
+}</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_12"><a class="link" href="#_response_fields_12">Response Fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>message</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">성공</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -2043,7 +2096,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_12"><a class="link" href="#_response_fields_12">Response Fields</a></h4>
+<h4 id="_response_fields_13"><a class="link" href="#_response_fields_13">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -2106,7 +2159,7 @@ Host: localhost:8080</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-01-31 16:11:23 +0900
+Last updated 2024-01-29 00:53:38 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
