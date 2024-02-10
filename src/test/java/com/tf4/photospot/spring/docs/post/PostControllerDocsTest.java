@@ -172,4 +172,14 @@ public class PostControllerDocsTest extends RestDocsSupport {
 				)
 			));
 	}
+
+	@Test
+	void likePost() throws Exception {
+		//given
+		willDoNothing().given(postService).likePost(anyLong(), anyLong());
+		//when
+		mockMvc.perform(post("/api/v1/posts/{postId}/likes", 1L))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplateDefaultSuccess());
+	}
 }

@@ -6,11 +6,13 @@ import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.global.argument.AuthUserId;
+import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostListRequest;
@@ -28,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class PostController {
-
 	private final PostService postService;
 
 	@GetMapping
@@ -51,5 +52,14 @@ public class PostController {
 	@PostMapping
 	public PostUploadResponse uploadPost(@AuthUserId Long userId, @RequestBody @Valid PostUploadHttpRequest request) {
 		return postService.upload(PostUploadRequest.of(userId, request));
+	}
+
+	@PostMapping("{postId}/likes")
+	public ApiResponse likePost(
+		@PathVariable(name = "postId") Long postId,
+		@AuthUserId Long userId
+	) {
+		postService.likePost(postId, userId);
+		return ApiResponse.SUCCESS;
 	}
 }

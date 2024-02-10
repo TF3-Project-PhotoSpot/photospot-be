@@ -21,6 +21,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -64,6 +65,9 @@ public class Post extends BaseEntity {
 
 	private LocalDateTime deletedAt;
 
+	@Version
+	private Integer version;
+
 	@Builder
 	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount,
 		boolean isPrivate) {
@@ -81,11 +85,8 @@ public class Post extends BaseEntity {
 		}
 	}
 
-	public void addPostTags(List<PostTag> postTags) {
-		this.postTags.addAll(postTags);
-	}
-
-	public void addMentions(List<Mention> mentions) {
-		this.mentions.addAll(mentions);
+	public PostLike likeFrom(User user) {
+		likeCount += 1;
+		return new PostLike(this, user);
 	}
 }

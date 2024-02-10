@@ -24,3 +24,11 @@ include::{snippets}/post-controller-docs-test/upload-post/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/upload-post/request-fields.adoc[]
 include::{snippets}/post-controller-docs-test/upload-post/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/upload-post/response-fields.adoc[]
+
+=== 방명록 좋아요
+
+'''
+
+include::{snippets}/post-controller-docs-test/like-post/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/like-post/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/like-post/response-fields.adoc[]
