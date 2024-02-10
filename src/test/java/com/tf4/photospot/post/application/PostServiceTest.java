@@ -67,13 +67,37 @@ class PostServiceTest extends IntegrationTestSupport {
 		final User user = userRepository.save(createUser("user"));
 
 		return Stream.of(
-			dynamicTest("좋아요를 누를 수 있다.", () ->
-				assertThatNoException().isThrownBy(() -> postService.likePost(post.getId(), user.getId()))),
-			dynamicTest("좋아요를 중복해서 누를 수 없다.", () ->
+			dynamicTest("좋아요를 할 수 있다.", () -> {
+				//given
+				final Long beforeLikes = post.getLikeCount();
+				//when
+				postService.likePost(post.getId(), user.getId());
+				//then
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes + 1));
+			}),
+			dynamicTest("좋아요를 중복해서 할 수 없다.", () ->
 				assertThatThrownBy(() -> postService.likePost(post.getId(), user.getId()))
 					.isInstanceOf(ApiException.class)
 					.extracting("errorCode")
-					.isEqualTo(PostErrorCode.ALREADY_LIKE)));
+					.isEqualTo(PostErrorCode.ALREADY_LIKE)
+			),
+			dynamicTest("좋아요 취소를 할 수 있다.", () -> {
+				//given
+				final Long beforeLikes = post.getLikeCount();
+				//when
+				postService.canclePostLike(post.getId(), user.getId());
+				//then
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes - 1));
+			}),
+			dynamicTest("좋아요 취소를 중복해서 할 수 없다.", () ->
+				assertThatThrownBy(() -> postService.canclePostLike(post.getId(), user.getId()))
+					.isInstanceOf(ApiException.class)
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.NO_EXISTS_LIKE)
+			)
+		);
 	}
 
 	@DisplayName("방명록 미리보기 목록 조회")

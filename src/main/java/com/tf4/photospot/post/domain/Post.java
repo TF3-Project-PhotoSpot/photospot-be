@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tf4.photospot.global.entity.BaseEntity;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.user.domain.User;
@@ -86,7 +88,14 @@ public class Post extends BaseEntity {
 	}
 
 	public PostLike likeFrom(User user) {
-		likeCount += 1;
+		likeCount++;
 		return new PostLike(this, user);
+	}
+
+	public void cancelLike(PostLike postLike) {
+		if (this != postLike.getPost() || likeCount == 0L) {
+			throw new ApiException(PostErrorCode.CAN_NOT_CANCEL_LIKE);
+		}
+		likeCount--;
 	}
 }

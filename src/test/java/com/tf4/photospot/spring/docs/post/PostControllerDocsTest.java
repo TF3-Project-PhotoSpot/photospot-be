@@ -182,4 +182,14 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplateDefaultSuccess());
 	}
+
+	@Test
+	void cancelPostLike() throws Exception {
+		//given
+		willDoNothing().given(postService).canclePostLike(anyLong(), anyLong());
+		//when
+		mockMvc.perform(delete("/api/v1/posts/{postId}/likes", 1L))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplateDefaultSuccess());
+	}
 }

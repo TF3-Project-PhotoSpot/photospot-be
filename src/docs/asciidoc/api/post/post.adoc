@@ -32,3 +32,11 @@ include::{snippets}/post-controller-docs-test/upload-post/response-fields.adoc[]
 include::{snippets}/post-controller-docs-test/like-post/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/like-post/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/like-post/response-fields.adoc[]
+
+=== 방명록 좋아요 취소
+
+'''
+
+include::{snippets}/post-controller-docs-test/cancel-post-like/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/cancel-post-like/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/cancel-post-like/response-fields.adoc[]

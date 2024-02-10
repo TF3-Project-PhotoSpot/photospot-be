@@ -7,6 +7,7 @@ import static com.tf4.photospot.post.domain.QPostLike.*;
 import static com.tf4.photospot.post.domain.QPostTag.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -23,6 +24,7 @@ import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
 import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
 import com.tf4.photospot.post.domain.Post;
+import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.user.domain.QUser;
 import com.tf4.photospot.user.domain.User;
@@ -90,5 +92,11 @@ public class PostQueryRepository {
 			.where(postLike.post.eq(post).and(postLike.user.eq(user)))
 			.fetchFirst();
 		return exists != null;
+	}
+
+	public Optional<PostLike> findPostLike(Post post, User user) {
+		return Optional.ofNullable(queryFactory.selectFrom(postLike)
+			.where(postLike.post.eq(post).and(postLike.user.eq(user)))
+			.fetchOne());
 	}
 }
