@@ -9,6 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.global.aop.Retry;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
@@ -24,6 +25,8 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.domain.Post;
+import com.tf4.photospot.post.domain.PostLike;
+import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
@@ -41,12 +44,12 @@ import software.amazon.awssdk.utils.CollectionUtils;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-
 	private final PostQueryRepository postQueryRepository;
 	private final PostJdbcRepository postJdbcRepository;
 	private final PostRepository postRepository;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
+	private final PostLikeRepository postLikeRepository;
 	private final S3Uploader s3Uploader;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
@@ -122,5 +125,19 @@ public class PostService {
 		if (!postJdbcRepository.saveMentions(post.getId(), mentionedUserIds)) {
 			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
 		}
+	}
+
+	@Retry
+	@Transactional
+	public void likePost(Long postId, Long userId) {
+		final User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		final Post post = postRepository.findById(postId)
+			.orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+		if (postQueryRepository.existsPostLike(post, user)) {
+			throw new ApiException(PostErrorCode.ALREADY_LIKE);
+		}
+		final PostLike postLike = post.likeFrom(user);
+		postLikeRepository.save(postLike);
 	}
 }

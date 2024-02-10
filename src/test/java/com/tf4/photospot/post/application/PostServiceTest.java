@@ -57,6 +57,25 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
 
+	@DisplayName("방명록 좋아요")
+	@TestFactory
+	Stream<DynamicTest> likePost() {
+		//given
+		final Spot spot = spotRepository.save(createSpot());
+		final User writer = userRepository.save(createUser("이성빈"));
+		final Post post = postRepository.save(createPost(spot, writer, 0L));
+		final User user = userRepository.save(createUser("user"));
+
+		return Stream.of(
+			dynamicTest("좋아요를 누를 수 있다.", () ->
+				assertThatNoException().isThrownBy(() -> postService.likePost(post.getId(), user.getId()))),
+			dynamicTest("좋아요를 중복해서 누를 수 없다.", () ->
+				assertThatThrownBy(() -> postService.likePost(post.getId(), user.getId()))
+					.isInstanceOf(ApiException.class)
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.ALREADY_LIKE)));
+	}
+
 	@DisplayName("방명록 미리보기 목록 조회")
 	@TestFactory
 	Stream<DynamicTest> getPostPreviews() {

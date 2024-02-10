@@ -2,6 +2,7 @@ package com.tf4.photospot.spring.docs;
 
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.snippet.Attributes.*;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import org.springframework.restdocs.RestDocumentationContextProvider;
 import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.restdocs.mockmvc.RestDocumentationResultHandler;
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.restdocs.snippet.Snippet;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -56,6 +58,11 @@ public abstract class RestDocsSupport {
 			preprocessRequest(prettyPrint()),
 			preprocessResponse(prettyPrint()),
 			snipets);
+	}
+
+	protected RestDocumentationResultHandler restDocsTemplateDefaultSuccess() {
+		return restDocsTemplate(responseFields(
+			fieldWithPath("message").type(JsonFieldType.STRING).description("성공")));
 	}
 
 	protected <T> Attribute defaultValue(T value) {

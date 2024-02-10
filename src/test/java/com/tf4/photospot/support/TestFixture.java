@@ -37,7 +37,7 @@ public class TestFixture {
 	}
 
 	public static Spot createSpot() {
-		return createSpot("주소", createPoint(), getRandomLikeCount());
+		return createSpot("주소", createPoint(), 0L);
 	}
 
 	public static Spot createSpot(CoordinateDto coord) {

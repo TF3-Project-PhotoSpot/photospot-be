@@ -25,6 +25,7 @@ import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.user.domain.QUser;
+import com.tf4.photospot.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
 
@@ -81,5 +82,13 @@ public class PostQueryRepository {
 
 	private BooleanExpression canVisble() {
 		return post.isPrivate.isFalse().and(post.deletedAt.isNull());
+	}
+
+	public boolean existsPostLike(Post post, User user) {
+		final Integer exists = queryFactory.selectOne()
+			.from(postLike)
+			.where(postLike.post.eq(post).and(postLike.user.eq(user)))
+			.fetchFirst();
+		return exists != null;
 	}
 }
