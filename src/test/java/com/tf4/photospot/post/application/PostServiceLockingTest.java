@@ -115,7 +115,7 @@ class PostServiceLockingTest {
 				final CountDownLatch completeLatch = new CountDownLatch(postLikeCount);
 				//when
 				users.forEach(user -> executorService.submit(() -> {
-					postService.canclePostLike(post.getId(), user.getId());
+					postService.cancelPostLike(post.getId(), user.getId());
 					completeLatch.countDown();
 				}));
 				completeLatch.await();
@@ -130,7 +130,7 @@ class PostServiceLockingTest {
 				//when
 				var likeWorker = CompletableFuture.runAsync(() -> postService.likePost(post.getId(), user.getId()));
 				var likeCancelWorker = CompletableFuture.runAsync(
-					() -> postService.canclePostLike(post.getId(), user.getId()));
+					() -> postService.cancelPostLike(post.getId(), user.getId()));
 				//then
 				assertThatThrownBy(likeCancelWorker::join)
 					.extracting(Throwable::getCause)

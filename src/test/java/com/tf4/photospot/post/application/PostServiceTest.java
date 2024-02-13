@@ -86,13 +86,13 @@ class PostServiceTest extends IntegrationTestSupport {
 				//given
 				final Long beforeLikes = post.getLikeCount();
 				//when
-				postService.canclePostLike(post.getId(), user.getId());
+				postService.cancelPostLike(post.getId(), user.getId());
 				//then
 				assertThat(postRepository.findById(post.getId())).isPresent().get()
 					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes - 1));
 			}),
 			dynamicTest("좋아요 취소를 중복해서 할 수 없다.", () ->
-				assertThatThrownBy(() -> postService.canclePostLike(post.getId(), user.getId()))
+				assertThatThrownBy(() -> postService.cancelPostLike(post.getId(), user.getId()))
 					.isInstanceOf(ApiException.class)
 					.extracting("errorCode")
 					.isEqualTo(PostErrorCode.NO_EXISTS_LIKE)

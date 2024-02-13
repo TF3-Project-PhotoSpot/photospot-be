@@ -94,9 +94,10 @@ public class PostQueryRepository {
 		return exists != null;
 	}
 
-	public Optional<PostLike> findPostLike(Post post, User user) {
+	public Optional<PostLike> findPostLikeFetch(Long postId, Long userId) {
 		return Optional.ofNullable(queryFactory.selectFrom(postLike)
-			.where(postLike.post.eq(post).and(postLike.user.eq(user)))
+			.join(postLike.post, post).fetchJoin()
+			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
 			.fetchOne());
 	}
 }

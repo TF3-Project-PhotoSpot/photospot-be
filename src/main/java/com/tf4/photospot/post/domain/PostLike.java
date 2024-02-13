@@ -40,4 +40,8 @@ public class PostLike extends BaseEntity {
 		this.post = post;
 		this.user = user;
 	}
+
+	public void cancel() {
+		post.cancelLike(this);
+	}
 }
