@@ -1,13 +1,16 @@
 package com.tf4.photospot.global.util;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
@@ -45,5 +48,13 @@ public abstract class QueryDslUtils extends PageUtils {
 			return Order.ASC;
 		}
 		return Order.DESC;
+	}
+
+	public BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> expression) {
+		try {
+			return new BooleanBuilder(expression.get());
+		} catch (IllegalArgumentException e) {
+			return new BooleanBuilder();
+		}
 	}
 }

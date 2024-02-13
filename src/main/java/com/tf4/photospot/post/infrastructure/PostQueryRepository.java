@@ -13,8 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tf4.photospot.global.util.QueryDslUtils;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
@@ -43,8 +43,8 @@ public class PostQueryRepository extends QueryDslUtils {
 				photo.photoUrl
 			))
 			.from(post)
-			.join(post.photo, photo);
-		applyPostPreviewCondition(query, cond);
+			.join(post.photo, photo)
+			.where(createPostSearchBuilder(cond));
 		return orderBy(query, post, pageable).toSlice(query, pageable);
 	}
 
@@ -56,8 +56,8 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin()
-			.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(cond.userId())));
-		applyPostPreviewCondition(query, cond);
+			.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(cond.userId())))
+			.where(createPostSearchBuilder(cond));
 		return orderBy(query, post, pageable).toSlice(query, pageable);
 	}
 
@@ -69,39 +69,37 @@ public class PostQueryRepository extends QueryDslUtils {
 			.fetch();
 	}
 
-	private <T> void applyPostPreviewCondition(JPAQuery<T> query, PostSearchCondition cond) {
+	private BooleanBuilder createPostSearchBuilder(PostSearchCondition cond) {
+		final BooleanBuilder searchBuilder = new BooleanBuilder(isNotDeleted());
 		switch (cond.type()) {
-			case MY_POSTS -> query.where(
-				equalsWriter(cond.userId()),
-				post.deletedAt.isNull()
-			);
-			case POSTS_OF_SPOT -> query.where(
-				equalsSpot(cond.spotId()),
-				post.isPrivate.isFalse().or(equalsWriter(cond.userId())),
-				post.deletedAt.isNull()
-			);
+			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
+			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond));
 		}
+		return searchBuilder;
 	}
 
-	private BooleanExpression equalsPostLike(Long userId) {
-		if (userId == null) {
-			return null;
-		}
-		return postLike.user.id.eq(userId);
+	private BooleanExpression canVisible(PostSearchCondition cond) {
+		return isPublicPost().or(equalsWriter(cond.userId()));
 	}
 
-	private BooleanExpression equalsWriter(Long writerId) {
-		if (writerId == null) {
-			return null;
-		}
-		return post.writer.id.eq(writerId);
+	private static BooleanExpression isPublicPost() {
+		return post.isPrivate.isFalse();
 	}
 
-	private BooleanExpression equalsSpot(Long spotId) {
-		if (spotId == null) {
-			return null;
-		}
-		return post.spot.id.eq(spotId);
+	private static BooleanExpression isNotDeleted() {
+		return post.deletedAt.isNull();
+	}
+
+	private BooleanBuilder equalsPostLike(Long userId) {
+		return nullSafeBuilder(() -> postLike.user.id.eq(userId));
+	}
+
+	private BooleanBuilder equalsWriter(Long writerId) {
+		return nullSafeBuilder(() -> post.writer.id.eq(writerId));
+	}
+
+	private BooleanBuilder equalsSpot(Long spotId) {
+		return nullSafeBuilder(() -> post.spot.id.eq(spotId));
 	}
 
 	public boolean existsPostLike(Post post, User user) {
