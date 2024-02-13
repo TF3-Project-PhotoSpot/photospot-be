@@ -96,4 +96,17 @@ public class PostController {
 			.build();
 		return postService.getPostPreviews(searchCondition);
 	}
+
+	@GetMapping("/mine")
+	public SlicePageDto<PostDetailResponse> getMyPostDetails(
+		@AuthUserId Long userId,
+		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.userId(userId)
+			.type(PostSearchType.MY_POSTS)
+			.pageable(pageable)
+			.build();
+		return postService.getPosts(searchCondition);
+	}
 }
