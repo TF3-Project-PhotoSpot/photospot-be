@@ -24,7 +24,12 @@ class PostListRequestTest {
 		//when then
 		assertThatStream(sortableList.stream()).allSatisfy(
 			sort -> assertThatNoException().isThrownBy(
-				() -> new PostListRequest(1L, 1L, PageRequest.of(0, 10, sort)))
+				() -> PostSearchCondition.builder()
+					.spotId(1L)
+					.userId(1L)
+					.pageable(PageRequest.of(0, 10, sort))
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.build())
 		);
 
 	}
@@ -34,7 +39,13 @@ class PostListRequestTest {
 	void failCreatePostListRequest() {
 		//given
 		final Sort unsortable = Sort.by(Sort.Order.desc("detailAddress"));
-		assertThatThrownBy(() -> new PostListRequest(1L, 1L, PageRequest.of(0, 10, unsortable)))
+		assertThatThrownBy(() ->
+			PostSearchCondition.builder()
+				.spotId(1L)
+				.userId(1L)
+				.pageable(PageRequest.of(0, 10, unsortable))
+				.type(PostSearchType.POSTS_OF_SPOT)
+				.build())
 			.extracting("errorCode")
 			.isEqualTo(CommonErrorCode.CANNOT_SORTED_PROPERTY);
 	}

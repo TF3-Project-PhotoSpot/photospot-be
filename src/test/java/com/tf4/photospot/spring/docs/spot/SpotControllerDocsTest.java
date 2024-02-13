@@ -16,6 +16,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.map.application.MapService;
 import com.tf4.photospot.map.application.response.SearchByCoordResponse;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
@@ -67,7 +68,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 		//given
 		SpotResponse spotResponse = createSpotResponse();
 		given(mapService.searchDistanceBetween(any(Point.class), any(Point.class))).willReturn(100);
-		given(spotService.findSpot(anyLong(), anyLong(), anyInt())).willReturn(spotResponse);
+		given(spotService.findSpot(any(PostSearchCondition.class))).willReturn(spotResponse);
 		//when
 		mockMvc.perform(get("/api/v1/spots/{spotId}", spotResponse.id())
 				.queryParam("lon", String.valueOf(DEFAULT_COORD.lon()))
@@ -109,8 +110,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 			.postCount(2L)
 			.previewResponses(List.of(
 				new PostPreviewResponse(1L, 2L, "photoUrl2"),
-				new PostPreviewResponse(1L, 1L, "photoUrl1"))
-			)
+				new PostPreviewResponse(1L, 1L, "photoUrl1")))
 			.bookmarked(false)
 			.build();
 	}

@@ -16,8 +16,8 @@ import com.tf4.photospot.global.argument.AuthUserId;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -39,7 +39,13 @@ public class PostController {
 		@AuthUserId Long userId,
 		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		return postService.getPosts(new PostListRequest(spotId, userId, pageable));
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.spotId(spotId)
+			.userId(userId)
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(pageable)
+			.build();
+		return postService.getPosts(searchCondition);
 	}
 
 	@GetMapping("/preview")
@@ -47,7 +53,12 @@ public class PostController {
 		@RequestParam(name = "spotId") Long spotId,
 		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		return postService.getPostPreviews(new PostPreviewListRequest(spotId, pageable));
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.spotId(spotId)
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(pageable)
+			.build();
+		return postService.getPostPreviews(searchCondition);
 	}
 
 	@PostMapping
@@ -71,5 +82,18 @@ public class PostController {
 	) {
 		postService.likePost(postId, userId);
 		return ApiResponse.SUCCESS;
+	}
+
+	@GetMapping("/preview/mine")
+	public SlicePageDto<PostPreviewResponse> getMyPosts(
+		@AuthUserId Long userId,
+		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.userId(userId)
+			.type(PostSearchType.MY_POSTS)
+			.pageable(pageable)
+			.build();
+		return postService.getPostPreviews(searchCondition);
 	}
 }

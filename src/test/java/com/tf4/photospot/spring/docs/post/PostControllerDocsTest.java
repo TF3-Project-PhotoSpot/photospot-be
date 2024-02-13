@@ -16,8 +16,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -43,7 +42,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		//given
 		var response = SlicePageDto.wrap(List.of(
 			new PostPreviewResponse(1L, 1L, "photoUrl")), false);
-		given(postService.getPostPreviews(any(PostPreviewListRequest.class))).willReturn(response);
+		given(postService.getPostPreviews(any(PostSearchCondition.class))).willReturn(response);
 		//when
 		mockMvc.perform(get("/api/v1/posts/preview")
 				.queryParam("spotId", "1")
@@ -84,7 +83,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.writer(new WriterResponse(1L, "nickname", "profileUrl"))
 			.tags(List.of(new TagResponse(1L, "iconUrl", "tagName")))
 			.build()), false);
-		given(postService.getPosts(any(PostListRequest.class))).willReturn(response);
+		given(postService.getPosts(any(PostSearchCondition.class))).willReturn(response);
 		//when
 		mockMvc.perform(get("/api/v1/posts")
 				.queryParam("spotId", "1")

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.SpotErrorCode;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
@@ -52,11 +52,11 @@ public class SpotService {
 		return new NearbySpotListResponse(spotQueryRepository.findNearbySpots(request.coord(), request.radius()));
 	}
 
-	public SpotResponse findSpot(Long spotId, Long userId, int postPreviewCount) {
-		Spot spot = spotRepository.findById(spotId).orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
-		Boolean bookmarked = spotQueryRepository.existsBookmark(spot.getId(), userId);
-		Slice<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(
-			PostPreviewListRequest.createLatestPostsRequest(spotId, postPreviewCount));
+	public SpotResponse findSpot(PostSearchCondition searchCond) {
+		final Spot spot = spotRepository.findById(searchCond.spotId())
+			.orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
+		final Boolean bookmarked = spotQueryRepository.existsBookmark(spot.getId(), searchCond.userId());
+		final Slice<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(searchCond);
 		return SpotResponse.of(spot, bookmarked, postPreviews.getContent());
 	}
 

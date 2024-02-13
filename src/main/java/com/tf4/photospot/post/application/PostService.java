@@ -17,8 +17,7 @@ import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.S3Directory;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -52,8 +51,8 @@ public class PostService {
 	private final PostLikeRepository postLikeRepository;
 	private final S3Uploader s3Uploader;
 
-	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
-		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(request);
+	public SlicePageDto<PostDetailResponse> getPosts(PostSearchCondition postSearchCond) {
+		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(postSearchCond);
 		final Map<Post, List<PostTag>> postTagGroup = postQueryRepository
 			.findPostTagsIn(postResponses.stream().map(PostWithLikeStatus::post).toList())
 			.stream()
@@ -65,8 +64,8 @@ public class PostService {
 		return SlicePageDto.wrap(postDetailResponses, postResponses.hasNext());
 	}
 
-	public SlicePageDto<PostPreviewResponse> getPostPreviews(PostPreviewListRequest request) {
-		return SlicePageDto.wrap(postQueryRepository.findPostPreviews(request));
+	public SlicePageDto<PostPreviewResponse> getPostPreviews(PostSearchCondition postSearchCond) {
+		return SlicePageDto.wrap(postQueryRepository.findPostPreviews(postSearchCond));
 	}
 
 	@Transactional
