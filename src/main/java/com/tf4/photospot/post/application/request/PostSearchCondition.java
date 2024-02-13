@@ -2,9 +2,6 @@ package com.tf4.photospot.post.application.request;
 
 import org.springframework.data.domain.Pageable;
 
-import com.tf4.photospot.global.exception.ApiException;
-import com.tf4.photospot.global.exception.domain.PostErrorCode;
-
 import lombok.Builder;
 
 public record PostSearchCondition(
@@ -13,11 +10,13 @@ public record PostSearchCondition(
 	PostSearchType type,
 	Pageable pageable
 ) {
+
 	@Builder
-	public PostSearchCondition {
-		if (type == null) {
-			throw new ApiException(PostErrorCode.REQUIRE_POST_SEARCH_TYPE);
-		}
-		type.verifyOrders(pageable.getSort());
+	public PostSearchCondition(Long spotId, Long userId, PostSearchType type, Pageable pageable) {
+		this.spotId = spotId;
+		this.userId = userId;
+		this.type = type;
+		this.pageable = pageable;
+		type.verify(this);
 	}
 }
