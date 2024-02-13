@@ -24,8 +24,8 @@ import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.mockobject.MockS3Config;
 import com.tf4.photospot.photo.domain.S3Directory;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -112,14 +112,22 @@ class PostServiceTest extends IntegrationTestSupport {
 		List<Post> posts = createList(() -> createPost(spot, writer), 15);
 		postRepository.saveAll(posts);
 		// Common Request
-		var firstPageRequest = new PostPreviewListRequest(spot.getId(),
-			PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+		var firstPageRequest = PostSearchCondition.builder()
+			.spotId(spot.getId())
+			.userId(writer.getId())
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+			.build();
 
 		return Stream.of(
 			dynamicTest("슬라이스 페이징으로 조회한다.", () -> {
 				//given
-				var lastPageRequest = new PostPreviewListRequest(spot.getId(),
-					PageRequest.of(1, 10, Sort.by(Sort.Order.desc("id"))));
+				var lastPageRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(writer.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(1, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
 				//when
 				SlicePageDto<PostPreviewResponse> firstResponse = postService.getPostPreviews(firstPageRequest);
 				SlicePageDto<PostPreviewResponse> lastResponse = postService.getPostPreviews(lastPageRequest);
@@ -131,8 +139,12 @@ class PostServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("좋아요순으로 조회할 수 있다.", () -> {
 				//given
-				var allPostRequest = new PostPreviewListRequest(spot.getId(),
-					PageRequest.of(0, 15, Sort.by(Sort.Order.desc("likeCount"))));
+				var allPostRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(writer.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "likeCount")))
+					.build();
 				//when
 				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(allPostRequest);
 				final List<Long> postIdsSortedLikeCountDesc = posts.stream()
@@ -150,8 +162,12 @@ class PostServiceTest extends IntegrationTestSupport {
 				deletePost.delete();
 				postRepository.saveAll(List.of(privatePost, deletePost));
 
-				var latestPostRequest = new PostPreviewListRequest(spot.getId(),
-					PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+				var latestPostRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(writer.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
 				//when
 				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(latestPostRequest);
 				//then
@@ -179,14 +195,22 @@ class PostServiceTest extends IntegrationTestSupport {
 		postTagRepository.saveAll(createPostTags(spot, lastPost, tags));
 		postLikeRepository.save(createPostLike(lastPost, reader));
 		// Common Request
-		PostListRequest firstPageRequest = new PostListRequest(spot.getId(), reader.getId(),
-			PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+		final PostSearchCondition firstPageRequest = PostSearchCondition.builder()
+			.spotId(spot.getId())
+			.userId(reader.getId())
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+			.build();
 
 		return Stream.of(
 			dynamicTest("방명록 상세 목록을 슬라이스 페이징으로 조회한다.", () -> {
 				//given
-				PostListRequest lastPageRequest = new PostListRequest(spot.getId(), reader.getId(),
-					PageRequest.of(1, 10, Sort.by(Sort.Order.desc("id"))));
+				PostSearchCondition lastPageRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(writer.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(1, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
 				//when
 				SlicePageDto<PostDetailResponse> firstResponse = postService.getPosts(firstPageRequest);
 				SlicePageDto<PostDetailResponse> lastResponse = postService.getPosts(lastPageRequest);
@@ -211,13 +235,22 @@ class PostServiceTest extends IntegrationTestSupport {
 				assertThat(postWithoutTagAndLikeStatus.isLiked()).isFalse();
 			}),
 			dynamicTest("최신순으로 조회할 수 있다.", () -> {
-				//given when
-				SlicePageDto<PostDetailResponse> postsSortedByLatest = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id")))));
-				SlicePageDto<PostDetailResponse> postsSortedByOldest = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")))));
+				//given
+				final PostSearchCondition searchByLatest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				final PostSearchCondition searchByOldest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id")))
+					.build();
+				// when
+				SlicePageDto<PostDetailResponse> postsSortedByLatest = postService.getPosts(searchByLatest);
+				SlicePageDto<PostDetailResponse> postsSortedByOldest = postService.getPosts(searchByOldest);
 				//then
 				assertThatList(postsSortedByLatest.content()).isSortedAccordingTo(
 					comparing(PostDetailResponse::id).reversed());
@@ -225,13 +258,22 @@ class PostServiceTest extends IntegrationTestSupport {
 					comparing(PostDetailResponse::id));
 			}),
 			dynamicTest("좋아요순으로 조회할 수 있다.", () -> {
-				//given when
-				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCount = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount")))));
-				SlicePageDto<PostDetailResponse> postsSortedByLeastLikeCount = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.asc("likeCount")))));
+				//given
+				final PostSearchCondition searchByMostLikes = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount"))))
+					.build();
+				final PostSearchCondition searchByLeastLikes = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Order.asc("likeCount"))))
+					.build();
+				// when
+				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCount = postService.getPosts(searchByMostLikes);
+				SlicePageDto<PostDetailResponse> postsSortedByLeastLikeCount = postService.getPosts(searchByLeastLikes);
 				//then
 				assertThatList(postsSortedByMostLikeCount.content()).isSortedAccordingTo(
 					comparing(PostDetailResponse::likeCount).reversed());
@@ -239,14 +281,20 @@ class PostServiceTest extends IntegrationTestSupport {
 					comparing(PostDetailResponse::likeCount));
 			}),
 			dynamicTest("좋아요순으로, 좋아요가 같으면 최신순으로 조회할 수 있다.", () -> {
-				//given when
+				//given
 				final Long mostLikeCount = 1000L;
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(
+						Sort.Order.desc("likeCount"),
+						Sort.Order.desc("id"))))
+					.build();
+				//when
 				postRepository.saveAll(createList(() -> createPost(spot, writer, mostLikeCount), 5));
 				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCountAndLatest = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(
-							Sort.Order.desc("likeCount"),
-							Sort.Order.desc("id")))));
+					searchCondition);
 				//then
 				assertThatList(postsSortedByMostLikeCountAndLatest.content())
 					.isSortedAccordingTo(comparing(PostDetailResponse::likeCount).reversed()
