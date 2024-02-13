@@ -72,11 +72,13 @@ public class PostQueryRepository extends QueryDslUtils {
 	private <T> void applyPostPreviewCondition(JPAQuery<T> query, PostSearchCondition cond) {
 		switch (cond.type()) {
 			case MY_POSTS -> query.where(
-				post.deletedAt.isNull().and(equalsWriter(cond.userId()))
+				equalsWriter(cond.userId()),
+				post.deletedAt.isNull()
 			);
 			case POSTS_OF_SPOT -> query.where(
 				equalsSpot(cond.spotId()),
-				post.deletedAt.isNull().and(post.isPrivate.isFalse())
+				post.isPrivate.isFalse().or(equalsWriter(cond.userId())),
+				post.deletedAt.isNull()
 			);
 		}
 	}

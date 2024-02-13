@@ -16,6 +16,24 @@ include::{snippets}/post-controller-docs-test/get-posts/query-parameters.adoc[]
 include::{snippets}/post-controller-docs-test/get-posts/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/get-posts/response-fields.adoc[]
 
+=== 내 방명록 미리보기 목록 조회
+
+'''
+
+include::{snippets}/post-controller-docs-test/get-my-post-previews/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/get-my-post-previews/query-parameters.adoc[]
+include::{snippets}/post-controller-docs-test/get-my-post-previews/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/get-my-post-previews/response-fields.adoc[]
+
+=== 내 방명록 상세 목록 조회
+
+'''
+
+include::{snippets}/post-controller-docs-test/get-my-posts/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/get-my-posts/query-parameters.adoc[]
+include::{snippets}/post-controller-docs-test/get-my-posts/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/get-my-posts/response-fields.adoc[]
+
 === 방명록 등록
 
 '''

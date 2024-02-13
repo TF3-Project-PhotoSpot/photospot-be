@@ -104,13 +104,11 @@ class PostServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Stream<DynamicTest> getPostPreviews() {
 		//given
-		Spot spot = createSpot();
-		User writer = createUser("작성자");
-		spotRepository.save(spot);
-		userRepository.save(writer);
+		Spot spot = spotRepository.save(createSpot());
+		User writer = userRepository.save(createUser("작성자"));
+		User reader = userRepository.save(createUser("읽는이"));
 		// Dummy posts
-		List<Post> posts = createList(() -> createPost(spot, writer), 15);
-		postRepository.saveAll(posts);
+		List<Post> posts = postRepository.saveAll(createList(() -> createPost(spot, writer), 15));
 		// Common Request
 		var firstPageRequest = PostSearchCondition.builder()
 			.spotId(spot.getId())
@@ -124,7 +122,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				//given
 				var lastPageRequest = PostSearchCondition.builder()
 					.spotId(spot.getId())
-					.userId(writer.getId())
+					.userId(reader.getId())
 					.type(PostSearchType.POSTS_OF_SPOT)
 					.pageable(PageRequest.of(1, 10, Sort.by(Sort.Direction.DESC, "id")))
 					.build();
@@ -141,7 +139,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				//given
 				var allPostRequest = PostSearchCondition.builder()
 					.spotId(spot.getId())
-					.userId(writer.getId())
+					.userId(reader.getId())
 					.type(PostSearchType.POSTS_OF_SPOT)
 					.pageable(PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "likeCount")))
 					.build();
@@ -164,7 +162,7 @@ class PostServiceTest extends IntegrationTestSupport {
 
 				var latestPostRequest = PostSearchCondition.builder()
 					.spotId(spot.getId())
-					.userId(writer.getId())
+					.userId(reader.getId())
 					.type(PostSearchType.POSTS_OF_SPOT)
 					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
 					.build();
@@ -172,6 +170,42 @@ class PostServiceTest extends IntegrationTestSupport {
 				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(latestPostRequest);
 				//then
 				assertThat(response.content().get(0).postId()).isNotIn(privatePost.getId(), deletePost.getId());
+			}),
+			dynamicTest("내 방명록만 조회 시 다른 유저가 작성한 방명록은 볼 수 없다.", () -> {
+				//given
+				final Post otherUserPost = postRepository.save(createPost(spot, reader, false));
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				final boolean visibleOtherWriterPost = postService.getPostPreviews(searchCondition).content()
+					.stream()
+					.anyMatch(postPreview -> postPreview.postId().equals(otherUserPost.getId()));
+				//then
+				assertFalse(visibleOtherWriterPost);
+			}),
+			dynamicTest("내 방명록 조회중 삭제된 것은 볼 수 없고 비공개는 볼 수 있다.", () -> {
+				//given
+				final Post privatePost = postRepository.save(createPost(spot, writer, true));
+				final Post deletePost = createPost(spot, writer, false);
+				deletePost.delete();
+				postRepository.save(deletePost);
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				List<PostPreviewResponse> response = postService.getPostPreviews(searchCondition).content();
+				final boolean visiblePrivatePost = response.stream()
+					.anyMatch(postPreview -> postPreview.postId().equals(privatePost.getId()));
+				final boolean visibleDeletedPost = response.stream()
+					.anyMatch(postPreview -> postPreview.postId().equals(deletePost.getId()));
+				//then
+				assertTrue(visiblePrivatePost);
+				assertFalse(visibleDeletedPost);
 			})
 		);
 	}
@@ -299,6 +333,42 @@ class PostServiceTest extends IntegrationTestSupport {
 				assertThatList(postsSortedByMostLikeCountAndLatest.content())
 					.isSortedAccordingTo(comparing(PostDetailResponse::likeCount).reversed()
 						.thenComparing(comparing(PostDetailResponse::id).reversed()));
+			}),
+			dynamicTest("내 방명록 상세 조회 시 다른 유저가 작성한 방명록은 볼 수 없다.", () -> {
+				//given
+				final Post otherUserPost = postRepository.save(createPost(spot, reader, false));
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				final boolean visibleOtherWriterPost = postService.getPosts(searchCondition).content()
+					.stream()
+					.anyMatch(postDetailResponse -> postDetailResponse.id().equals(otherUserPost.getId()));
+				//then
+				assertFalse(visibleOtherWriterPost);
+			}),
+			dynamicTest("내 방명록 상세 조회시 삭제된 것은 볼 수 없고 비공개는 볼 수 있다.", () -> {
+				//given
+				final Post privatePost = postRepository.save(createPost(spot, writer, true));
+				final Post deletePost = createPost(spot, writer, false);
+				deletePost.delete();
+				postRepository.save(deletePost);
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				List<PostDetailResponse> response = postService.getPosts(searchCondition).content();
+				final boolean visiblePrivatePost = response.stream()
+					.anyMatch(postDetailResponse -> postDetailResponse.id().equals(privatePost.getId()));
+				final boolean visibleDeletedPost = response.stream()
+					.anyMatch(postDetailResponse -> postDetailResponse.id().equals(deletePost.getId()));
+				//then
+				assertTrue(visiblePrivatePost);
+				assertFalse(visibleDeletedPost);
 			})
 		);
 	}
