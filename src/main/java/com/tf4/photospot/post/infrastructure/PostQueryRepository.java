@@ -37,6 +37,7 @@ public class PostQueryRepository extends QueryDslUtils {
 	private final JPAQueryFactory queryFactory;
 
 	public Slice<PostPreviewResponse> findPostPreviews(PostSearchCondition cond) {
+		var sortBaseEntity = cond.type() == PostSearchType.LIKE_POSTS ? postLike : post;
 		final Pageable pageable = cond.pageable();
 		var query = queryFactory.select(new QPostPreviewResponse(
 				post.spot.id,
@@ -49,10 +50,11 @@ public class PostQueryRepository extends QueryDslUtils {
 			query.join(postLike).on(postLike.post.eq(post));
 		}
 		query.where(createPostSearchBuilder(cond));
-		return orderBy(query, post, pageable).toSlice(query, pageable);
+		return orderBy(query, sortBaseEntity, pageable).toSlice(query, pageable);
 	}
 
 	public Slice<PostWithLikeStatus> findPostsWithLikeStatus(PostSearchCondition cond) {
+		var sortBaseEntity = (cond.type() == PostSearchType.LIKE_POSTS) ? postLike : post;
 		final Pageable pageable = cond.pageable();
 		final QUser writer = new QUser("writer");
 		var query = queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
@@ -66,7 +68,7 @@ public class PostQueryRepository extends QueryDslUtils {
 			query.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(cond.userId())));
 		}
 		query.where(createPostSearchBuilder(cond));
-		return orderBy(query, post, pageable).toSlice(query, pageable);
+		return orderBy(query, sortBaseEntity, pageable).toSlice(query, pageable);
 	}
 
 	public List<PostTag> findPostTagsIn(List<Post> posts) {

@@ -30,6 +30,7 @@ import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
+import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTagRepository;
@@ -230,6 +231,24 @@ class PostServiceTest extends IntegrationTestSupport {
 				var response = postService.getPostPreviews(postSearchCondition);
 				assertThat(response.content().size()).isEqualTo(postLikeCount);
 				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 목록을 좋아요한 순서로 조회 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostLike like1 = postLikeRepository.save(createPostLike(posts.get(0), user));
+				final PostLike like2 = postLikeRepository.save(createPostLike(posts.get(1), user));
+				final PostLike like3 = postLikeRepository.save(createPostLike(posts.get(2), user));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPostPreviews(postSearchCondition);
+				assertThat(response.content())
+					.extracting(PostPreviewResponse::postId)
+					.containsExactly(
+						like3.getPost().getId(),
+						like2.getPost().getId(),
+						like1.getPost().getId());
 			})
 		);
 	}
@@ -417,6 +436,24 @@ class PostServiceTest extends IntegrationTestSupport {
 				var response = postService.getPosts(postSearchCondition);
 				assertThat(response.content().size()).isEqualTo(postLikeCount);
 				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 상세 목록을 좋아요한 순서로 조회 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostLike like1 = postLikeRepository.save(createPostLike(posts.get(0), user));
+				final PostLike like2 = postLikeRepository.save(createPostLike(posts.get(1), user));
+				final PostLike like3 = postLikeRepository.save(createPostLike(posts.get(2), user));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPosts(postSearchCondition);
+				assertThat(response.content())
+					.extracting(PostDetailResponse::id)
+					.containsExactly(
+						like3.getPost().getId(),
+						like2.getPost().getId(),
+						like1.getPost().getId());
 			})
 		);
 	}
