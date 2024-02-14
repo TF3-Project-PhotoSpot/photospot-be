@@ -18,6 +18,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tf4.photospot.global.util.QueryDslUtils;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
@@ -43,8 +44,11 @@ public class PostQueryRepository extends QueryDslUtils {
 				photo.photoUrl
 			))
 			.from(post)
-			.join(post.photo, photo)
-			.where(createPostSearchBuilder(cond));
+			.join(post.photo, photo);
+		if (cond.type() == PostSearchType.LIKE_POSTS) {
+			query.join(postLike).on(postLike.post.eq(post));
+		}
+		query.where(createPostSearchBuilder(cond));
 		return orderBy(query, post, pageable).toSlice(query, pageable);
 	}
 
@@ -55,9 +59,13 @@ public class PostQueryRepository extends QueryDslUtils {
 			.from(post)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
-			.leftJoin(photo.bubble, bubble).fetchJoin()
-			.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(cond.userId())))
-			.where(createPostSearchBuilder(cond));
+			.leftJoin(photo.bubble, bubble).fetchJoin();
+		if (cond.type() == PostSearchType.LIKE_POSTS) {
+			query.join(postLike).on(postLike.post.eq(post));
+		} else {
+			query.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(cond.userId())));
+		}
+		query.where(createPostSearchBuilder(cond));
 		return orderBy(query, post, pageable).toSlice(query, pageable);
 	}
 
@@ -74,6 +82,7 @@ public class PostQueryRepository extends QueryDslUtils {
 		switch (cond.type()) {
 			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
 			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond));
+			case LIKE_POSTS -> searchBuilder.and(equalsPostLike(cond.userId())).and(canVisible(cond));
 		}
 		return searchBuilder;
 	}

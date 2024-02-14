@@ -206,6 +206,30 @@ class PostServiceTest extends IntegrationTestSupport {
 				//then
 				assertTrue(visiblePrivatePost);
 				assertFalse(visibleDeletedPost);
+			}),
+			dynamicTest("내가 좋아요한 방명록이 없는 경우 조회 결과가 나오지 않는다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPostPreviews(postSearchCondition);
+				assertThat(response.content()).isEmpty();
+				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 미리보기 목록을 조회할 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				int postLikeCount = 5;
+				posts.subList(0, postLikeCount).forEach(post -> postLikeRepository.save(createPostLike(post, user)));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, postLikeCount, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPostPreviews(postSearchCondition);
+				assertThat(response.content().size()).isEqualTo(postLikeCount);
+				assertThat(response.hasNext()).isFalse();
 			})
 		);
 	}
@@ -369,6 +393,30 @@ class PostServiceTest extends IntegrationTestSupport {
 				//then
 				assertTrue(visiblePrivatePost);
 				assertFalse(visibleDeletedPost);
+			}),
+			dynamicTest("내가 좋아요한 방명록이 없는 경우 상세 조회 결과가 나오지 않는다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPosts(postSearchCondition);
+				assertThat(response.content()).isEmpty();
+				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 상세 목록을 조회할 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				int postLikeCount = 5;
+				posts.subList(0, postLikeCount).forEach(post -> postLikeRepository.save(createPostLike(post, user)));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, postLikeCount, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPosts(postSearchCondition);
+				assertThat(response.content().size()).isEqualTo(postLikeCount);
+				assertThat(response.hasNext()).isFalse();
 			})
 		);
 	}
@@ -390,7 +438,7 @@ class PostServiceTest extends IntegrationTestSupport {
 		var mentionedUserIds = List.of(mentionedUser.getId());
 
 		return List.of(
-			DynamicTest.dynamicTest("방명록을 업로드하고 그와 관련된 엔티티를 저장한다.", () -> {
+			dynamicTest("방명록을 업로드하고 그와 관련된 엔티티를 저장한다.", () -> {
 				// given
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tagIds, mentionedUserIds,
 					false);
@@ -410,7 +458,7 @@ class PostServiceTest extends IntegrationTestSupport {
 					() -> assertThat(spotRepository.count()).isEqualTo(rowNum)
 				);
 			}),
-			DynamicTest.dynamicTest("스팟이 존재하지 않으면 스팟을 생성하고 방명록을 업로드한다.", () -> {
+			dynamicTest("스팟이 존재하지 않으면 스팟을 생성하고 방명록을 업로드한다.", () -> {
 				// given
 				var newSpotInfo = new SpotInfoDto(new CoordinateDto(36.5, 125.5), "새로운 주소");
 				var httpRequest = new PostUploadHttpRequest(photoInfo, newSpotInfo, "풍경이 예쁜 곳", tagIds,
@@ -428,7 +476,7 @@ class PostServiceTest extends IntegrationTestSupport {
 					() -> assertThat(spotRepository.count()).isEqualTo(rowNum + 1)
 				);
 			}),
-			DynamicTest.dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
+			dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
 				// given
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "     ", null, null, false);
 				var request = PostUploadRequest.of(writer.getId(), httpRequest);
@@ -439,7 +487,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				// then
 				assertThat(post.getDetailAddress()).isNull();
 			}),
-			DynamicTest.dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
+			dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
 				// given
 				var invalidTagIds = List.of(tags.get(0).getId(), tags.get(1).getId(), 3000L);
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", invalidTagIds,
@@ -450,7 +498,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				assertThatThrownBy(() -> postService.upload(request)).isInstanceOf(ApiException.class)
 					.hasMessage(PostErrorCode.NOT_FOUND_TAG.getMessage());
 			}),
-			DynamicTest.dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
+			dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
 				// given
 				var invalidUserIds = List.of(mentionedUser.getId(), 3000L);
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tagIds,
