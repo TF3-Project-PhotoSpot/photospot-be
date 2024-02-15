@@ -84,7 +84,7 @@ public class PostController {
 		return ApiResponse.SUCCESS;
 	}
 
-	@GetMapping("/preview/mine")
+	@GetMapping("/mine/preview")
 	public SlicePageDto<PostPreviewResponse> getMyPosts(
 		@AuthUserId Long userId,
 		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
@@ -105,6 +105,32 @@ public class PostController {
 		final PostSearchCondition searchCondition = PostSearchCondition.builder()
 			.userId(userId)
 			.type(PostSearchType.MY_POSTS)
+			.pageable(pageable)
+			.build();
+		return postService.getPosts(searchCondition);
+	}
+
+	@GetMapping("/likes/preview")
+	public SlicePageDto<PostPreviewResponse> getLikePostPreviews(
+		@AuthUserId Long userId,
+		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.userId(userId)
+			.type(PostSearchType.LIKE_POSTS)
+			.pageable(pageable)
+			.build();
+		return postService.getPostPreviews(searchCondition);
+	}
+
+	@GetMapping("/likes")
+	public SlicePageDto<PostDetailResponse> getLikePostDetails(
+		@AuthUserId Long userId,
+		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+	) {
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.userId(userId)
+			.type(PostSearchType.LIKE_POSTS)
 			.pageable(pageable)
 			.build();
 		return postService.getPosts(searchCondition);

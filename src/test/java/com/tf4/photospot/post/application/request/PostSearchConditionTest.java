@@ -67,7 +67,32 @@ class PostSearchConditionTest {
 							.build())
 					.extracting("errorCode")
 					.isEqualTo(CommonErrorCode.INVALID_SEARCH_CONDITION)
-			)
+			),
+			dynamicTest("내가 좋아요한 방명록 조회 조건은 userId가 필수다.", () -> {
+				var likePostsBuilder = PostSearchCondition.builder()
+					.userId(1L)
+					.pageable(defaultPageRequest)
+					.type(PostSearchType.LIKE_POSTS);
+				var likePostsBuilderNotUserId = PostSearchCondition.builder()
+					.pageable(defaultPageRequest)
+					.type(PostSearchType.LIKE_POSTS);
+				assertThatNoException().isThrownBy(likePostsBuilder::build);
+				assertThatException().isThrownBy(likePostsBuilderNotUserId::build);
+			}),
+			dynamicTest("내가 좋아요한 방명록 조회 조건은 시간순 정렬만 가능하다.", () -> {
+				final PageRequest pageRequestSortLikeCount = PageRequest.of(0, 10,
+					Sort.by(Sort.Direction.DESC, "likeCount"));
+				var likePostsBuilder = PostSearchCondition.builder()
+					.userId(1L)
+					.pageable(defaultPageRequest)
+					.type(PostSearchType.LIKE_POSTS);
+				var likePostsBuilderSortLikeCount = PostSearchCondition.builder()
+					.userId(1L)
+					.pageable(pageRequestSortLikeCount)
+					.type(PostSearchType.LIKE_POSTS);
+				assertThatNoException().isThrownBy(likePostsBuilder::build);
+				assertThatException().isThrownBy(likePostsBuilderSortLikeCount::build);
+			})
 		);
 	}
 }
