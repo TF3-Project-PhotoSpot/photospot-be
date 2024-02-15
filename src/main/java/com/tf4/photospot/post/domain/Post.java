@@ -88,4 +88,22 @@ public class Post extends BaseEntity {
 	public void addMentions(List<Mention> mentions) {
 		this.mentions.addAll(mentions);
 	}
+
+	public List<Long> getPostTagIds() {
+		return postTags.stream()
+			.map(PostTag::getTag)
+			.map(Tag::getId)
+			.toList();
+	}
+
+	public List<Long> getMentionIds() {
+		return mentions.stream()
+			.map(Mention::getMentionedUser)
+			.map(User::getId)
+			.toList();
+	}
+
+	public void updatePrivacyState(boolean status) {
+		this.isPrivate = status;
+	}
 }

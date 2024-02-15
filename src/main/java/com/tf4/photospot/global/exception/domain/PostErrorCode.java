@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum PostErrorCode implements ApiErrorCode {
 
-	NOT_FOUND_TAG(HttpStatus.BAD_REQUEST, "존재하지 않은 태그입니다.");
+	NOT_FOUND_TAG(HttpStatus.NOT_FOUND, "존재하지 않는 태그입니다."),
+	NOT_FOUND_POST(HttpStatus.NOT_FOUND, "존재하지 않는 방명록입니다.");
 
 	private final HttpStatusCode statusCode;
 	private final String message;

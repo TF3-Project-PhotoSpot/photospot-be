@@ -21,7 +21,7 @@ import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.PostUploadResponse;
+import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
@@ -138,7 +138,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		var tags = List.of(1L, 2L, 3L);
 		var mentions = List.of(4L, 5L, 6L);
 		var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tags, mentions, false);
-		var response = new PostUploadResponse(1L);
+		var response = new PostSaveResponse(1L);
 
 		given(postService.upload(any(PostUploadRequest.class))).willReturn(response);
 

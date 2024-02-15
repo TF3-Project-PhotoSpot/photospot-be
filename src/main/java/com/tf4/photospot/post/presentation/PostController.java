@@ -3,22 +3,31 @@ package com.tf4.photospot.post.presentation;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.global.argument.AuthUserId;
+import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostListRequest;
 import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.PostUploadResponse;
+import com.tf4.photospot.post.application.response.PostSaveResponse;
+import com.tf4.photospot.post.application.response.PostUpdateResponse;
+import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
+import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
 
 import jakarta.validation.Valid;
@@ -49,7 +58,25 @@ public class PostController {
 	}
 
 	@PostMapping
-	public PostUploadResponse uploadPost(@AuthUserId Long userId, @RequestBody @Valid PostUploadHttpRequest request) {
+	public PostSaveResponse uploadPost(@AuthUserId Long userId, @RequestBody @Valid PostUploadHttpRequest request) {
 		return postService.upload(PostUploadRequest.of(userId, request));
+	}
+
+	@PutMapping("/{id}")
+	public PostUpdateResponse updatePost(@AuthUserId Long userId, @PathVariable("id") Long id,
+		@RequestBody @Valid PostUpdateHttpRequest request) {
+		return postService.update(PostUpdateRequest.of(userId, id, request));
+	}
+
+	@PatchMapping("/{id}")
+	public PostUpdateResponse updateState(@AuthUserId Long userId, @PathVariable("id") Long id,
+		@RequestBody @Valid PostStateUpdateRequest request) {
+		return postService.updateState(userId, id, request.isPrivate());
+	}
+
+	@DeleteMapping("/{id}")
+	public ApiResponse deletePost(@AuthUserId Long userId, @PathVariable("id") Long id) {
+		postService.delete(userId, id);
+		return ApiResponse.SUCCESS;
 	}
 }

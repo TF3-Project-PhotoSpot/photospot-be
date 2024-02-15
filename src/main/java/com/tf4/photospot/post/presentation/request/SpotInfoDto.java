@@ -15,6 +15,7 @@ public record SpotInfoDto(
 		return Spot.builder()
 			.coord(coord.toCoord())
 			.address(address)
+			.postCount(0L)
 			.build();
 	}
 }
