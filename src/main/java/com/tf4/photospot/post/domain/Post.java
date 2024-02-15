@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.tf4.photospot.global.entity.BaseEntity;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.user.domain.User;
@@ -21,6 +23,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -64,6 +67,9 @@ public class Post extends BaseEntity {
 
 	private LocalDateTime deletedAt;
 
+	@Version
+	private Integer version;
+
 	@Builder
 	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount,
 		boolean isPrivate) {
@@ -81,12 +87,16 @@ public class Post extends BaseEntity {
 		}
 	}
 
-	public void addPostTags(List<PostTag> postTags) {
-		this.postTags.addAll(postTags);
+	public PostLike likeFrom(User user) {
+		likeCount++;
+		return new PostLike(this, user);
 	}
 
-	public void addMentions(List<Mention> mentions) {
-		this.mentions.addAll(mentions);
+	public void cancelLike(PostLike postLike) {
+		if (this != postLike.getPost() || likeCount == 0L) {
+			throw new ApiException(PostErrorCode.CAN_NOT_CANCEL_LIKE);
+		}
+		likeCount--;
 	}
 
 	public List<Long> getPostTagIds() {

@@ -1,37 +1,60 @@
 package com.tf4.photospot.global.util;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.tf4.photospot.post.domain.QPost;
 
-public abstract class QueryDslUtils {
-	public static <T> JPAQuery<T> orderBy(
+public abstract class QueryDslUtils extends PageUtils {
+	public <T> QueryDslUtils orderBy(
 		JPAQuery<T> query,
-		QPost qEntity,
+		EntityPathBase<?> qEntity,
 		Pageable pageable
 	) {
 		for (Sort.Order order : pageable.getSort()) {
 			query.orderBy(toOrderSpecifier(qEntity, order));
 		}
-		return query;
+		return this;
+	}
+
+	public <T> Slice<T> toSlice(
+		JPAQuery<T> query,
+		Pageable pageable
+	) {
+		final List<T> contents = query.offset(pageable.getOffset())
+			.limit(pageable.getPageSize() + 1L)
+			.fetch();
+		return toSlice(pageable, contents);
 	}
 
 	@SuppressWarnings({"rawtypes, unchecked"})
-	private static <T> OrderSpecifier toOrderSpecifier(EntityPathBase<T> qEntity, Sort.Order order) {
+	private <T> OrderSpecifier toOrderSpecifier(EntityPathBase<T> qEntity, Sort.Order order) {
 		return new OrderSpecifier(getDirection(order),
 			new PathBuilder<>(qEntity.getType(), qEntity.getMetadata()).get(order.getProperty()));
 	}
 
-	private static Order getDirection(Sort.Order order) {
+	private Order getDirection(Sort.Order order) {
 		if (order.isAscending()) {
 			return Order.ASC;
 		}
 		return Order.DESC;
+	}
+
+	public BooleanBuilder nullSafeBuilder(Supplier<BooleanExpression> expression) {
+		try {
+			return new BooleanBuilder(expression.get());
+		} catch (IllegalArgumentException e) {
+			return new BooleanBuilder();
+		}
 	}
 }
