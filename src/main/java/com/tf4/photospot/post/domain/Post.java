@@ -99,20 +99,6 @@ public class Post extends BaseEntity {
 		likeCount--;
 	}
 
-	public List<Long> getPostTagIds() {
-		return postTags.stream()
-			.map(PostTag::getTag)
-			.map(Tag::getId)
-			.toList();
-	}
-
-	public List<Long> getMentionIds() {
-		return mentions.stream()
-			.map(Mention::getMentionedUser)
-			.map(User::getId)
-			.toList();
-	}
-
 	public void updateDetailAddress(String detailAddress) {
 		this.detailAddress = detailAddress;
 	}
