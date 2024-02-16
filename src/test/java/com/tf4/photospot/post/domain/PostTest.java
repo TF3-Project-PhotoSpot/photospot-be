@@ -77,4 +77,30 @@ public class PostTest {
 					.isEqualTo(PostErrorCode.CAN_NOT_CANCEL_LIKE);
 			}));
 	}
+
+	@Test
+	void updateDetailAddress() {
+		// given
+		assertEquals("디테일 주소", post.getDetailAddress());
+		var newAddress = "새로운 디테일 주소";
+
+		// when
+		post.updateDetailAddress(newAddress);
+
+		// then
+		assertEquals(newAddress, post.getDetailAddress());
+	}
+
+	@Test
+	void updatePrivacyState() {
+		// given
+		assertFalse(post.isPrivate());
+		var isPrivate = true;
+
+		// when
+		post.updatePrivacyState(isPrivate);
+
+		// then
+		assertTrue(post.isPrivate());
+	}
 }

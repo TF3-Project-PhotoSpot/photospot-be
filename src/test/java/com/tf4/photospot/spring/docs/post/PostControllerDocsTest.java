@@ -17,14 +17,18 @@ import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
+import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
 import com.tf4.photospot.post.presentation.request.PhotoInfoDto;
+import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
+import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
@@ -302,7 +306,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		var tags = List.of(1L, 2L, 3L);
 		var mentions = List.of(4L, 5L, 6L);
 		var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tags, mentions, false);
-		var response = new PostSaveResponse(1L);
+		var response = new PostSaveResponse(1L, 1L);
 
 		given(postService.upload(any(PostUploadRequest.class))).willReturn(response);
 
@@ -315,24 +319,28 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
 				requestFields(
-					fieldWithPath("photoInfo").description("사진 정보"),
-					fieldWithPath("photoInfo.photoUrl").description("사진 주소"),
-					fieldWithPath("photoInfo.coord").description("사진 좌표"),
-					fieldWithPath("photoInfo.coord.lat").description("위도"),
-					fieldWithPath("photoInfo.coord.lon").description("경도"),
+					fieldWithPath("photoInfo").type(JsonFieldType.OBJECT).description("사진 메타데이터"),
+					fieldWithPath("photoInfo.photoUrl").type(JsonFieldType.STRING).description("사진 주소"),
+					fieldWithPath("photoInfo.coord").type(JsonFieldType.OBJECT).description("사진 좌표"),
+					fieldWithPath("photoInfo.coord.lat").type(JsonFieldType.NUMBER).description("위도"),
+					fieldWithPath("photoInfo.coord.lon").type(JsonFieldType.NUMBER).description("경도"),
 					fieldWithPath("photoInfo.takenAt").description("사진이 찍힌 날짜 및 시간"),
-					fieldWithPath("spotInfo").description("장소 정보"),
-					fieldWithPath("spotInfo.coord").description("장소 중심 좌표"),
-					fieldWithPath("spotInfo.coord.lat").description("위도"),
-					fieldWithPath("spotInfo.coord.lon").description("경도"),
-					fieldWithPath("spotInfo.address").description("장소 중심 주소"),
-					fieldWithPath("detailAddress").description("작성자가 직접 입력한 상세 주소"),
-					fieldWithPath("tags").description("작성자가 선택한 태그 아이디 리스트"),
-					fieldWithPath("mentions").description("작성자가 언급한 유저 아이디 리스트"),
-					fieldWithPath("isPrivate").description("사진 비공개 설정 유무").optional().attributes(defaultValue(false))
+					fieldWithPath("spotInfo").type(JsonFieldType.OBJECT).description("장소 메타데이터"),
+					fieldWithPath("spotInfo.coord").type(JsonFieldType.OBJECT).description("장소 중심 좌표"),
+					fieldWithPath("spotInfo.coord.lat").type(JsonFieldType.NUMBER).description("위도"),
+					fieldWithPath("spotInfo.coord.lon").type(JsonFieldType.NUMBER).description("경도"),
+					fieldWithPath("spotInfo.address").type(JsonFieldType.STRING).description("장소 중심 좌표를 주소로 변환한 값"),
+					fieldWithPath("detailAddress").type(JsonFieldType.STRING).description("작성자가 직접 입력한 상세 주소"),
+					fieldWithPath("tags").type(JsonFieldType.ARRAY).description("작성자가 선택한 태그 id 리스트"),
+					fieldWithPath("mentions").type(JsonFieldType.ARRAY).description("작성자가 언급한 유저 id 리스트"),
+					fieldWithPath("isPrivate").type(JsonFieldType.BOOLEAN)
+						.description("사진 비공개 설정 유무")
+						.optional()
+						.attributes(defaultValue(false))
 				),
 				responseFields(
-					fieldWithPath("postId").type(JsonFieldType.NUMBER).description("업로드 된 방명록 id 반환")
+					fieldWithPath("postId").type(JsonFieldType.NUMBER).description("업로드 된 방명록 id 반환"),
+					fieldWithPath("spotId").type(JsonFieldType.NUMBER).description("업로드 된 방명록이 속한 스팟 id 반환")
 				)
 			));
 	}
@@ -353,6 +361,71 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		willDoNothing().given(postService).cancelPostLike(anyLong(), anyLong());
 		//when
 		mockMvc.perform(delete("/api/v1/posts/{postId}/likes", 1L))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplateDefaultSuccess());
+	}
+
+	@Test
+	void updatePost() throws Exception {
+		// given
+		var tags = List.of(4L, 5L);
+		var mentions = List.of(1L);
+		var detailAd = "새로운 상세 주소";
+		var httpRequest = new PostUpdateHttpRequest(tags, mentions, detailAd);
+		var response = new PostUpdateResponse(1L, 1L);
+
+		given(postService.update(any(PostUpdateRequest.class))).willReturn(response);
+
+		// when & then
+		mockMvc.perform(put("/api/v1/posts/{postId}", 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(httpRequest))
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				requestFields(
+					fieldWithPath("tags").type(JsonFieldType.ARRAY).description("작성자가 선택한 태그 id 리스트"),
+					fieldWithPath("mentions").type(JsonFieldType.ARRAY).description("작성자가 언급한 유저 id 리스트"),
+					fieldWithPath("detailAddress").type(JsonFieldType.STRING).description("작성자가 직접 입력한 상세 주소")
+				),
+				responseFields(
+					fieldWithPath("postId").type(JsonFieldType.NUMBER).description("수정된 방명록 id 반환"),
+					fieldWithPath("spotId").type(JsonFieldType.NUMBER).description("수정된 방명록이 속한 스팟 id 반환")
+				)
+			));
+	}
+
+	@Test
+	void updatePrivacyState() throws Exception {
+		// given
+		var httpRequest = new PostStateUpdateRequest(true);
+		var response = new PostUpdateResponse(1L, 1L);
+		given(postService.updatePrivacyState(anyLong(), anyLong(), anyBoolean())).willReturn(response);
+
+		// when & then
+		mockMvc.perform(patch("/api/v1/posts/{postId}", 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(httpRequest))
+				.accept(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				requestFields(
+					fieldWithPath("isPrivate").type(JsonFieldType.BOOLEAN).description("방명록 공개 여부")
+				),
+				responseFields(
+					fieldWithPath("postId").type(JsonFieldType.NUMBER).description("수정된 방명록 id 반환"),
+					fieldWithPath("spotId").type(JsonFieldType.NUMBER).description("수정된 방명록이 속한 스팟 id 반환")
+				)
+			));
+	}
+
+	@Test
+	void deletePost() throws Exception {
+		// given
+		willDoNothing().given(postService).delete(anyLong(), anyLong());
+
+		// when & then
+		mockMvc.perform(delete("/api/v1/posts/{postId}", 1L))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplateDefaultSuccess());
 	}

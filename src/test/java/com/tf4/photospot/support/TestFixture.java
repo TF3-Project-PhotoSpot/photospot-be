@@ -44,6 +44,7 @@ public class TestFixture {
 		return Spot.builder()
 			.address("주소")
 			.coord(coord.toCoord())
+			.postCount(0L)
 			.build();
 	}
 
