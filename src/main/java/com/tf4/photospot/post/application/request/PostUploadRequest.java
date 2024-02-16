@@ -23,8 +23,6 @@ public record PostUploadRequest(
 
 	public PostUploadRequest {
 		detailAddress = convertBlankToNull(detailAddress);
-		tags = distinctList(tags);
-		mentions = distinctList(mentions);
 	}
 
 	public static PostUploadRequest of(Long userId, PostUploadHttpRequest request) {
@@ -46,9 +44,5 @@ public record PostUploadRequest(
 			return str;
 		}
 		return null;
-	}
-
-	private static List<Long> distinctList(List<Long> list) {
-		return list.stream().distinct().toList();
 	}
 }

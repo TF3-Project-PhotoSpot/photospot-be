@@ -4,9 +4,7 @@ import java.util.List;
 
 public record PostUpdateHttpRequest(
 	List<Long> tags,
-
 	List<Long> mentions,
-
-	boolean isPrivate
+	String detailAddress
 ) {
 }

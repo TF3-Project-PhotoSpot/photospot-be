@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +20,6 @@ import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
@@ -71,7 +68,9 @@ public class PostController {
 	}
 
 	@PostMapping
-	public PostSaveResponse uploadPost(@AuthUserId Long userId, @RequestBody @Valid PostUploadHttpRequest request) {
+	public PostSaveResponse uploadPost(
+		@AuthUserId Long userId,
+		@RequestBody @Valid PostUploadHttpRequest request) {
 		return postService.upload(PostUploadRequest.of(userId, request));
 	}
 
@@ -145,21 +144,27 @@ public class PostController {
 		return postService.getPosts(searchCondition);
 	}
 
-	@PutMapping("/{id}")
-	public PostUpdateResponse updatePost(@AuthUserId Long userId, @PathVariable("id") Long id,
+	@PutMapping("/{postId}")
+	public PostUpdateResponse updatePost(
+		@AuthUserId Long userId,
+		@PathVariable("postId") Long postId,
 		@RequestBody @Valid PostUpdateHttpRequest request) {
-		return postService.update(PostUpdateRequest.of(userId, id, request));
+		return postService.update(PostUpdateRequest.of(userId, postId, request));
 	}
 
-	@PatchMapping("/{id}")
-	public PostUpdateResponse updateState(@AuthUserId Long userId, @PathVariable("id") Long id,
+	@PatchMapping("/{postId}")
+	public PostUpdateResponse updatePrivacyState(
+		@AuthUserId Long userId,
+		@PathVariable("postId") Long postId,
 		@RequestBody @Valid PostStateUpdateRequest request) {
-		return postService.updateState(userId, id, request.isPrivate());
+		return postService.updatePrivacyState(userId, postId, request.isPrivate());
 	}
 
-	@DeleteMapping("/{id}")
-	public ApiResponse deletePost(@AuthUserId Long userId, @PathVariable("id") Long id) {
-		postService.delete(userId, id);
+	@DeleteMapping("/{postId}")
+	public ApiResponse deletePost(
+		@AuthUserId Long userId,
+		@PathVariable("postId") Long postId) {
+		postService.delete(userId, postId);
 		return ApiResponse.SUCCESS;
 	}
 }

@@ -113,6 +113,10 @@ public class Post extends BaseEntity {
 			.toList();
 	}
 
+	public void updateDetailAddress(String detailAddress) {
+		this.detailAddress = detailAddress;
+	}
+
 	public void updatePrivacyState(boolean status) {
 		this.isPrivate = status;
 	}

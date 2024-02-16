@@ -1,7 +1,6 @@
 package com.tf4.photospot.post.application;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,16 +18,16 @@ import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.S3Directory;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
-import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
+import com.tf4.photospot.post.application.response.PostAllResponse;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
@@ -78,6 +77,18 @@ public class PostService {
 		return SlicePageDto.wrap(postQueryRepository.findPostPreviews(postSearchCond));
 	}
 
+	public PostAllResponse getPost(Long userId, Long postId) {
+		final PostWithLikeStatus postResponse = postQueryRepository.findPost(userId, postId);
+		if (postResponse == null) {
+			throw new ApiException(PostErrorCode.NOT_FOUND_POST);
+		}
+		final List<PostTag> postTags = postQueryRepository.findPostTagsIn(
+			Collections.singletonList(postResponse.post()));
+		final List<Mention> mentions = postQueryRepository.findMentionsIn(
+			Collections.singletonList(postResponse.post()));
+		return PostAllResponse.of(postResponse, postTags, mentions);
+	}
+
 	@Transactional
 	public PostSaveResponse upload(PostUploadRequest request) {
 		User writer = findLoginUser(request.userId());
@@ -106,7 +117,7 @@ public class PostService {
 			spot.incPostCount();
 			savePostTags(post.getId(), spot.getId(), tagIds);
 			saveMentions(post.getId(), mentionIds);
-			return new PostSaveResponse(post.getSpot().getId());
+			return new PostSaveResponse(post.getId(), post.getSpot().getId());
 		} catch (Exception ex) {
 			s3Uploader.deleteFile(post.getPhoto().getPhotoUrl(), S3Directory.POST_FOLDER);
 			throw ex;
@@ -139,10 +150,8 @@ public class PostService {
 	@Retry
 	@Transactional
 	public void likePost(Long postId, Long userId) {
-		final User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		final Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+		final User user = findLoginUser(userId);
+		final Post post = findPost(postId);
 		if (postQueryRepository.existsPostLike(post, user)) {
 			throw new ApiException(PostErrorCode.ALREADY_LIKE);
 		}
@@ -164,35 +173,29 @@ public class PostService {
 		User loginUser = findLoginUser(request.userId());
 		Post post = findPost(request.postId());
 		validateSameUser(loginUser.getId(), post.getWriter().getId());
-		post.updatePrivacyState(request.isPrivate());
+		post.updateDetailAddress(request.detailAddress());
 		updatePostTags(post, request.tags());
 		updateMentions(post, request.mentions());
-		return new PostUpdateResponse(post.getId());
+		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
 	}
 
 	private void updatePostTags(Post post, List<Long> tagIds) {
-		if (new HashSet<>(post.getPostTagIds()).equals(new HashSet<>(tagIds))) {
-			return;
-		}
 		postJdbcRepository.deletePostTagsByPostId(post.getId());
 		savePostTags(post.getId(), post.getSpot().getId(), tagIds);
 	}
 
 	private void updateMentions(Post post, List<Long> mentionedUserIds) {
-		if (new HashSet<>(post.getMentionIds()).equals(new HashSet<>(mentionedUserIds))) {
-			return;
-		}
 		postJdbcRepository.deleteMentionsByPostId(post.getId());
 		saveMentions(post.getId(), mentionedUserIds);
 	}
 
 	@Transactional
-	public PostUpdateResponse updateState(Long userId, Long postId, boolean isPrivate) {
+	public PostUpdateResponse updatePrivacyState(Long userId, Long postId, boolean isPrivate) {
 		User loginUser = findLoginUser(userId);
 		Post post = findPost(postId);
 		validateSameUser(loginUser.getId(), post.getWriter().getId());
 		post.updatePrivacyState(isPrivate);
-		return new PostUpdateResponse(post.getId());
+		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
 	}
 
 	// Todo : 방명록 존재하지 않는 스팟 바로바로 확인해서 삭제 해야 할지? 아니면 스케줄러?
