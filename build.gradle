@@ -75,6 +75,9 @@ dependencies {
     // HttpClient for RestClient
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
 
+    // Apache Commons Lang
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
+
     // test
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
