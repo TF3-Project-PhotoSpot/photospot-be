@@ -16,8 +16,8 @@ import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tf4.photospot.auth.application.response.AppleAuthTokenDto;
 import com.tf4.photospot.auth.application.response.ApplePublicKeyResponse;
+import com.tf4.photospot.auth.application.response.AuthUserInfoDto;
 import com.tf4.photospot.auth.infrastructure.AppleClient;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
@@ -32,16 +32,10 @@ public class AppleService {
 
 	private final AppleClient appleClient;
 
-	// Todo : 문자열 관리
-	public AppleAuthTokenDto getToken(String identityToken, String nonce) {
+	public AuthUserInfoDto getTokenInfo(String identityToken, String nonce) {
 		Claims claims = getAppleClaims(identityToken);
 		validateClaims(claims, nonce);
-		return AppleAuthTokenDto.builder()
-			.subject(claims.getSubject())
-			.issuer(claims.getIssuer())
-			.audience(claims.getAudience())
-			.nonce(claims.get("nonce").toString())
-			.build();
+		return new AuthUserInfoDto(claims.getSubject());
 	}
 
 	public Claims getAppleClaims(String identityToken) {
@@ -68,7 +62,7 @@ public class AppleService {
 	}
 
 	private ApplePublicKeyResponse.Key getApplePublicKey(Map<String, String> headers) {
-		return appleClient.getApplePublicKey().getMatchedKeyBy(headers.get("kid"), headers.get("alg"))
+		return appleClient.getPublicKey().getMatchedKeyBy(headers.get("kid"), headers.get("alg"))
 			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_APPLE_IDENTITY_TOKEN));
 	}
 
@@ -84,15 +78,15 @@ public class AppleService {
 		return KeyFactory.getInstance(key.getKty()).generatePublic(new RSAPublicKeySpec(intN, intE));
 	}
 
-	// Todo : client_id 설정
+	// Todo : client_id 설정, 문자열 관리
 	private void validateClaims(Claims claims, String nonce) {
-		validateClaim(claims.get("nonce"), nonce);
-		validateClaim(claims.getIssuer(), "https://appleid.apple.com");
-		validateClaim(claims.getAudience(), "client_id");
+		validateValue(claims.get("nonce"), nonce);
+		validateValue(claims.getIssuer(), "https://appleid.apple.com");
+		validateValue(claims.getAudience(), "client_id");
 		validateExpiration(claims.getExpiration());
 	}
 
-	private void validateClaim(Object claimValue, Object expectValue) {
+	private void validateValue(Object claimValue, Object expectValue) {
 		if (!expectValue.equals(claimValue)) {
 			throw new ApiException(AuthErrorCode.INVALID_APPLE_IDENTITY_TOKEN);
 		}
@@ -100,7 +94,7 @@ public class AppleService {
 
 	private void validateExpiration(Date expiration) {
 		if (expiration.before(new Date())) {
-			throw new ApiException(AuthErrorCode.INVALID_APPLE_IDENTITY_TOKEN);
+			throw new ApiException(AuthErrorCode.EXPIRED_APPLE_IDENTITY_TOKEN);
 		}
 	}
 }

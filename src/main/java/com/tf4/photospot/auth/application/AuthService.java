@@ -1,20 +1,18 @@
 package com.tf4.photospot.auth.application;
 
-import java.util.Map;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
-import com.tf4.photospot.global.config.security.SecurityConstant;
+import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
-import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
+import com.tf4.photospot.user.application.response.OauthLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
-import com.tf4.photospot.user.util.NicknameGenerator;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,49 +20,49 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
 	private final UserRepository userRepository;
 	private final JwtService jwtService;
 	private final AppleService appleService;
+	private final KakaoService kakaoService;
 
 	private static final int NICKNAME_GENERATOR_RETRY_MAX = 5;
 
-	@Transactional
-	public OauthLoginUserResponse oauthLogin(String type, Map<String, String> identityInfo) {
-		String provider = OauthAttributes.findByType(type).getProvider();
-		String account = provider.equals(OauthAttributes.KAKAO.getProvider()) ? validateKakaoAccount() :
-			validateAppleAccount(identityInfo);
+	public OauthLoginResponse kakaoLogin(String accessToken, String id) {
+		return oauthLogin(OauthAttributes.KAKAO.getProvider(), validateAndGetKakaoUserInfo(accessToken, id));
+	}
+
+	public OauthLoginResponse appleLogin(String identityToken, String nonce) {
+		return oauthLogin(OauthAttributes.APPLE.getProvider(), validateAndGetAppleUserInfo(identityToken, nonce));
+	}
+
+	public OauthLoginResponse oauthLogin(String provider, String account) {
 		return userRepository.findUserByProviderTypeAndAccount(provider, account)
-			.map(findUser -> OauthLoginUserResponse.from(true, findUser))
-			.orElseGet(() -> OauthLoginUserResponse.from(false,
+			.map(findUser -> OauthLoginResponse.from(true, findUser))
+			.orElseGet(() -> OauthLoginResponse.from(false,
 				userRepository.save(new LoginUserInfo(provider, account).toUser(generateNickname()))));
 	}
 
-	// Todo
-	public String validateKakaoAccount() {
-		return null;
+	// Todo : 클라이언트에서 accessToken 전달 시 PREFIX도 함께 오는지 확인 후 수정
+	public String validateAndGetKakaoUserInfo(String accessToken, String id) {
+		return kakaoService.getTokenInfo(accessToken, id).account();
 	}
 
-	public String validateAppleAccount(Map<String, String> identityInfo) {
-		return appleService.getToken(identityInfo.get(SecurityConstant.IDENTITY_TOKEN_PARAM),
-			identityInfo.get(SecurityConstant.NONCE_PARAM)).subject();
+	public String validateAndGetAppleUserInfo(String identityToken, String nonce) {
+		return appleService.getTokenInfo(identityToken, nonce).account();
+	}
+
+	private String generateNickname() {
+		for (int attempt = 0; attempt < NICKNAME_GENERATOR_RETRY_MAX; attempt++) {
+			String nickname = NicknameGenerator.generateRandomNickname();
+			if (!isNicknameDuplicated(nickname)) {
+				return nickname;
+			}
+		}
+		throw new ApiException(AuthErrorCode.UNEXPECTED_NICKNAME_GENERATE_FAIL);
 	}
 
 	private boolean isNicknameDuplicated(String nickname) {
 		return userRepository.existsByNickname(nickname);
-	}
-
-	// Todo : 커스텀 예외
-	private String generateNickname() {
-		int count = 0;
-		String generatedRandomNickname = NicknameGenerator.generatorRandomNickname();
-		while (isNicknameDuplicated(generatedRandomNickname)) {
-			if (count++ >= NICKNAME_GENERATOR_RETRY_MAX) {
-				throw new RuntimeException();
-			}
-			generatedRandomNickname = NicknameGenerator.generatorRandomNickname();
-		}
-		return generatedRandomNickname;
 	}
 
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {

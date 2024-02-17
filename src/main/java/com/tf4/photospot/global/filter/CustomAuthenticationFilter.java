@@ -27,13 +27,8 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 		String providerType = OauthAttributes.findByType(request.getParameter(SecurityConstant.PROVIDER_TYPE_PARAM))
 			.getProvider();
 		Map<String, String> identityInfo = new HashMap<>();
-		if (providerType.equals(OauthAttributes.KAKAO.getProvider())) {
-			identityInfo.put(SecurityConstant.ACCOUNT_PARAM, request.getParameter(SecurityConstant.ACCOUNT_PARAM));
-		} else if (providerType.equals(OauthAttributes.APPLE.getProvider())) {
-			identityInfo.put(SecurityConstant.IDENTITY_TOKEN_PARAM,
-				request.getParameter(SecurityConstant.IDENTITY_TOKEN_PARAM));
-			identityInfo.put(SecurityConstant.NONCE_PARAM, request.getParameter(SecurityConstant.NONCE_PARAM));
-		}
+		identityInfo.put(SecurityConstant.TOKEN_PARAM, request.getParameter(SecurityConstant.TOKEN_PARAM));
+		identityInfo.put(SecurityConstant.IDENTIFIER, request.getParameter(SecurityConstant.IDENTIFIER));
 		CustomAuthenticationToken authToken = new CustomAuthenticationToken(identityInfo, providerType);
 		authToken.setDetails(this.authenticationDetailsSource.buildDetails(request));
 		return this.getAuthenticationManager().authenticate(authToken);

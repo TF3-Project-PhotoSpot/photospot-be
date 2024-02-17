@@ -11,9 +11,11 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.tf4.photospot.auth.application.AuthService;
+import com.tf4.photospot.auth.domain.OauthAttributes;
+import com.tf4.photospot.global.config.security.SecurityConstant;
 import com.tf4.photospot.global.dto.LoginUserDto;
 import com.tf4.photospot.global.util.AuthorityConverter;
-import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
+import com.tf4.photospot.user.application.response.OauthLoginResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,10 +26,18 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 	private final AuthService authService;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		Map<String, String> identityInfo = (Map<String, String>)authentication.getPrincipal();
-		String providerType = authentication.getCredentials().toString();
-		OauthLoginUserResponse loginUser = authService.oauthLogin(providerType, identityInfo);
+		OauthAttributes provider = OauthAttributes.findByType(authentication.getCredentials().toString());
+		Map<String, String> identifyInfo = (Map<String, String>)authentication.getPrincipal();
+		OauthLoginResponse loginUser;
+		if (provider.equals(OauthAttributes.KAKAO)) {
+			loginUser = authService.kakaoLogin(identifyInfo.get(SecurityConstant.TOKEN_PARAM),
+				identifyInfo.get(SecurityConstant.IDENTIFIER));
+		} else {
+			loginUser = authService.appleLogin(identifyInfo.get(SecurityConstant.TOKEN_PARAM),
+				identifyInfo.get(SecurityConstant.IDENTIFIER));
+		}
 		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(
 			loginUser.getRole().getType());
 		return new UsernamePasswordAuthenticationToken(

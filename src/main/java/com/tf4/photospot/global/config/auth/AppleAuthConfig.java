@@ -13,18 +13,14 @@ import com.tf4.photospot.auth.infrastructure.AppleClient;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 
-import lombok.RequiredArgsConstructor;
-
 @Configuration
-@RequiredArgsConstructor
-public class AppleApiConfig {
-
+public class AppleAuthConfig {
 	@Bean
 	public AppleClient appleClient(RestClient.Builder restClientBuilder) {
 		RestClient restClient = restClientBuilder
 			.defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
 			.defaultStatusHandler(HttpStatusCode::is5xxServerError, (request, response) -> {
-				throw new ApiException(AuthErrorCode.APPLE_ID_SERVER_ERROR);
+				throw new ApiException(AuthErrorCode.APPLE_AUTH_SERVER_ERROR);
 			})
 			.build();
 		return HttpServiceProxyFactory

@@ -7,7 +7,6 @@ import com.tf4.photospot.auth.application.response.ApplePublicKeyResponse;
 
 @HttpExchange("https://appleid.apple.com/auth")
 public interface AppleClient {
-
 	@GetExchange("/keys")
-	ApplePublicKeyResponse getApplePublicKey();
+	ApplePublicKeyResponse getPublicKey();
 }
