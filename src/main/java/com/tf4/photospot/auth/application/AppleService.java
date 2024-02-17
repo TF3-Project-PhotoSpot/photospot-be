@@ -16,6 +16,7 @@ import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tf4.photospot.auth.application.response.AppleAuthTokenDto;
 import com.tf4.photospot.auth.application.response.ApplePublicKeyResponse;
 import com.tf4.photospot.auth.infrastructure.AppleClient;
 import com.tf4.photospot.global.exception.ApiException;
@@ -31,10 +32,16 @@ public class AppleService {
 
 	private final AppleClient appleClient;
 
-	public String getAppleId(String identityToken, String nonce) {
+	// Todo : 문자열 관리
+	public AppleAuthTokenDto getToken(String identityToken, String nonce) {
 		Claims claims = getAppleClaims(identityToken);
 		validateClaims(claims, nonce);
-		return claims.getSubject();
+		return AppleAuthTokenDto.builder()
+			.subject(claims.getSubject())
+			.issuer(claims.getIssuer())
+			.audience(claims.getAudience())
+			.nonce(claims.get("nonce").toString())
+			.build();
 	}
 
 	public Claims getAppleClaims(String identityToken) {

@@ -10,8 +10,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.tf4.photospot.auth.domain.OauthAttributes;
 import com.tf4.photospot.global.config.security.SecurityConstant;
-import com.tf4.photospot.global.exception.ApiException;
-import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationToken;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,11 +25,11 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws
 		AuthenticationException {
 		String providerType = OauthAttributes.findByType(request.getParameter(SecurityConstant.PROVIDER_TYPE_PARAM))
-			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_PROVIDER_TYPE)).getType();
+			.getProvider();
 		Map<String, String> identityInfo = new HashMap<>();
-		if (providerType.equals(OauthAttributes.KAKAO.getType())) {
+		if (providerType.equals(OauthAttributes.KAKAO.getProvider())) {
 			identityInfo.put(SecurityConstant.ACCOUNT_PARAM, request.getParameter(SecurityConstant.ACCOUNT_PARAM));
-		} else if (providerType.equals(OauthAttributes.APPLE.getType())) {
+		} else if (providerType.equals(OauthAttributes.APPLE.getProvider())) {
 			identityInfo.put(SecurityConstant.IDENTITY_TOKEN_PARAM,
 				request.getParameter(SecurityConstant.IDENTITY_TOKEN_PARAM));
 			identityInfo.put(SecurityConstant.NONCE_PARAM, request.getParameter(SecurityConstant.NONCE_PARAM));

@@ -27,32 +27,41 @@ public class AuthService {
 	private final JwtService jwtService;
 	private final AppleService appleService;
 
+	private static final int NICKNAME_GENERATOR_RETRY_MAX = 5;
+
 	@Transactional
-	public OauthLoginUserResponse oauthLogin(String providerType, Map<String, String> identityInfo) {
-		String account;
-		if (providerType.equals(OauthAttributes.KAKAO.getType())) {
-			account = identityInfo.get(SecurityConstant.ACCOUNT_PARAM);
-		} else {
-			account = getAppleAccount(identityInfo);
-		}
-		return userRepository.findUserByProviderTypeAndAccount(providerType, account)
+	public OauthLoginUserResponse oauthLogin(String type, Map<String, String> identityInfo) {
+		String provider = OauthAttributes.findByType(type).getProvider();
+		String account = provider.equals(OauthAttributes.KAKAO.getProvider()) ? validateKakaoAccount() :
+			validateAppleAccount(identityInfo);
+		return userRepository.findUserByProviderTypeAndAccount(provider, account)
 			.map(findUser -> OauthLoginUserResponse.from(true, findUser))
 			.orElseGet(() -> OauthLoginUserResponse.from(false,
-				userRepository.save(new LoginUserInfo(providerType, account).toUser(generateNickname()))));
+				userRepository.save(new LoginUserInfo(provider, account).toUser(generateNickname()))));
 	}
 
-	public String getAppleAccount(Map<String, String> identityInfo) {
-		return appleService.getAppleId(identityInfo.get(SecurityConstant.IDENTITY_TOKEN_PARAM),
-			identityInfo.get(SecurityConstant.NONCE_PARAM));
+	// Todo
+	public String validateKakaoAccount() {
+		return null;
+	}
+
+	public String validateAppleAccount(Map<String, String> identityInfo) {
+		return appleService.getToken(identityInfo.get(SecurityConstant.IDENTITY_TOKEN_PARAM),
+			identityInfo.get(SecurityConstant.NONCE_PARAM)).subject();
 	}
 
 	private boolean isNicknameDuplicated(String nickname) {
 		return userRepository.existsByNickname(nickname);
 	}
 
+	// Todo : 커스텀 예외
 	private String generateNickname() {
+		int count = 0;
 		String generatedRandomNickname = NicknameGenerator.generatorRandomNickname();
 		while (isNicknameDuplicated(generatedRandomNickname)) {
+			if (count++ >= NICKNAME_GENERATOR_RETRY_MAX) {
+				throw new RuntimeException();
+			}
 			generatedRandomNickname = NicknameGenerator.generatorRandomNickname();
 		}
 		return generatedRandomNickname;

@@ -1,22 +1,12 @@
 package com.tf4.photospot.user.util;
 
-import java.util.Random;
+import org.apache.commons.lang3.RandomStringUtils;
 
 public class NicknameGenerator {
-
-	public static final String characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-
 	public static String generatorRandomNickname() {
-		StringBuilder randomNickname = new StringBuilder();
-
-		Random random = new Random();
-		for (int i = 0; i < 10; i++) {
-			int index = random.nextInt(characters.length());
-			char randomChar = characters.charAt(index);
-			randomNickname.append(randomChar);
-		}
-
-		return randomNickname.toString();
-
+		int randomCnt = (int)(Math.random() * 3) + 4;
+		String randomStr = RandomStringUtils.randomAlphabetic(randomCnt);
+		String randomNum = RandomStringUtils.randomNumeric(4);
+		return randomStr + randomNum;
 	}
 }
