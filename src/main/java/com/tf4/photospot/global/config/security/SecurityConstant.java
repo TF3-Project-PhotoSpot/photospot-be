@@ -9,5 +9,5 @@ public interface SecurityConstant {
 	String IDENTIFIER = "identifier";
 
 	// kakao : 카카오 서버 access token, apple : 애플 서버 identify token
-	String TOKEN_PARAM = "token";
+	String TOKEN = "token";
 }

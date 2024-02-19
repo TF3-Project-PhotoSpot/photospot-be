@@ -9,6 +9,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.tf4.photospot.auth.domain.OauthAttributes;
+import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.security.SecurityConstant;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationToken;
 
@@ -27,7 +28,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 		String providerType = OauthAttributes.findByType(request.getParameter(SecurityConstant.PROVIDER_TYPE_PARAM))
 			.getProvider();
 		Map<String, String> identityInfo = new HashMap<>();
-		identityInfo.put(SecurityConstant.TOKEN_PARAM, request.getParameter(SecurityConstant.TOKEN_PARAM));
+		identityInfo.put(SecurityConstant.TOKEN, request.getHeader(JwtConstant.AUTHORIZATION_HEADER));
 		identityInfo.put(SecurityConstant.IDENTIFIER, request.getParameter(SecurityConstant.IDENTIFIER));
 		CustomAuthenticationToken authToken = new CustomAuthenticationToken(identityInfo, providerType);
 		authToken.setDetails(this.authenticationDetailsSource.buildDetails(request));

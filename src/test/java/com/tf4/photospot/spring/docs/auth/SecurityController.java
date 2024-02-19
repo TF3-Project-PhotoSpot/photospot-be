@@ -1,6 +1,7 @@
 package com.tf4.photospot.spring.docs.auth;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -14,9 +15,14 @@ import jakarta.servlet.http.HttpServletResponse;
 public class SecurityController {
 
 	@PostMapping("/login")
-	public LoginResponse login(HttpServletResponse response) {
+	public LoginResponse login(@RequestBody LoginRequest request, HttpServletResponse response) {
 		Cookie cookie = new Cookie("RefreshToken", "refresh_token_value");
 		response.addCookie(cookie);
 		return new LoginResponse("access_token", false);
 	}
+}
+
+record LoginRequest(
+	String providerType,
+	String identifier) {
 }

@@ -32,10 +32,10 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		Map<String, String> identifyInfo = (Map<String, String>)authentication.getPrincipal();
 		OauthLoginResponse loginUser;
 		if (provider.equals(OauthAttributes.KAKAO)) {
-			loginUser = authService.kakaoLogin(identifyInfo.get(SecurityConstant.TOKEN_PARAM),
+			loginUser = authService.kakaoLogin(identifyInfo.get(SecurityConstant.TOKEN),
 				identifyInfo.get(SecurityConstant.IDENTIFIER));
 		} else {
-			loginUser = authService.appleLogin(identifyInfo.get(SecurityConstant.TOKEN_PARAM),
+			loginUser = authService.appleLogin(identifyInfo.get(SecurityConstant.TOKEN),
 				identifyInfo.get(SecurityConstant.IDENTIFIER));
 		}
 		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(
