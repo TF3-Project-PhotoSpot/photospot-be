@@ -18,6 +18,7 @@ spring:
 
 kakao:
   rest-api-key: test6d177caw1120g3510952427y92d3
+  app-id: 123456
 
 jwt:
   issuer: test-issuer
