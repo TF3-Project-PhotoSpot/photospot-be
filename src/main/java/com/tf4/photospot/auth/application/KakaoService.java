@@ -1,5 +1,6 @@
 package com.tf4.photospot.auth.application;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.tf4.photospot.auth.application.response.AuthUserInfoDto;
@@ -16,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 public class KakaoService {
 	private final KakaoClient kakaoClient;
 
+	@Value("${kakao.app-id}")
+	private String appId;
+
 	public AuthUserInfoDto getTokenInfo(String accessToken, String id) {
 		KakaoTokenInfoResponse response = kakaoClient.getTokenInfo(JwtConstant.PREFIX + accessToken);
 		validateInfo(id, response);
@@ -24,7 +28,7 @@ public class KakaoService {
 
 	private void validateInfo(String id, KakaoTokenInfoResponse response) {
 		validateValue(String.valueOf(response.getId()), id);
-		validateValue(String.valueOf(response.getAppId()), "app_id");
+		validateValue(String.valueOf(response.getAppId()), appId);
 		validateExpiration(response.getExpiresIn());
 	}
 

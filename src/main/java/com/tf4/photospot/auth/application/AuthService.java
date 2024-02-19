@@ -27,10 +27,12 @@ public class AuthService {
 
 	private static final int NICKNAME_GENERATOR_RETRY_MAX = 5;
 
+	@Transactional
 	public OauthLoginResponse kakaoLogin(String accessToken, String id) {
 		return oauthLogin(OauthAttributes.KAKAO.getProvider(), validateAndGetKakaoUserInfo(accessToken, id));
 	}
 
+	@Transactional
 	public OauthLoginResponse appleLogin(String identityToken, String nonce) {
 		return oauthLogin(OauthAttributes.APPLE.getProvider(), validateAndGetAppleUserInfo(identityToken, nonce));
 	}
@@ -43,11 +45,11 @@ public class AuthService {
 	}
 
 	// Todo : 클라이언트에서 accessToken 전달 시 PREFIX도 함께 오는지 확인 후 수정
-	public String validateAndGetKakaoUserInfo(String accessToken, String id) {
+	private String validateAndGetKakaoUserInfo(String accessToken, String id) {
 		return kakaoService.getTokenInfo(accessToken, id).account();
 	}
 
-	public String validateAndGetAppleUserInfo(String identityToken, String nonce) {
+	private String validateAndGetAppleUserInfo(String identityToken, String nonce) {
 		return appleService.getTokenInfo(identityToken, nonce).account();
 	}
 
