@@ -3,7 +3,8 @@
 '''
 
 include::{snippets}/security-controller-docs-test/login/http-request.adoc[]
-include::{snippets}/security-controller-docs-test/login/query-parameters.adoc[]
+include::{snippets}/security-controller-docs-test/login/request-headers.adoc[]
+include::{snippets}/security-controller-docs-test/login/request-fields.adoc[]
 include::{snippets}/security-controller-docs-test/login/response-body.adoc[]
 include::{snippets}/security-controller-docs-test/login/response-fields.adoc[]
 
