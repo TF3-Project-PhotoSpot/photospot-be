@@ -141,11 +141,15 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, excludes: [
-                    "**/GlobalExceptionHandler.java",
+                    "**/GlobalExceptionHandler.class",
+                    "**/ApplePublicKeyResponse.Key.class",
+                    "**/AppleService.class",
+                    "**/KakaoService.class",
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
-                    "**/config/*"
+                    "**/config/*",
+                    "**/filter/*"
             ])
         }))
     }
@@ -164,11 +168,15 @@ jacocoTestCoverageVerification {
             }
 
             excludes = [
-                    "**/GlobalExceptionHandler.java",
+                    "**/GlobalExceptionHandler.class",
+                    "**/ApplePublicKeyResponse.Key.class",
+                    "**/AppleService.class",
+                    "**/KakaoService.class",
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
-                    "**/config/*"
+                    "**/config/*",
+                    "**/filter/*"
             ]
         }
     }
@@ -189,6 +197,7 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-        property 'sonar.exclusions', '**/GlobalExceptionHandler.java, **/*Request.*, **/*Response.*, **/*Dto.*, **/config/*'
+        property 'sonar.exclusions', '**/GlobalExceptionHandler.class, **/*Request.*, **/*Response.*, **/*Dto.*,' +
+                '**/config/*, **/filter/*, **/ApplePublicKeyResponse.Key.class, **/AppleService.class, **/KakaoService.class'
     }
 }
