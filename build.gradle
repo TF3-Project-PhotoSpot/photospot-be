@@ -145,7 +145,7 @@ jacocoTestReport {
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
-                    "**/config/**"
+                    "**/config/*"
             ])
         }))
     }
@@ -168,7 +168,7 @@ jacocoTestCoverageVerification {
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
-                    "**/config/**"
+                    "**/config/*"
             ]
         }
     }
@@ -189,6 +189,6 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-        property 'sonar.exclusions', '**/GlobalExceptionHandler.java, **/*Request.*, **/*Response.*, **/*Dto.*, **/config/**'
+        property 'sonar.exclusions', '**/GlobalExceptionHandler.java, **/*Request.*, **/*Response.*, **/*Dto.*, **/config/*'
     }
 }
