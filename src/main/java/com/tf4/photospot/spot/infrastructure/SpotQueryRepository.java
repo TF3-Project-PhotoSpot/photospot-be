@@ -17,6 +17,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.querydsl.spatial.GeometryExpressions;
 import com.querydsl.spatial.SpatialOps;
 import com.tf4.photospot.global.util.PageUtils;
+import com.tf4.photospot.spot.application.response.NearbySpotResponse;
+import com.tf4.photospot.spot.application.response.QNearbySpotResponse;
 import com.tf4.photospot.spot.application.response.QSpotCoordResponse;
 import com.tf4.photospot.spot.application.response.SpotCoordResponse;
 import com.tf4.photospot.spot.domain.Spot;
@@ -79,6 +81,16 @@ public class SpotQueryRepository {
 			.from(spot)
 			.join(post).on(post.spot.eq(spot))
 			.where(post.writer.id.eq(userId))
+			.fetch();
+	}
+
+	public List<NearbySpotResponse> findNearbySpots(Point coord, Integer radius) {
+		return queryFactory.select(new QNearbySpotResponse(spot.id, spot.coord))
+			.from(spot)
+			.where(
+				containsInRadius(coord, radius),
+				canVisible()
+			)
 			.fetch();
 	}
 }
