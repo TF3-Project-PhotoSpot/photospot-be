@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class OauthLoginUserResponse {
+public class OauthLoginResponse {
 
 	private boolean hasLoggedInBefore;
 
@@ -23,7 +23,7 @@ public class OauthLoginUserResponse {
 		return hasLoggedInBefore;
 	}
 
-	public static OauthLoginUserResponse from(boolean hasLoggedInBefore, User user) {
-		return new OauthLoginUserResponse(hasLoggedInBefore, user.getId(), user.getRole());
+	public static OauthLoginResponse from(boolean hasLoggedInBefore, User user) {
+		return new OauthLoginResponse(hasLoggedInBefore, user.getId(), user.getRole());
 	}
 }

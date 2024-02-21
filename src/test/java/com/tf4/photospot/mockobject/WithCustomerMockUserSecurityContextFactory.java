@@ -8,13 +8,13 @@ import org.springframework.security.test.context.support.WithSecurityContextFact
 
 import com.tf4.photospot.global.dto.LoginUserDto;
 import com.tf4.photospot.global.util.AuthorityConverter;
-import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
+import com.tf4.photospot.user.application.response.OauthLoginResponse;
 
 public class WithCustomerMockUserSecurityContextFactory implements WithSecurityContextFactory<WithCustomMockUser> {
 
 	@Override
 	public SecurityContext createSecurityContext(WithCustomMockUser mockUser) {
-		OauthLoginUserResponse loginUser = new OauthLoginUserResponse(mockUser.hasLoggedInBefore(), mockUser.userId(),
+		OauthLoginResponse loginUser = new OauthLoginResponse(mockUser.hasLoggedInBefore(), mockUser.userId(),
 			mockUser.role());
 		Authentication auth = new UsernamePasswordAuthenticationToken(
 			new LoginUserDto(loginUser.getId(), loginUser.hasLoggedInBefore()), null,

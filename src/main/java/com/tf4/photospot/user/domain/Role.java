@@ -19,7 +19,7 @@ public enum Role {
 
 	public static Role findByType(String type) {
 		return Arrays.stream(Role.values())
-			.filter(role -> Arrays.asList(role.type.split(",")).contains(type))
+			.filter(role -> Arrays.asList(role.getType().split(",")).contains(type))
 			.findFirst()
 			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_ROLE));
 	}

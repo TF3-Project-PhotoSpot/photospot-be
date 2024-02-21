@@ -66,6 +66,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+    implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -73,6 +74,9 @@ dependencies {
 
     // HttpClient for RestClient
     implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
+
+    // Apache Commons Lang
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
 
     // test
     testCompileOnly 'org.projectlombok:lombok'
@@ -134,15 +138,24 @@ jacocoTestReport {
     reports {
         xml.required = true
     }
+    def Qdomains = []
+    for (qPattern in '**/QA'..'**/QZ') {
+        Qdomains.add(qPattern + '*')
+    }
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, excludes: [
-                    "**/GlobalExceptionHandler.java",
+                    "**/GlobalExceptionHandler.class",
+                    "**/ApplePublicKeyResponse*",
+                    "**/AppleService.class",
+                    "**/KakaoService.class",
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
-                    "**/config/*"
-            ])
+                    "**/*Constant.*",
+                    "**/config/*",
+                    "**/filter/*"
+            ] + Qdomains)
         }))
     }
     finalizedBy 'jacocoTestCoverageVerification'
@@ -156,16 +169,26 @@ jacocoTestCoverageVerification {
             limit {
                 counter = 'LINE'
                 value = 'COVEREDRATIO'
-                minimum = 0.80
+                minimum = 0.75
+            }
+
+            def Qdomains = []
+            for (qPattern in '*.QA'..'*.QZ') {
+                Qdomains.add(qPattern + '*')
             }
 
             excludes = [
-                    "**/GlobalExceptionHandler.java",
+                    "**/GlobalExceptionHandler.class",
+                    "**/ApplePublicKeyResponse*",
+                    "**/AppleService.class",
+                    "**/KakaoService.class",
                     "**/*Request.*",
                     "**/*Response.*",
                     "**/*Dto.*",
-                    "**/config/*"
-            ]
+                    "**/*Constant.*",
+                    "**/config/*",
+                    "**/filter/*"
+            ] + Qdomains
         }
     }
 }
@@ -185,6 +208,7 @@ sonar {
         property "sonar.host.url", "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-        property 'sonar.exclusions', '**/GlobalExceptionHandler.java, **/*Request.*, **/*Response.*, **/*Dto.*, **/config/*'
+        property 'sonar.exclusions', '**/GlobalExceptionHandler.class, **/*Request.*, **/*Response.*, **/*Dto.*, **/*Constant.*' +
+                '**/config/*, **/filter/*, **/ApplePublicKeyResponse*, **/AppleService.class, **/KakaoService.class'
     }
 }

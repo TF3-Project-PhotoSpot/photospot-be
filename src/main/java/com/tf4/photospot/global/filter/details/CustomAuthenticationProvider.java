@@ -1,6 +1,7 @@
 package com.tf4.photospot.global.filter.details;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -9,10 +10,12 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.tf4.photospot.auth.application.AuthService;
+import com.tf4.photospot.auth.domain.OauthAttributes;
+import com.tf4.photospot.global.config.security.SecurityConstant;
 import com.tf4.photospot.global.dto.LoginUserDto;
 import com.tf4.photospot.global.util.AuthorityConverter;
-import com.tf4.photospot.user.application.UserService;
-import com.tf4.photospot.user.application.response.OauthLoginUserResponse;
+import com.tf4.photospot.user.application.response.OauthLoginResponse;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,15 +23,23 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CustomAuthenticationProvider implements AuthenticationProvider {
 
-	private final UserService userService;
+	private final AuthService authService;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-		String account = authentication.getPrincipal().toString();
-		String providerType = authentication.getCredentials().toString();
-		OauthLoginUserResponse loginUser = userService.oauthLogin(providerType, account);
+		OauthAttributes provider = OauthAttributes.findByType(authentication.getCredentials().toString());
+		Map<String, String> identifyInfo = (Map<String, String>)authentication.getPrincipal();
+		OauthLoginResponse loginUser;
+		if (provider.equals(OauthAttributes.KAKAO)) {
+			loginUser = authService.kakaoLogin(identifyInfo.get(SecurityConstant.TOKEN),
+				identifyInfo.get(SecurityConstant.IDENTIFIER));
+		} else {
+			loginUser = authService.appleLogin(identifyInfo.get(SecurityConstant.TOKEN),
+				identifyInfo.get(SecurityConstant.IDENTIFIER));
+		}
 		List<GrantedAuthority> authorities = AuthorityConverter.convertStringToGrantedAuthority(
-			loginUser.getRole().type);
+			loginUser.getRole().getType());
 		return new UsernamePasswordAuthenticationToken(
 			new LoginUserDto(loginUser.getId(), loginUser.hasLoggedInBefore()), null, authorities);
 	}
