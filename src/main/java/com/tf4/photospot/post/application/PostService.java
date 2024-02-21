@@ -9,6 +9,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.global.aop.Retry;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
@@ -16,14 +17,15 @@ import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.S3Directory;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostUploadResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.domain.Post;
+import com.tf4.photospot.post.domain.PostLike;
+import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
@@ -41,16 +43,16 @@ import software.amazon.awssdk.utils.CollectionUtils;
 @Service
 @RequiredArgsConstructor
 public class PostService {
-
 	private final PostQueryRepository postQueryRepository;
 	private final PostJdbcRepository postJdbcRepository;
 	private final PostRepository postRepository;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
+	private final PostLikeRepository postLikeRepository;
 	private final S3Uploader s3Uploader;
 
-	public SlicePageDto<PostDetailResponse> getPosts(PostListRequest request) {
-		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(request);
+	public SlicePageDto<PostDetailResponse> getPosts(PostSearchCondition postSearchCond) {
+		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(postSearchCond);
 		final Map<Post, List<PostTag>> postTagGroup = postQueryRepository
 			.findPostTagsIn(postResponses.stream().map(PostWithLikeStatus::post).toList())
 			.stream()
@@ -62,8 +64,8 @@ public class PostService {
 		return SlicePageDto.wrap(postDetailResponses, postResponses.hasNext());
 	}
 
-	public SlicePageDto<PostPreviewResponse> getPostPreviews(PostPreviewListRequest request) {
-		return SlicePageDto.wrap(postQueryRepository.findPostPreviews(request));
+	public SlicePageDto<PostPreviewResponse> getPostPreviews(PostSearchCondition postSearchCond) {
+		return SlicePageDto.wrap(postQueryRepository.findPostPreviews(postSearchCond));
 	}
 
 	@Transactional
@@ -122,5 +124,28 @@ public class PostService {
 		if (!postJdbcRepository.saveMentions(post.getId(), mentionedUserIds)) {
 			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
 		}
+	}
+
+	@Retry
+	@Transactional
+	public void likePost(Long postId, Long userId) {
+		final User user = userRepository.findById(userId)
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		final Post post = postRepository.findById(postId)
+			.orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+		if (postQueryRepository.existsPostLike(post, user)) {
+			throw new ApiException(PostErrorCode.ALREADY_LIKE);
+		}
+		final PostLike postLike = post.likeFrom(user);
+		postLikeRepository.save(postLike);
+	}
+
+	@Retry
+	@Transactional
+	public void cancelPostLike(Long postId, Long userId) {
+		final PostLike postLike = postQueryRepository.findPostLikeFetch(postId, userId)
+			.orElseThrow(() -> new ApiException(PostErrorCode.NO_EXISTS_LIKE));
+		postLike.cancel();
+		postLikeRepository.delete(postLike);
 	}
 }

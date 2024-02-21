@@ -24,12 +24,13 @@ import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.mockobject.MockS3Config;
 import com.tf4.photospot.photo.domain.S3Directory;
-import com.tf4.photospot.post.application.request.PostListRequest;
-import com.tf4.photospot.post.application.request.PostPreviewListRequest;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
+import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTagRepository;
@@ -57,26 +58,75 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
 
+	@DisplayName("방명록 좋아요")
+	@TestFactory
+	Stream<DynamicTest> likePost() {
+		//given
+		final Spot spot = spotRepository.save(createSpot());
+		final User writer = userRepository.save(createUser("이성빈"));
+		final Post post = postRepository.save(createPost(spot, writer, 0L));
+		final User user = userRepository.save(createUser("user"));
+
+		return Stream.of(
+			dynamicTest("좋아요를 할 수 있다.", () -> {
+				//given
+				final Long beforeLikes = post.getLikeCount();
+				//when
+				postService.likePost(post.getId(), user.getId());
+				//then
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes + 1));
+			}),
+			dynamicTest("좋아요를 중복해서 할 수 없다.", () ->
+				assertThatThrownBy(() -> postService.likePost(post.getId(), user.getId()))
+					.isInstanceOf(ApiException.class)
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.ALREADY_LIKE)
+			),
+			dynamicTest("좋아요 취소를 할 수 있다.", () -> {
+				//given
+				final Long beforeLikes = post.getLikeCount();
+				//when
+				postService.cancelPostLike(post.getId(), user.getId());
+				//then
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
+					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes - 1));
+			}),
+			dynamicTest("좋아요 취소를 중복해서 할 수 없다.", () ->
+				assertThatThrownBy(() -> postService.cancelPostLike(post.getId(), user.getId()))
+					.isInstanceOf(ApiException.class)
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.NO_EXISTS_LIKE)
+			)
+		);
+	}
+
 	@DisplayName("방명록 미리보기 목록 조회")
 	@TestFactory
 	Stream<DynamicTest> getPostPreviews() {
 		//given
-		Spot spot = createSpot();
-		User writer = createUser("작성자");
-		spotRepository.save(spot);
-		userRepository.save(writer);
+		Spot spot = spotRepository.save(createSpot());
+		User writer = userRepository.save(createUser("작성자"));
+		User reader = userRepository.save(createUser("읽는이"));
 		// Dummy posts
-		List<Post> posts = createList(() -> createPost(spot, writer), 15);
-		postRepository.saveAll(posts);
+		List<Post> posts = postRepository.saveAll(createList(() -> createPost(spot, writer), 15));
 		// Common Request
-		var firstPageRequest = new PostPreviewListRequest(spot.getId(),
-			PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+		var firstPageRequest = PostSearchCondition.builder()
+			.spotId(spot.getId())
+			.userId(writer.getId())
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+			.build();
 
 		return Stream.of(
 			dynamicTest("슬라이스 페이징으로 조회한다.", () -> {
 				//given
-				var lastPageRequest = new PostPreviewListRequest(spot.getId(),
-					PageRequest.of(1, 10, Sort.by(Sort.Order.desc("id"))));
+				var lastPageRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(1, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
 				//when
 				SlicePageDto<PostPreviewResponse> firstResponse = postService.getPostPreviews(firstPageRequest);
 				SlicePageDto<PostPreviewResponse> lastResponse = postService.getPostPreviews(lastPageRequest);
@@ -88,8 +138,12 @@ class PostServiceTest extends IntegrationTestSupport {
 			}),
 			dynamicTest("좋아요순으로 조회할 수 있다.", () -> {
 				//given
-				var allPostRequest = new PostPreviewListRequest(spot.getId(),
-					PageRequest.of(0, 15, Sort.by(Sort.Order.desc("likeCount"))));
+				var allPostRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 15, Sort.by(Sort.Direction.DESC, "likeCount")))
+					.build();
 				//when
 				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(allPostRequest);
 				final List<Long> postIdsSortedLikeCountDesc = posts.stream()
@@ -107,12 +161,94 @@ class PostServiceTest extends IntegrationTestSupport {
 				deletePost.delete();
 				postRepository.saveAll(List.of(privatePost, deletePost));
 
-				var latestPostRequest = new PostPreviewListRequest(spot.getId(),
-					PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+				var latestPostRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
 				//when
 				SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(latestPostRequest);
 				//then
 				assertThat(response.content().get(0).postId()).isNotIn(privatePost.getId(), deletePost.getId());
+			}),
+			dynamicTest("내 방명록만 조회 시 다른 유저가 작성한 방명록은 볼 수 없다.", () -> {
+				//given
+				final Post otherUserPost = postRepository.save(createPost(spot, reader, false));
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				final boolean visibleOtherWriterPost = postService.getPostPreviews(searchCondition).content()
+					.stream()
+					.anyMatch(postPreview -> postPreview.postId().equals(otherUserPost.getId()));
+				//then
+				assertFalse(visibleOtherWriterPost);
+			}),
+			dynamicTest("내 방명록 조회중 삭제된 것은 볼 수 없고 비공개는 볼 수 있다.", () -> {
+				//given
+				final Post privatePost = postRepository.save(createPost(spot, writer, true));
+				final Post deletePost = createPost(spot, writer, false);
+				deletePost.delete();
+				postRepository.save(deletePost);
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				List<PostPreviewResponse> response = postService.getPostPreviews(searchCondition).content();
+				final boolean visiblePrivatePost = response.stream()
+					.anyMatch(postPreview -> postPreview.postId().equals(privatePost.getId()));
+				final boolean visibleDeletedPost = response.stream()
+					.anyMatch(postPreview -> postPreview.postId().equals(deletePost.getId()));
+				//then
+				assertTrue(visiblePrivatePost);
+				assertFalse(visibleDeletedPost);
+			}),
+			dynamicTest("내가 좋아요한 방명록이 없는 경우 조회 결과가 나오지 않는다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPostPreviews(postSearchCondition);
+				assertThat(response.content()).isEmpty();
+				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 미리보기 목록을 조회할 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				int postLikeCount = 5;
+				posts.subList(0, postLikeCount).forEach(post -> postLikeRepository.save(createPostLike(post, user)));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, postLikeCount, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPostPreviews(postSearchCondition);
+				assertThat(response.content().size()).isEqualTo(postLikeCount);
+				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 목록을 좋아요한 순서로 조회 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostLike like1 = postLikeRepository.save(createPostLike(posts.get(0), user));
+				final PostLike like2 = postLikeRepository.save(createPostLike(posts.get(1), user));
+				final PostLike like3 = postLikeRepository.save(createPostLike(posts.get(2), user));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPostPreviews(postSearchCondition);
+				assertThat(response.content())
+					.extracting(PostPreviewResponse::postId)
+					.containsExactly(
+						like3.getPost().getId(),
+						like2.getPost().getId(),
+						like1.getPost().getId());
 			})
 		);
 	}
@@ -136,14 +272,22 @@ class PostServiceTest extends IntegrationTestSupport {
 		postTagRepository.saveAll(createPostTags(spot, lastPost, tags));
 		postLikeRepository.save(createPostLike(lastPost, reader));
 		// Common Request
-		PostListRequest firstPageRequest = new PostListRequest(spot.getId(), reader.getId(),
-			PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id"))));
+		final PostSearchCondition firstPageRequest = PostSearchCondition.builder()
+			.spotId(spot.getId())
+			.userId(reader.getId())
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+			.build();
 
 		return Stream.of(
 			dynamicTest("방명록 상세 목록을 슬라이스 페이징으로 조회한다.", () -> {
 				//given
-				PostListRequest lastPageRequest = new PostListRequest(spot.getId(), reader.getId(),
-					PageRequest.of(1, 10, Sort.by(Sort.Order.desc("id"))));
+				PostSearchCondition lastPageRequest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(writer.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(1, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
 				//when
 				SlicePageDto<PostDetailResponse> firstResponse = postService.getPosts(firstPageRequest);
 				SlicePageDto<PostDetailResponse> lastResponse = postService.getPosts(lastPageRequest);
@@ -168,13 +312,22 @@ class PostServiceTest extends IntegrationTestSupport {
 				assertThat(postWithoutTagAndLikeStatus.isLiked()).isFalse();
 			}),
 			dynamicTest("최신순으로 조회할 수 있다.", () -> {
-				//given when
-				SlicePageDto<PostDetailResponse> postsSortedByLatest = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.desc("id")))));
-				SlicePageDto<PostDetailResponse> postsSortedByOldest = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.asc("id")))));
+				//given
+				final PostSearchCondition searchByLatest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				final PostSearchCondition searchByOldest = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "id")))
+					.build();
+				// when
+				SlicePageDto<PostDetailResponse> postsSortedByLatest = postService.getPosts(searchByLatest);
+				SlicePageDto<PostDetailResponse> postsSortedByOldest = postService.getPosts(searchByOldest);
 				//then
 				assertThatList(postsSortedByLatest.content()).isSortedAccordingTo(
 					comparing(PostDetailResponse::id).reversed());
@@ -182,13 +335,22 @@ class PostServiceTest extends IntegrationTestSupport {
 					comparing(PostDetailResponse::id));
 			}),
 			dynamicTest("좋아요순으로 조회할 수 있다.", () -> {
-				//given when
-				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCount = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount")))));
-				SlicePageDto<PostDetailResponse> postsSortedByLeastLikeCount = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(Sort.Order.asc("likeCount")))));
+				//given
+				final PostSearchCondition searchByMostLikes = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Order.desc("likeCount"))))
+					.build();
+				final PostSearchCondition searchByLeastLikes = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Order.asc("likeCount"))))
+					.build();
+				// when
+				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCount = postService.getPosts(searchByMostLikes);
+				SlicePageDto<PostDetailResponse> postsSortedByLeastLikeCount = postService.getPosts(searchByLeastLikes);
 				//then
 				assertThatList(postsSortedByMostLikeCount.content()).isSortedAccordingTo(
 					comparing(PostDetailResponse::likeCount).reversed());
@@ -196,18 +358,102 @@ class PostServiceTest extends IntegrationTestSupport {
 					comparing(PostDetailResponse::likeCount));
 			}),
 			dynamicTest("좋아요순으로, 좋아요가 같으면 최신순으로 조회할 수 있다.", () -> {
-				//given when
+				//given
 				final Long mostLikeCount = 1000L;
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.spotId(spot.getId())
+					.userId(reader.getId())
+					.type(PostSearchType.POSTS_OF_SPOT)
+					.pageable(PageRequest.of(0, 10, Sort.by(
+						Sort.Order.desc("likeCount"),
+						Sort.Order.desc("id"))))
+					.build();
+				//when
 				postRepository.saveAll(createList(() -> createPost(spot, writer, mostLikeCount), 5));
 				SlicePageDto<PostDetailResponse> postsSortedByMostLikeCountAndLatest = postService.getPosts(
-					new PostListRequest(spot.getId(), reader.getId(),
-						PageRequest.of(0, 10, Sort.by(
-							Sort.Order.desc("likeCount"),
-							Sort.Order.desc("id")))));
+					searchCondition);
 				//then
 				assertThatList(postsSortedByMostLikeCountAndLatest.content())
 					.isSortedAccordingTo(comparing(PostDetailResponse::likeCount).reversed()
 						.thenComparing(comparing(PostDetailResponse::id).reversed()));
+			}),
+			dynamicTest("내 방명록 상세 조회 시 다른 유저가 작성한 방명록은 볼 수 없다.", () -> {
+				//given
+				final Post otherUserPost = postRepository.save(createPost(spot, reader, false));
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				final boolean visibleOtherWriterPost = postService.getPosts(searchCondition).content()
+					.stream()
+					.anyMatch(postDetailResponse -> postDetailResponse.id().equals(otherUserPost.getId()));
+				//then
+				assertFalse(visibleOtherWriterPost);
+			}),
+			dynamicTest("내 방명록 상세 조회시 삭제된 것은 볼 수 없고 비공개는 볼 수 있다.", () -> {
+				//given
+				final Post privatePost = postRepository.save(createPost(spot, writer, true));
+				final Post deletePost = createPost(spot, writer, false);
+				deletePost.delete();
+				postRepository.save(deletePost);
+				final PostSearchCondition searchCondition = PostSearchCondition.builder()
+					.userId(writer.getId())
+					.type(PostSearchType.MY_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				//when
+				List<PostDetailResponse> response = postService.getPosts(searchCondition).content();
+				final boolean visiblePrivatePost = response.stream()
+					.anyMatch(postDetailResponse -> postDetailResponse.id().equals(privatePost.getId()));
+				final boolean visibleDeletedPost = response.stream()
+					.anyMatch(postDetailResponse -> postDetailResponse.id().equals(deletePost.getId()));
+				//then
+				assertTrue(visiblePrivatePost);
+				assertFalse(visibleDeletedPost);
+			}),
+			dynamicTest("내가 좋아요한 방명록이 없는 경우 상세 조회 결과가 나오지 않는다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPosts(postSearchCondition);
+				assertThat(response.content()).isEmpty();
+				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 상세 목록을 조회할 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				int postLikeCount = 5;
+				posts.subList(0, postLikeCount).forEach(post -> postLikeRepository.save(createPostLike(post, user)));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, postLikeCount, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPosts(postSearchCondition);
+				assertThat(response.content().size()).isEqualTo(postLikeCount);
+				assertThat(response.hasNext()).isFalse();
+			}),
+			dynamicTest("내가 좋아요한 방명록 상세 목록을 좋아요한 순서로 조회 수 있다.", () -> {
+				final User user = userRepository.save(createUser("user"));
+				final PostLike like1 = postLikeRepository.save(createPostLike(posts.get(0), user));
+				final PostLike like2 = postLikeRepository.save(createPostLike(posts.get(1), user));
+				final PostLike like3 = postLikeRepository.save(createPostLike(posts.get(2), user));
+				final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+					.userId(user.getId())
+					.type(PostSearchType.LIKE_POSTS)
+					.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+					.build();
+				var response = postService.getPosts(postSearchCondition);
+				assertThat(response.content())
+					.extracting(PostDetailResponse::id)
+					.containsExactly(
+						like3.getPost().getId(),
+						like2.getPost().getId(),
+						like1.getPost().getId());
 			})
 		);
 	}
@@ -229,7 +475,7 @@ class PostServiceTest extends IntegrationTestSupport {
 		var mentionedUserIds = List.of(mentionedUser.getId());
 
 		return List.of(
-			DynamicTest.dynamicTest("방명록을 업로드하고 그와 관련된 엔티티를 저장한다.", () -> {
+			dynamicTest("방명록을 업로드하고 그와 관련된 엔티티를 저장한다.", () -> {
 				// given
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tagIds, mentionedUserIds,
 					false);
@@ -249,7 +495,7 @@ class PostServiceTest extends IntegrationTestSupport {
 					() -> assertThat(spotRepository.count()).isEqualTo(rowNum)
 				);
 			}),
-			DynamicTest.dynamicTest("스팟이 존재하지 않으면 스팟을 생성하고 방명록을 업로드한다.", () -> {
+			dynamicTest("스팟이 존재하지 않으면 스팟을 생성하고 방명록을 업로드한다.", () -> {
 				// given
 				var newSpotInfo = new SpotInfoDto(new CoordinateDto(36.5, 125.5), "새로운 주소");
 				var httpRequest = new PostUploadHttpRequest(photoInfo, newSpotInfo, "풍경이 예쁜 곳", tagIds,
@@ -267,7 +513,7 @@ class PostServiceTest extends IntegrationTestSupport {
 					() -> assertThat(spotRepository.count()).isEqualTo(rowNum + 1)
 				);
 			}),
-			DynamicTest.dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
+			dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
 				// given
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "     ", null, null, false);
 				var request = PostUploadRequest.of(writer.getId(), httpRequest);
@@ -278,7 +524,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				// then
 				assertThat(post.getDetailAddress()).isNull();
 			}),
-			DynamicTest.dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
+			dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
 				// given
 				var invalidTagIds = List.of(tags.get(0).getId(), tags.get(1).getId(), 3000L);
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", invalidTagIds,
@@ -289,7 +535,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				assertThatThrownBy(() -> postService.upload(request)).isInstanceOf(ApiException.class)
 					.hasMessage(PostErrorCode.NOT_FOUND_TAG.getMessage());
 			}),
-			DynamicTest.dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
+			dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
 				// given
 				var invalidUserIds = List.of(mentionedUser.getId(), 3000L);
 				var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tagIds,

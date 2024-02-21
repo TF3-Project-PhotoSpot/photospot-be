@@ -1,7 +1,9 @@
 package com.tf4.photospot.spot.presentation;
 
 import org.hibernate.validator.constraints.Range;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -15,6 +17,8 @@ import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.map.application.MapService;
 import com.tf4.photospot.map.application.response.SearchByCoordResponse;
+import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
@@ -73,12 +77,18 @@ public class SpotController {
 		@ModelAttribute @Valid CoordinateDto startingCoord,
 		@RequestParam(name = "postPreviewCount", defaultValue = "5")
 		@Range(min = 1, max = 10, message = "미리보기 사진은 1~10개만 가능합니다.") Integer postPreviewCount,
-		//프론트 요청으로 외부 API가 결합되어 있어서 예외 상황시 호출하지 않도록 플래그 추가
 		@RequestParam(name = "distance", defaultValue = "true") Boolean requireDistance,
 		@AuthUserId Long userId
 	) {
 		Integer distance = 0;
-		SpotResponse spotResponse = spotService.findSpot(spotId, userId, postPreviewCount);
+		Sort sortByLatest = Sort.by(Sort.Direction.DESC, "id");
+		PostSearchCondition postSearchCond = PostSearchCondition.builder()
+			.spotId(spotId)
+			.userId(userId)
+			.pageable(PageRequest.of(0, postPreviewCount, sortByLatest))
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.build();
+		SpotResponse spotResponse = spotService.findSpot(postSearchCond);
 		if (requireDistance) {
 			distance = mapService.searchDistanceBetween(startingCoord.toCoord(), spotResponse.coord());
 		}

@@ -7,6 +7,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+    properties:
+      hibernate:
+        defer-datasource-initialization: true
+        use_sql_comments: true
+        format_sql: true
+    open-in-view: false
   cloud:
     aws:
       credentials:
@@ -15,6 +21,11 @@ spring:
       s3:
         region: ap-northeast-2
         bucket: bucket
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
 
 kakao:
   rest-api-key: test6d177caw1120g3510952427y92d3

@@ -17,7 +17,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
+import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostRepository;
@@ -90,18 +93,23 @@ class SpotServiceTest extends IntegrationTestSupport {
 		spotRepository.save(spot);
 		User user = createUser("이성빈");
 		userRepository.save(user);
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.spotId(spot.getId())
+			.userId(user.getId())
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "id")))
+			.build();
 
 		return Stream.of(
-			dynamicTest("방명록이 없는 스팟을 조회한다.", () -> {
+			dynamicTest("스팟을 조회한다.", () -> {
 				//when
-				SpotResponse response = spotService.findSpot(spot.getId(), user.getId(), 5);
+				SpotResponse response = spotService.findSpot(searchCondition);
 				//then
 				assertThat(response.id()).isEqualTo(spot.getId());
 				assertThat(response.address()).isEqualTo("address");
 				assertThatObject(response.coord()).isEqualTo(coord);
 				assertThat(response.postCount()).isEqualTo(5);
 				assertThat(response.bookmarked()).isFalse();
-				assertThat(response.previewResponses()).isEmpty();
 			}),
 			dynamicTest("북마크 등록 여부를 알려준다.", () -> {
 				//given
@@ -110,18 +118,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 				SpotBookmark spotBookmark = createSpotBookmark(user, spot, defaultBookmark);
 				spotBookmarkRepository.save(spotBookmark);
 				//when
-				SpotResponse response = spotService.findSpot(spot.getId(), user.getId(), 5);
-				//then
-				assertThat(response.bookmarked()).isTrue();
-			}),
-			dynamicTest("북마크 등록 여부를 알려준다.", () -> {
-				//given
-				BookmarkFolder defaultBookmark = BookmarkFolder.createDefaultBookmark(user);
-				bookmarFolderRepository.save(defaultBookmark);
-				SpotBookmark spotBookmark = createSpotBookmark(user, spot, defaultBookmark);
-				spotBookmarkRepository.save(spotBookmark);
-				//when
-				SpotResponse response = spotService.findSpot(spot.getId(), user.getId(), 5);
+				SpotResponse response = spotService.findSpot(searchCondition);
 				//then
 				assertThat(response.bookmarked()).isTrue();
 			}),
@@ -131,7 +128,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 					5);
 				postRepository.saveAll(posts);
 				//when
-				SpotResponse response = spotService.findSpot(spot.getId(), user.getId(), 5);
+				SpotResponse response = spotService.findSpot(searchCondition);
 				//then
 				assertThat(response.previewResponses())
 					.isNotEmpty()
