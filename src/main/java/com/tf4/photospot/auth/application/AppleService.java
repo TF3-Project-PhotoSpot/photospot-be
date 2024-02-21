@@ -10,6 +10,7 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
@@ -31,6 +32,9 @@ import lombok.RequiredArgsConstructor;
 public class AppleService {
 
 	private final AppleClient appleClient;
+
+	@Value("${apple.client-id}")
+	private String appleClientId;
 
 	public AuthUserInfoDto getTokenInfo(String identityToken, String nonce) {
 		Claims claims = getAppleClaims(identityToken);
@@ -82,7 +86,7 @@ public class AppleService {
 	private void validateClaims(Claims claims, String nonce) {
 		validateValue(claims.get("nonce"), nonce);
 		validateValue(claims.getIssuer(), "https://appleid.apple.com");
-		validateValue(claims.getAudience(), "client_id");
+		validateValue(claims.getAudience(), appleClientId);
 		validateExpiration(claims.getExpiration());
 	}
 
