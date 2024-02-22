@@ -36,20 +36,20 @@ public class AppleService {
 	@Value("${apple.client-id}")
 	private String appleClientId;
 
-	public AuthUserInfoDto getTokenInfo(String identityToken, String nonce) {
-		Claims claims = getAppleClaims(identityToken);
+	public AuthUserInfoDto getTokenInfo(String identifyToken, String nonce) {
+		Claims claims = getAppleClaims(identifyToken);
 		validateClaims(claims, nonce);
 		return new AuthUserInfoDto(claims.getSubject());
 	}
 
-	public Claims getAppleClaims(String identityToken) {
+	public Claims getAppleClaims(String identifyToken) {
 		try {
-			Map<String, String> tokenHeaders = parseHeaders(identityToken);
+			Map<String, String> tokenHeaders = parseHeaders(identifyToken);
 			PublicKey publicKey = generatePublicKey(getApplePublicKey(tokenHeaders));
 			return Jwts.parserBuilder()
 				.setSigningKey(publicKey)
 				.build()
-				.parseClaimsJws(identityToken)
+				.parseClaimsJws(identifyToken)
 				.getBody();
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {
 			throw new ApiException(AuthErrorCode.CRYPTO_KEY_PROCESSING_ERROR);
@@ -61,13 +61,13 @@ public class AppleService {
 			return new ObjectMapper().readValue(JWT.decode(token).getHeader(), new TypeReference<>() {
 			});
 		} catch (JsonProcessingException | ArrayIndexOutOfBoundsException ex) {
-			throw new ApiException(AuthErrorCode.INVALID_APPLE_IDENTITY_TOKEN);
+			throw new ApiException(AuthErrorCode.INVALID_APPLE_IDENTIFY_TOKEN);
 		}
 	}
 
 	private ApplePublicKeyResponse.Key getApplePublicKey(Map<String, String> headers) {
 		return appleClient.getPublicKey().getMatchedKeyBy(headers.get("kid"), headers.get("alg"))
-			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_APPLE_IDENTITY_TOKEN));
+			.orElseThrow(() -> new ApiException(AuthErrorCode.INVALID_APPLE_IDENTIFY_TOKEN));
 	}
 
 	private PublicKey generatePublicKey(ApplePublicKeyResponse.Key key) throws
@@ -92,13 +92,13 @@ public class AppleService {
 
 	private void validateValue(Object claimValue, Object expectValue) {
 		if (!expectValue.equals(claimValue)) {
-			throw new ApiException(AuthErrorCode.INVALID_APPLE_IDENTITY_TOKEN);
+			throw new ApiException(AuthErrorCode.INVALID_APPLE_IDENTIFY_TOKEN);
 		}
 	}
 
 	private void validateExpiration(Date expiration) {
 		if (expiration.before(new Date())) {
-			throw new ApiException(AuthErrorCode.EXPIRED_APPLE_IDENTITY_TOKEN);
+			throw new ApiException(AuthErrorCode.EXPIRED_APPLE_IDENTIFY_TOKEN);
 		}
 	}
 }
