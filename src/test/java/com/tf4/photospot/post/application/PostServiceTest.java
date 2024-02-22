@@ -75,7 +75,8 @@ class PostServiceTest extends IntegrationTestSupport {
 		final Post post = postRepository.save(createPost(spot, writer, 0L));
 		final User user = userRepository.save(createUser("user"));
 
-		return Stream.of(dynamicTest("좋아요를 할 수 있다.", () -> {
+		return Stream.of(
+			dynamicTest("좋아요를 할 수 있다.", () -> {
 				//given
 				final Long beforeLikes = post.getLikeCount();
 				//when
