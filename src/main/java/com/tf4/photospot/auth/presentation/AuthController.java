@@ -1,8 +1,8 @@
 package com.tf4.photospot.auth.presentation;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,7 +23,7 @@ public class AuthController {
 	@GetMapping("/reissue")
 	public ReissueTokenResponse reissueToken(
 		@AuthenticationPrincipal LoginUserDto loginUserDto,
-		@CookieValue(JwtConstant.REFRESH_COOKIE_NAME) String refreshToken) {
+		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String refreshToken) {
 		return authService.reissueToken(loginUserDto.getId(), refreshToken);
 	}
 }

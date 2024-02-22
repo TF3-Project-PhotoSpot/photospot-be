@@ -1,12 +1,12 @@
 package com.tf4.photospot.global.filter;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tf4.photospot.auth.application.JwtService;
@@ -19,7 +19,6 @@ import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +33,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		FilterChain filterChain) throws ServletException, IOException {
 		Authentication auth;
 		if (request.getRequestURI().equals(SecurityConstant.REISSUE_ACCESS_TOKEN_URL)) {
-			String refreshToken = extractRefreshTokenFromCookie(request);
+			String refreshToken = extractRefreshTokenFromHeader(request);
 			Claims claims = jwtService.parseRefreshToken(refreshToken);
 			Long userId = claims.get(JwtConstant.USER_ID, Long.class);
 			auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null, null);
@@ -57,16 +56,12 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		}
 	}
 
-	private String extractRefreshTokenFromCookie(HttpServletRequest request) {
-		Cookie[] cookies = request.getCookies();
-		if (cookies == null) {
+	private String extractRefreshTokenFromHeader(HttpServletRequest request) {
+		String refreshToken = request.getHeader(JwtConstant.AUTHORIZATION_HEADER);
+		if (!StringUtils.hasText(refreshToken)) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
-		return Arrays.stream(cookies)
-			.filter(cookie -> JwtConstant.REFRESH_COOKIE_NAME.equals(cookie.getName()))
-			.findFirst()
-			.map(Cookie::getValue)
-			.orElseThrow(() -> new ApiException(AuthErrorCode.UNAUTHORIZED_USER));
+		return refreshToken;
 	}
 
 	@Override
