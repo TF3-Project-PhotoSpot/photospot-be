@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 
 import org.locationtech.jts.geom.Point;
 
+import com.tf4.photospot.album.domain.Album;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.photo.domain.Photo;
@@ -164,5 +165,9 @@ public class TestFixture {
 		return mentionedUsers.stream()
 			.map(user -> createMention(post, user))
 			.toList();
+	}
+
+	public static Album createAlbum() {
+		return new Album("album");
 	}
 }

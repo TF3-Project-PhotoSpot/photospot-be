@@ -6,6 +6,7 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -64,6 +65,16 @@ public class PostJdbcRepository {
 			select :postId, id from users where id in (:mentionedUsers)
 			""", params);
 		return rowNum == mentionedUsers.size();
+	}
+
+	public void saveAlbumPosts(Long albumId, List<Long> postIds) {
+		final SqlParameterSource[] batchValues = postIds.stream()
+			.map(postId -> new MapSqlParameterSource()
+				.addValue("albumId", albumId)
+				.addValue("postId", postId))
+			.toList()
+			.toArray(new MapSqlParameterSource[0]);
+		jdbcTemplate.batchUpdate("insert into album_post (album_id, postId) values (:albumId, :postId)", batchValues);
 	}
 }
 

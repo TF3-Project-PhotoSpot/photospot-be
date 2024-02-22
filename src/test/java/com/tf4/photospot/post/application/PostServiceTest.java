@@ -17,6 +17,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import com.tf4.photospot.album.domain.AlbumPostRepository;
+import com.tf4.photospot.album.domain.AlbumRepository;
+import com.tf4.photospot.album.domain.AlbumUserRepository;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
@@ -57,6 +60,9 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final PostLikeRepository postLikeRepository;
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
+	private final AlbumPostRepository albumPostRepository;
+	private final AlbumRepository albumRepository;
+	private final AlbumUserRepository albumUserRepository;
 
 	@DisplayName("방명록 좋아요")
 	@TestFactory

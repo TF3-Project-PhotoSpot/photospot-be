@@ -7,14 +7,16 @@ import lombok.Builder;
 public record PostSearchCondition(
 	Long spotId,
 	Long userId,
+	Long albumId,
 	PostSearchType type,
 	Pageable pageable
 ) {
 
 	@Builder
-	public PostSearchCondition(Long spotId, Long userId, PostSearchType type, Pageable pageable) {
+	public PostSearchCondition(Long spotId, Long userId, Long albumId, PostSearchType type, Pageable pageable) {
 		this.spotId = spotId;
 		this.userId = userId;
+		this.albumId = albumId;
 		this.type = type;
 		this.pageable = pageable;
 		type.verify(this);

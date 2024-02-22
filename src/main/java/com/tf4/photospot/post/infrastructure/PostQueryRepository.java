@@ -1,5 +1,7 @@
 package com.tf4.photospot.post.infrastructure;
 
+import static com.tf4.photospot.album.domain.QAlbumPost.*;
+import static com.tf4.photospot.album.domain.QAlbumUser.*;
 import static com.tf4.photospot.photo.domain.QBubble.*;
 import static com.tf4.photospot.photo.domain.QPhoto.*;
 import static com.tf4.photospot.post.domain.QPost.*;
@@ -15,7 +17,9 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.global.util.QueryDslUtils;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
@@ -37,7 +41,6 @@ public class PostQueryRepository extends QueryDslUtils {
 	private final JPAQueryFactory queryFactory;
 
 	public Slice<PostPreviewResponse> findPostPreviews(PostSearchCondition cond) {
-		var sortBaseEntity = cond.type() == PostSearchType.LIKE_POSTS ? postLike : post;
 		final Pageable pageable = cond.pageable();
 		var query = queryFactory.select(new QPostPreviewResponse(
 				post.spot.id,
@@ -49,12 +52,16 @@ public class PostQueryRepository extends QueryDslUtils {
 		if (cond.type() == PostSearchType.LIKE_POSTS) {
 			query.join(postLike).on(postLike.post.eq(post));
 		}
+		if (cond.type() == PostSearchType.ALBUM_POSTS) {
+			query.join(albumPost).on(albumPost.post.eq(post))
+				.leftJoin(albumUser).on(albumUser.user.eq(post.writer));
+		}
 		query.where(createPostSearchBuilder(cond));
-		return orderBy(query, sortBaseEntity, pageable).toSlice(query, pageable);
+		return orderBy(query, getPostSearchPathBase(cond.type()), pageable).toSlice(query, pageable);
 	}
 
 	public Slice<PostWithLikeStatus> findPostsWithLikeStatus(PostSearchCondition cond) {
-		var sortBaseEntity = (cond.type() == PostSearchType.LIKE_POSTS) ? postLike : post;
+		final PostSearchType searchType = cond.type();
 		final Pageable pageable = cond.pageable();
 		final QUser writer = new QUser("writer");
 		var query = queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
@@ -62,13 +69,27 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin();
-		if (cond.type() == PostSearchType.LIKE_POSTS) {
+		if (searchType == PostSearchType.LIKE_POSTS) {
 			query.join(postLike).on(postLike.post.eq(post));
 		} else {
 			query.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(cond.userId())));
 		}
+		if (cond.type() == PostSearchType.ALBUM_POSTS) {
+			query.join(albumPost).on(albumPost.post.eq(post))
+				.leftJoin(albumUser).on(albumUser.user.eq(post.writer));
+		}
 		query.where(createPostSearchBuilder(cond));
-		return orderBy(query, sortBaseEntity, pageable).toSlice(query, pageable);
+		return orderBy(query, getPostSearchPathBase(searchType), pageable).toSlice(query, pageable);
+	}
+
+	private EntityPathBase<? extends BaseEntity> getPostSearchPathBase(PostSearchType type) {
+		if (type == PostSearchType.LIKE_POSTS) {
+			return postLike;
+		}
+		if (type == PostSearchType.ALBUM_POSTS) {
+			return albumPost;
+		}
+		return post;
 	}
 
 	public List<PostTag> findPostTagsIn(List<Post> posts) {
@@ -85,6 +106,8 @@ public class PostQueryRepository extends QueryDslUtils {
 			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
 			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond));
 			case LIKE_POSTS -> searchBuilder.and(equalsPostLike(cond.userId())).and(canVisible(cond));
+			case ALBUM_POSTS ->
+				searchBuilder.and(equalsAlbum(cond.albumId())).and(isPublicPost().or(albumUser.isNotNull()));
 		}
 		return searchBuilder;
 	}
@@ -111,6 +134,10 @@ public class PostQueryRepository extends QueryDslUtils {
 
 	private BooleanBuilder equalsSpot(Long spotId) {
 		return nullSafeBuilder(() -> post.spot.id.eq(spotId));
+	}
+
+	private BooleanBuilder equalsAlbum(Long albumId) {
+		return nullSafeBuilder(() -> albumPost.album.id.eq(albumId));
 	}
 
 	public boolean existsPostLike(Post post, User user) {

@@ -92,6 +92,40 @@ class PostSearchConditionTest {
 					.type(PostSearchType.LIKE_POSTS);
 				assertThatNoException().isThrownBy(likePostsBuilder::build);
 				assertThatException().isThrownBy(likePostsBuilderSortLikeCount::build);
+			}),
+			dynamicTest("앨범 방명록 조회 조건은 userId, albumId가 필수다.", () -> {
+				var albumPostsBuilder = PostSearchCondition.builder()
+					.userId(1L)
+					.albumId(1L)
+					.pageable(defaultPageRequest)
+					.type(PostSearchType.ALBUM_POSTS);
+				var albumPostsBuilderNotUserId = PostSearchCondition.builder()
+					.pageable(defaultPageRequest)
+					.albumId(1L)
+					.type(PostSearchType.ALBUM_POSTS);
+				var albumPostsBuilderNotAlbumId = PostSearchCondition.builder()
+					.pageable(defaultPageRequest)
+					.userId(1L)
+					.type(PostSearchType.ALBUM_POSTS);
+				assertThatNoException().isThrownBy(albumPostsBuilder::build);
+				assertThatException().isThrownBy(albumPostsBuilderNotAlbumId::build);
+				assertThatException().isThrownBy(albumPostsBuilderNotUserId::build);
+			}),
+			dynamicTest("앨범 방명록 조회 조건은 시간순 정렬만 가능하다.", () -> {
+				final PageRequest pageRequestSortLikeCount = PageRequest.of(0, 10,
+					Sort.by(Sort.Direction.DESC, "likeCount"));
+				var albumPostsBuilder = PostSearchCondition.builder()
+					.userId(1L)
+					.albumId(1L)
+					.pageable(defaultPageRequest)
+					.type(PostSearchType.ALBUM_POSTS);
+				var albumPostsBuilderSortLikeCount = PostSearchCondition.builder()
+					.userId(1L)
+					.albumId(1L)
+					.pageable(pageRequestSortLikeCount)
+					.type(PostSearchType.ALBUM_POSTS);
+				assertThatNoException().isThrownBy(albumPostsBuilder::build);
+				assertThatException().isThrownBy(albumPostsBuilderSortLikeCount::build);
 			})
 		);
 	}
