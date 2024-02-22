@@ -16,6 +16,7 @@ public enum AuthErrorCode implements ApiErrorCode {
 	EXPIRED_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "리프레시 토큰이 만료되었습니다."),
 	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
 	UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
+	PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 요청에 대한 권한이 없습니다."),
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
 	INVALID_ROLE(HttpStatus.BAD_REQUEST, "유효하지 않은 권한입니다."),
 	INVALID_PROVIDER_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 공급자입니다."),

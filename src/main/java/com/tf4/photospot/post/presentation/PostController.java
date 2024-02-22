@@ -5,8 +5,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,10 +20,14 @@ import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
+import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.PostUploadResponse;
+import com.tf4.photospot.post.application.response.PostSaveResponse;
+import com.tf4.photospot.post.application.response.PostUpdateResponse;
+import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
+import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
 
 import jakarta.validation.Valid;
@@ -62,7 +68,9 @@ public class PostController {
 	}
 
 	@PostMapping
-	public PostUploadResponse uploadPost(@AuthUserId Long userId, @RequestBody @Valid PostUploadHttpRequest request) {
+	public PostSaveResponse uploadPost(
+		@AuthUserId Long userId,
+		@RequestBody @Valid PostUploadHttpRequest request) {
 		return postService.upload(PostUploadRequest.of(userId, request));
 	}
 
@@ -134,5 +142,29 @@ public class PostController {
 			.pageable(pageable)
 			.build();
 		return postService.getPosts(searchCondition);
+	}
+
+	@PutMapping("/{postId}")
+	public PostUpdateResponse updatePost(
+		@AuthUserId Long userId,
+		@PathVariable("postId") Long postId,
+		@RequestBody @Valid PostUpdateHttpRequest request) {
+		return postService.update(PostUpdateRequest.of(userId, postId, request));
+	}
+
+	@PatchMapping("/{postId}")
+	public PostUpdateResponse updatePrivacyState(
+		@AuthUserId Long userId,
+		@PathVariable("postId") Long postId,
+		@RequestBody @Valid PostStateUpdateRequest request) {
+		return postService.updatePrivacyState(userId, postId, request.isPrivate());
+	}
+
+	@DeleteMapping("/{postId}")
+	public ApiResponse deletePost(
+		@AuthUserId Long userId,
+		@PathVariable("postId") Long postId) {
+		postService.delete(userId, postId);
+		return ApiResponse.SUCCESS;
 	}
 }

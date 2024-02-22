@@ -18,7 +18,7 @@ public record PostUploadRequest(
 	String detailAddress,
 	List<Long> tags,
 	List<Long> mentions,
-	Boolean isPrivate
+	boolean isPrivate
 ) {
 
 	public PostUploadRequest {

@@ -2,6 +2,7 @@ package com.tf4.photospot.post.infrastructure;
 
 import static com.tf4.photospot.photo.domain.QBubble.*;
 import static com.tf4.photospot.photo.domain.QPhoto.*;
+import static com.tf4.photospot.post.domain.QMention.*;
 import static com.tf4.photospot.post.domain.QPost.*;
 import static com.tf4.photospot.post.domain.QPostLike.*;
 import static com.tf4.photospot.post.domain.QPostTag.*;
@@ -23,6 +24,7 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
 import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
+import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
@@ -71,6 +73,18 @@ public class PostQueryRepository extends QueryDslUtils {
 		return orderBy(query, sortBaseEntity, pageable).toSlice(query, pageable);
 	}
 
+	public PostWithLikeStatus findPost(Long userId, Long postId) {
+		final QUser writer = new QUser("writer");
+		return queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
+			.from(post)
+			.join(post.writer, writer).fetchJoin()
+			.join(post.photo, photo).fetchJoin()
+			.leftJoin(photo.bubble, bubble).fetchJoin()
+			.leftJoin(postLike).on(postLike.post.eq(post).and(equalsPostLike(userId)))
+			.where(post.id.eq(postId).and(canVisible(userId)))
+			.fetchOne();
+	}
+
 	public List<PostTag> findPostTagsIn(List<Post> posts) {
 		return queryFactory.select(postTag)
 			.from(postTag)
@@ -79,18 +93,26 @@ public class PostQueryRepository extends QueryDslUtils {
 			.fetch();
 	}
 
+	public List<Mention> findMentionsIn(List<Post> posts) {
+		return queryFactory.select(mention)
+			.from(mention)
+			.join(mention.mentionedUser).fetchJoin()
+			.where(mention.post.in(posts))
+			.fetch();
+	}
+
 	private BooleanBuilder createPostSearchBuilder(PostSearchCondition cond) {
 		final BooleanBuilder searchBuilder = new BooleanBuilder(isNotDeleted());
 		switch (cond.type()) {
 			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
-			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond));
-			case LIKE_POSTS -> searchBuilder.and(equalsPostLike(cond.userId())).and(canVisible(cond));
+			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond.userId()));
+			case LIKE_POSTS -> searchBuilder.and(equalsPostLike(cond.userId())).and(canVisible(cond.userId()));
 		}
 		return searchBuilder;
 	}
 
-	private BooleanExpression canVisible(PostSearchCondition cond) {
-		return isPublicPost().or(equalsWriter(cond.userId()));
+	private BooleanExpression canVisible(Long userId) {
+		return isPublicPost().or(equalsWriter(userId));
 	}
 
 	private static BooleanExpression isPublicPost() {
