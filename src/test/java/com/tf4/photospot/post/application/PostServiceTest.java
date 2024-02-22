@@ -155,7 +155,7 @@ class PostServiceTest extends IntegrationTestSupport {
 			//given
 			Post privatePost = createPost(spot, writer, true);
 			Post deletePost = createPost(spot, writer);
-			deletePost.delete();
+			deletePost.delete(writer);
 			postRepository.saveAll(List.of(privatePost, deletePost));
 
 			var latestPostRequest = PostSearchCondition.builder()
@@ -187,7 +187,7 @@ class PostServiceTest extends IntegrationTestSupport {
 			//given
 			final Post privatePost = postRepository.save(createPost(spot, writer, true));
 			final Post deletePost = createPost(spot, writer, false);
-			deletePost.delete();
+			deletePost.delete(writer);
 			postRepository.save(deletePost);
 			final PostSearchCondition searchCondition = PostSearchCondition.builder()
 				.userId(writer.getId())
@@ -374,7 +374,7 @@ class PostServiceTest extends IntegrationTestSupport {
 			//given
 			final Post privatePost = postRepository.save(createPost(spot, writer, true));
 			final Post deletePost = createPost(spot, writer, false);
-			deletePost.delete();
+			deletePost.delete(writer);
 			postRepository.save(deletePost);
 			final PostSearchCondition searchCondition = PostSearchCondition.builder()
 				.userId(writer.getId())
