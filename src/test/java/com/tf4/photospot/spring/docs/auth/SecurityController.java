@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.auth.application.response.LoginResponse;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 
 @RequestMapping("/api/v1/auth")
@@ -16,13 +15,12 @@ public class SecurityController {
 
 	@PostMapping("/login")
 	public LoginResponse login(@RequestBody LoginRequest request, HttpServletResponse response) {
-		Cookie cookie = new Cookie("RefreshToken", "refresh_token_value");
-		response.addCookie(cookie);
-		return new LoginResponse("access_token", false);
+		return new LoginResponse("access_token", "refresh_token", false);
 	}
 }
 
 record LoginRequest(
 	String providerType,
-	String identifier) {
+	String identifier,
+	String token) {
 }
