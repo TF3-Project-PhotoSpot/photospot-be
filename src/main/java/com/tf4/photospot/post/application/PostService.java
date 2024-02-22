@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.global.aop.Retry;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
-import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.photo.application.S3Uploader;
@@ -172,8 +171,7 @@ public class PostService {
 	public PostUpdateResponse update(PostUpdateRequest request) {
 		User loginUser = findLoginUser(request.userId());
 		Post post = findPost(request.postId());
-		validateSameUser(loginUser.getId(), post.getWriter().getId());
-		post.updateDetailAddress(request.detailAddress());
+		post.updateDetailAddress(loginUser, request.detailAddress());
 		updatePostTags(post, request.tags());
 		updateMentions(post, request.mentions());
 		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
@@ -193,8 +191,7 @@ public class PostService {
 	public PostUpdateResponse updatePrivacyState(Long userId, Long postId, boolean isPrivate) {
 		User loginUser = findLoginUser(userId);
 		Post post = findPost(postId);
-		validateSameUser(loginUser.getId(), post.getWriter().getId());
-		post.updatePrivacyState(isPrivate);
+		post.updatePrivacyState(loginUser, isPrivate);
 		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
 	}
 
@@ -203,12 +200,9 @@ public class PostService {
 	public void delete(Long userId, Long postId) {
 		User loginUser = findLoginUser(userId);
 		Post post = findPost(postId);
-		validateSameUser(loginUser.getId(), post.getWriter().getId());
+		post.delete(loginUser);
 		postTagRepository.deleteByPostId(postId);
 		mentionRepository.deleteByPostId(postId);
-		post.getPhoto().delete();
-		post.getSpot().decPostCount();
-		post.delete();
 	}
 
 	private User findLoginUser(Long userId) {
@@ -217,11 +211,5 @@ public class PostService {
 
 	private Post findPost(Long postId) {
 		return postRepository.findById(postId).orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
-	}
-
-	private void validateSameUser(Long loginUserId, Long writerId) {
-		if (!loginUserId.equals(writerId)) {
-			throw new ApiException(AuthErrorCode.PERMISSION_DENIED);
-		}
 	}
 }
