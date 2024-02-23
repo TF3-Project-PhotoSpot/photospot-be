@@ -7,11 +7,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tf4.photospot.auth.presentation.request.LoginDto;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.support.IntegrationTestSupport;
 
@@ -34,13 +37,15 @@ public class AuthControllerTest extends IntegrationTestSupport {
 	@DisplayName("로그인 시 잘못된 공급자를 받으면 예외를 응답한다.")
 	void loginWithInvalidProviderType() throws Exception {
 		// given
+		ObjectMapper objectMapper = new ObjectMapper();
 		var account = "account_value";
 		var invalidProviderType = "koukou";
+		var loginDto = new LoginDto(invalidProviderType, account, "token");
 
 		// when & then
 		mockMvc.perform(post("/api/v1/auth/login")
-				.queryParam("account", account)
-				.queryParam("providerType", invalidProviderType)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginDto))
 			)
 			.andDo(print())
 			.andExpect(status().isBadRequest())
