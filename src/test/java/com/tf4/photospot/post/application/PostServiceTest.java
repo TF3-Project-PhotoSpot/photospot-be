@@ -40,6 +40,8 @@ import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.domain.PostTagRepository;
+import com.tf4.photospot.post.domain.Report;
+import com.tf4.photospot.post.domain.ReportRepository;
 import com.tf4.photospot.post.domain.Tag;
 import com.tf4.photospot.post.domain.TagRepository;
 import com.tf4.photospot.post.presentation.request.PhotoInfoDto;
@@ -65,6 +67,7 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final PostTagRepository postTagRepository;
 	private final TagRepository tagRepository;
 	private final MentionRepository mentionRepository;
+	private final ReportRepository reportRepository;
 
 	@DisplayName("방명록 좋아요")
 	@TestFactory
@@ -447,10 +450,15 @@ class PostServiceTest extends IntegrationTestSupport {
 
 			// when
 			Long postId = postService.upload(request).postId();
+			var post = postRepository.findById(postId).orElseThrow();
 			var response = postService.getPost(request.userId(), postId);
 
 			// then
-			assertAll(() -> assertThat(response.photoUrl()).contains(S3Directory.POST_FOLDER.getPath())
+			assertAll(
+				() -> assertEquals(post.getLikeCount(), 0L),
+				() -> assertEquals(post.getReportCount(), 0L),
+				() -> assertEquals(post.getSpot().getPostCount(), 1L),
+				() -> assertThat(response.photoUrl()).contains(S3Directory.POST_FOLDER.getPath())
 					.doesNotContain(S3Directory.TEMP_FOLDER.getPath()),
 				() -> assertThat(response.detailAddress()).isEqualTo("디테일 주소"),
 				() -> assertThat(response.tags()).extracting("tagName").containsExactly("tagA", "tagB", "tagC"),
@@ -595,5 +603,34 @@ class PostServiceTest extends IntegrationTestSupport {
 			new CoordinateDto(35.512, 126.912), "2024-01-13T05:20:18.981+09:00");
 		var spotInfo = new SpotInfoDto(new CoordinateDto(35.557, 126.923), "중점 좌표 기준 변환된 주소");
 		return new PostUploadHttpRequest(photoInfo, spotInfo, detailAddress, tagIds, mentionedUserIds, false);
+	}
+
+	@TestFactory
+	Stream<DynamicTest> reportPost() {
+		// given
+		User reporter = createUser("신고자");
+		userRepository.save(reporter);
+		Post post = createPost(spotRepository.save(createSpot()), reporter);
+		postRepository.save(post);
+
+		return Stream.of(
+			dynamicTest("방명록을 신고한다.", () -> {
+				// when
+				postService.report(reporter.getId(), post.getId(), "불쾌감을 유발하는 사진입니다.");
+				Report report = reportRepository.findByPostId(post.getId()).orElseThrow();
+
+				// then
+				assertAll(
+					() -> assertEquals(report.getReporter(), reporter),
+					() -> assertEquals(report.getPost().getReportCount(), 1),
+					() -> assertEquals(report.getReason(), "불쾌감을 유발하는 사진입니다.")
+				);
+			}),
+			dynamicTest("이미 신고한 방명록인 경우 예외를 던진다.", () -> {
+				// when & then
+				assertThatThrownBy(() -> postService.report(reporter.getId(), post.getId(), "타인을 비방하는 사진입니다."))
+					.isInstanceOf(ApiException.class).hasMessage(PostErrorCode.ALREADY_REPORT.getMessage());
+			})
+		);
 	}
 }
