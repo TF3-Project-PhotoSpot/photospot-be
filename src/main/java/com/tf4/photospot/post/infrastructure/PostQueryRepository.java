@@ -6,6 +6,7 @@ import static com.tf4.photospot.post.domain.QMention.*;
 import static com.tf4.photospot.post.domain.QPost.*;
 import static com.tf4.photospot.post.domain.QPostLike.*;
 import static com.tf4.photospot.post.domain.QPostTag.*;
+import static com.tf4.photospot.post.domain.QReport.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -148,5 +149,13 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(postLike.post, post).fetchJoin()
 			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
 			.fetchOne());
+	}
+
+	public boolean existsReport(Post post, User user) {
+		final Integer exists = queryFactory.selectOne()
+			.from(report)
+			.where(report.post.eq(post).and(report.reporter.eq(user)))
+			.fetchFirst();
+		return exists != null;
 	}
 }
