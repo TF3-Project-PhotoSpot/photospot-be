@@ -102,3 +102,11 @@ include::{snippets}/post-controller-docs-test/update-privacy-state/response-fiel
 include::{snippets}/post-controller-docs-test/delete-post/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/delete-post/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/delete-post/response-fields.adoc[]
+
+== 방명록 신고
+
+'''
+
+include::{snippets}/post-controller-docs-test/report-post/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/report-post/request-body.adoc[]
+include::{snippets}/post-controller-docs-test/report-post/response-fields.adoc[]

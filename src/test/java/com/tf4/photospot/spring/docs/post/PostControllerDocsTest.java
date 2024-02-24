@@ -27,6 +27,7 @@ import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
 import com.tf4.photospot.post.presentation.request.PhotoInfoDto;
+import com.tf4.photospot.post.presentation.request.PostReportRequest;
 import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
 import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
@@ -426,6 +427,21 @@ public class PostControllerDocsTest extends RestDocsSupport {
 
 		// when & then
 		mockMvc.perform(delete("/api/v1/posts/{postId}", 1L))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplateDefaultSuccess());
+	}
+
+	@Test
+	void reportPost() throws Exception {
+		// given
+		var request = new PostReportRequest("신고 사유");
+		willDoNothing().given(postService).report(anyLong(), anyLong(), anyString());
+
+		// when & then
+		mockMvc.perform(post("/api/v1/posts/{postId}/report", 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(request))
+				.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplateDefaultSuccess());
 	}
