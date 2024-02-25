@@ -9,6 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.security.SecurityConstant;
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
+	private final AuthService authService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -51,7 +53,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 	}
 
 	private void validate(String accessToken) {
-		if (accessToken == null) {
+		if (accessToken == null || authService.existsBlacklist(accessToken)) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
 	}

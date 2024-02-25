@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
@@ -21,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AuthService {
 	private final UserRepository userRepository;
+	private final JwtRedisRepository jwtRedisRepository;
 	private final JwtService jwtService;
 	private final AppleService appleService;
 	private final KakaoService kakaoService;
@@ -44,7 +46,6 @@ public class AuthService {
 				userRepository.save(new LoginUserInfo(provider, account).toUser(generateNickname()))));
 	}
 
-	// Todo : 클라이언트에서 accessToken 전달 시 PREFIX도 함께 오는지 확인 후 수정
 	private String validateAndGetKakaoUserInfo(String accessToken, String id) {
 		return kakaoService.getTokenInfo(accessToken, id).account();
 	}
@@ -71,5 +72,16 @@ public class AuthService {
 		jwtService.validRefreshToken(userId, refreshToken);
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()));
+	}
+
+	public void logout(Long userId, String accessToken) {
+		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		Long expiration = jwtService.parseAccessToken(accessToken).getExpiration().getTime();
+		jwtRedisRepository.saveAccessTokenInBlackList(accessToken, expiration);
+		jwtRedisRepository.deleteByUserId(user.getId());
+	}
+
+	public boolean existsBlacklist(String accessToken) {
+		return jwtRedisRepository.existsBlacklist(accessToken);
 	}
 }

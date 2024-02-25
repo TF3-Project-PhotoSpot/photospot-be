@@ -49,7 +49,7 @@ public class SecurityConfig {
 				.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				.disable())
 			.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(new JwtTokenValidatorFilter(jwtService), CustomAuthenticationFilter.class)
+			.addFilterBefore(new JwtTokenValidatorFilter(jwtService, authService), CustomAuthenticationFilter.class)
 			.addFilterBefore(new CustomExceptionFilter(), JwtTokenValidatorFilter.class)
 			.exceptionHandling(exceptionHandling -> exceptionHandling
 				.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));

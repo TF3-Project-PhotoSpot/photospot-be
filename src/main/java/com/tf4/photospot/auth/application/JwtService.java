@@ -10,8 +10,8 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
@@ -25,17 +25,16 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 
-@Transactional(readOnly = true)
 @Service
+@Transactional(readOnly = true)
 public class JwtService {
-
-	private final JwtRepository jwtRepository;
+	private final JwtRedisRepository jwtRedisRepository;
 	private final JwtProperties jwtProperties;
 
 	private final SecretKey key;
 
-	public JwtService(JwtRepository jwtRepository, JwtProperties jwtProperties) {
-		this.jwtRepository = jwtRepository;
+	public JwtService(JwtRedisRepository jwtRedisRepository, JwtProperties jwtProperties) {
+		this.jwtRedisRepository = jwtRedisRepository;
 		this.jwtProperties = jwtProperties;
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 	}
@@ -58,7 +57,7 @@ public class JwtService {
 	@Transactional
 	public String issueRefreshToken(Long userId) {
 		String refreshToken = generateRefreshToken(userId, new Date());
-		jwtRepository.save(new RefreshToken(userId, refreshToken));
+		jwtRedisRepository.save(new RefreshToken(userId, refreshToken));
 		return refreshToken;
 	}
 
@@ -100,7 +99,7 @@ public class JwtService {
 	}
 
 	public void validRefreshToken(Long userId, String refreshToken) {
-		RefreshToken token = jwtRepository.findByUserId(userId)
+		RefreshToken token = jwtRedisRepository.findByUserId(userId)
 			.orElseThrow(() -> new ApiException(AuthErrorCode.UNAUTHORIZED_USER));
 
 		if (!token.isTokenMatching(refreshToken)) {
@@ -113,10 +112,5 @@ public class JwtService {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
 		return header.substring(JwtConstant.PREFIX.length());
-	}
-
-	@Transactional
-	public void removeRefreshToken(Long userId) {
-		jwtRepository.deleteById(userId);
 	}
 }
