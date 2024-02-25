@@ -21,6 +21,10 @@ spring:
       s3:
         region: ap-northeast-2
         bucket: bucket
+  data:
+    redis:
+      port: 6379
+      host: localhost
 
 logging:
   level:

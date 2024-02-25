@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
+import com.tf4.photospot.auth.domain.RefreshToken;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.mockobject.WithCustomMockUser;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
@@ -25,6 +28,7 @@ public class AuthServiceTest extends IntegrationTestSupport {
 	private final AuthService authService;
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
+	private final JwtRedisRepository jwtRedisRepository;
 
 	@TestFactory
 	@DisplayName("사용자 등록 시나리오")
@@ -72,5 +76,25 @@ public class AuthServiceTest extends IntegrationTestSupport {
 
 		// then
 		assertThat(tokenResponse.accessToken()).isNotBlank();
+	}
+
+	@Test
+	@WithCustomMockUser
+	@DisplayName("로그아웃을 하면 Redis에 저장된 리프레시 토큰을 삭제하고 블랙리스트에 액세스 토큰을 추가한다.")
+	void logout() {
+		// given
+		User loginUser = createUser("사용자");
+		userRepository.save(loginUser);
+		jwtRedisRepository.save(new RefreshToken(loginUser.getId(), "refresh_token"));
+		String accessToken = "Bearer " + jwtService.issueAccessToken(loginUser.getId(), loginUser.getRole().getType());
+
+		// when
+		authService.logout(loginUser.getId(), accessToken);
+
+		// then
+		assertAll(
+			() -> assertThat(jwtRedisRepository.findByUserId(loginUser.getId())).isEqualTo(Optional.empty()),
+			() -> assertTrue(authService.existsBlacklist(accessToken))
+		);
 	}
 }
