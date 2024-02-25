@@ -141,8 +141,8 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 		//given
 		PostIdListHttpRequest request = new PostIdListHttpRequest(List.of(1L, 2L));
 		final List<CreateAlbumPostResponse> responses = List.of(
-			CreateAlbumPostResponse.builder().postId(1L).isDuplicated(false).build(),
-			CreateAlbumPostResponse.builder().postId(2L).isDuplicated(true).build()
+			new CreateAlbumPostResponse(1L),
+			new CreateAlbumPostResponse(2L)
 		);
 		given(albumService.addPosts(anyList(), anyLong(), anyLong())).willReturn(responses);
 		//when
@@ -153,15 +153,12 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 			)
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
-					pathParameters(parameterWithName("albumId").description("앨범 ID")),
-					requestFields(fieldWithPath("postIds").type(JsonFieldType.ARRAY).description("방명록 id 리스트")),
-					responseFields(
-						fieldWithPath("allAdded").type(JsonFieldType.BOOLEAN).description("모든 방명록 앨범에 추가 여부"),
-						fieldWithPath("failedPosts").type(JsonFieldType.ARRAY).description("앨범에 추가 실패한 방명록 리스트"),
-						fieldWithPath("failedPosts[].postId").type(JsonFieldType.NUMBER).description("방명록 id"),
-						fieldWithPath("failedPosts[].isDuplicated").type(JsonFieldType.BOOLEAN).description("중복 여부"))
+				pathParameters(parameterWithName("albumId").description("앨범 ID")),
+				requestFields(fieldWithPath("postIds").type(JsonFieldType.ARRAY).description("방명록 id 리스트")),
+				responseFields(
+					fieldWithPath("failedPostIds").type(JsonFieldType.ARRAY).description("앨범에 추가못한 방명록 id 리스트")
 				)
-			);
+			));
 	}
 
 	@Test

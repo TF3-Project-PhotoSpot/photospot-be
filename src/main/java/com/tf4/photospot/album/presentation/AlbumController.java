@@ -1,5 +1,7 @@
 package com.tf4.photospot.album.presentation;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.album.application.AlbumService;
+import com.tf4.photospot.album.application.response.CreateAlbumPostResponse;
 import com.tf4.photospot.album.presentation.request.CreateAlbumHttpRequest;
 import com.tf4.photospot.album.presentation.request.PostIdListHttpRequest;
 import com.tf4.photospot.album.presentation.response.CreateAlbumHttpResponse;
@@ -78,7 +81,8 @@ public class AlbumController {
 		@AuthUserId Long userId,
 		@RequestBody @Valid PostIdListHttpRequest request
 	) {
-		return CreateAlbumPostsHttpResponse.from(albumService.addPosts(request.postIds(), albumId, userId));
+		List<CreateAlbumPostResponse> createAlbumPosts = albumService.addPosts(request.postIds(), albumId, userId);
+		return CreateAlbumPostsHttpResponse.of(request, createAlbumPosts);
 	}
 
 	@PatchMapping("/{albumId}/posts")

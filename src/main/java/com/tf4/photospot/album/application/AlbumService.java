@@ -64,10 +64,7 @@ public class AlbumService {
 		final List<Long> addablePostIds = new ArrayList<>(postIds);
 		addablePostIds.removeAll(existingPostIds);
 		albumJdbcRepository.saveAlbumPosts(albumId, addablePostIds);
-		final List<CreateAlbumPostResponse> createAlbumPosts = new ArrayList<>();
-		addablePostIds.forEach(postId -> createAlbumPosts.add(new CreateAlbumPostResponse(postId, false)));
-		existingPostIds.forEach(postId -> createAlbumPosts.add(new CreateAlbumPostResponse(postId, true)));
-		return createAlbumPosts;
+		return addablePostIds.stream().map(CreateAlbumPostResponse::new).toList();
 	}
 
 	@Transactional

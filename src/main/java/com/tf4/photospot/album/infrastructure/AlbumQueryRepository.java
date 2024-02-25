@@ -5,12 +5,10 @@ import static com.tf4.photospot.album.domain.QAlbumPost.*;
 import static com.tf4.photospot.album.domain.QAlbumUser.*;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.stereotype.Repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.tf4.photospot.album.domain.AlbumUser;
 import com.tf4.photospot.global.util.QueryDslUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -26,13 +24,6 @@ public class AlbumQueryRepository extends QueryDslUtils {
 			.where(albumUser.user.id.eq(userId).and(albumUser.album.id.eq(albumId)))
 			.fetchFirst();
 		return exists != null;
-	}
-
-	public Optional<AlbumUser> findAlbumUser(Long albumId, Long userId) {
-		return Optional.ofNullable(queryFactory.selectFrom(albumUser)
-			.join(albumUser.album, album).fetchJoin()
-			.where(albumUser.album.id.eq(albumId).and(albumUser.user.id.eq(userId)))
-			.fetchFirst());
 	}
 
 	public List<Long> findPostIdsOfAlbumPosts(Long albumId, List<Long> postIds) {

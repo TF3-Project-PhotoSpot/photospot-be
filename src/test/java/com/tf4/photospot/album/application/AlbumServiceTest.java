@@ -171,7 +171,6 @@ class AlbumServiceTest extends IntegrationTestSupport {
 				final List<CreateAlbumPostResponse> responses = albumService.addPosts(postIds, albumId,
 					user.getId());
 				assertThat(responses).extracting("postId").isEqualTo(postIds);
-				assertThat(responses).allMatch(response -> !response.isDuplicated());
 			}),
 			dynamicTest("앨범에 중복된 방명록을 추가할 수 없다.", () -> {
 				final Post existPost = posts.get(0);
@@ -179,10 +178,10 @@ class AlbumServiceTest extends IntegrationTestSupport {
 				postIds.add(existPost.getId());
 				final List<CreateAlbumPostResponse> responses = albumService.addPosts(postIds, albumId,
 					user.getId());
-				final Optional<CreateAlbumPostResponse> createFailAlbumPost = responses.stream()
+				final Optional<CreateAlbumPostResponse> result = responses.stream()
 					.filter(response -> response.postId().equals(existPost.getId()))
 					.findFirst();
-				assertThat(createFailAlbumPost).isPresent().get().matches(CreateAlbumPostResponse::isDuplicated);
+				assertThat(result).isEmpty();
 				assertThat(albumPostRepository.findAll().size()).isEqualTo(posts.size() + newPosts.size());
 			}),
 			dynamicTest("앨범 방명록을 제거한다.", () -> {

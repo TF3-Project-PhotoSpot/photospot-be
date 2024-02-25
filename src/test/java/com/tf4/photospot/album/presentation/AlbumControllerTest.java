@@ -39,8 +39,8 @@ class AlbumControllerTest {
 	void successRequestPositvePostIds() throws Exception {
 		//given
 		var response = List.of(
-			new CreateAlbumPostResponse(1L, true),
-			new CreateAlbumPostResponse(2L, false));
+			new CreateAlbumPostResponse(1L),
+			new CreateAlbumPostResponse(2L));
 		given(albumService.addPosts(anyList(), anyLong(), anyLong())).willReturn(response);
 		//when then
 		mockMvc.perform(post("/api/v1/albums/{albumId}/posts", 1L).with(csrf())
@@ -57,8 +57,8 @@ class AlbumControllerTest {
 	void failRequestPositvePostIds() throws Exception {
 		//given
 		var response = List.of(
-			new CreateAlbumPostResponse(1L, true),
-			new CreateAlbumPostResponse(2L, false));
+			new CreateAlbumPostResponse(1L),
+			new CreateAlbumPostResponse(2L));
 		given(albumService.addPosts(anyList(), anyLong(), anyLong())).willReturn(response);
 		//when then
 		mockMvc.perform(post("/api/v1/albums/{albumId}/posts", 1L).with(csrf())
