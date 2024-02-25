@@ -15,8 +15,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
-import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
@@ -33,10 +33,10 @@ import lombok.RequiredArgsConstructor;
 public class JwtServiceTest extends IntegrationTestSupport {
 	private final JwtService jwtService;
 	private final JwtProperties jwtProperties;
-	private final JwtRepository jwtRepository;
+	private final JwtRedisRepository jwtRedisRepository;
 	private final UserRepository userRepository;
 
-	@DisplayName("리프레시 토큰을 발급하고 DB에 저장한다.")
+	@DisplayName("리프레시 토큰을 발급하고 Redis에 저장한다.")
 	@Test
 	void issueTokens() {
 		// given
@@ -45,7 +45,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 		String refreshToken = jwtService.issueRefreshToken(savedUser.getId());
 
 		// when
-		RefreshToken userRefreshToken = jwtRepository.findByUserId(savedUser.getId()).orElseThrow();
+		RefreshToken userRefreshToken = jwtRedisRepository.findByUserId(savedUser.getId()).orElseThrow();
 
 		// then
 		assertAll(
@@ -196,7 +196,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 			}),
 			DynamicTest.dynamicTest("해당 사용자에 대한 토큰이 DB에 없는 경우 예외를 발생한다", () -> {
 				// given
-				jwtService.removeRefreshToken(savedUser.getId());
+				jwtRedisRepository.deleteByUserId(savedUser.getId());
 
 				// when & then
 				assertThatThrownBy(() -> jwtService.validRefreshToken(savedUser.getId(), refreshToken))
@@ -205,5 +205,4 @@ public class JwtServiceTest extends IntegrationTestSupport {
 			})
 		);
 	}
-
 }
