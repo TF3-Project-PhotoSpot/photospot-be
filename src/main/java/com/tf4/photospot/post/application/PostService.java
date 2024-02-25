@@ -18,16 +18,22 @@ import com.tf4.photospot.photo.application.S3Uploader;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
+import com.tf4.photospot.post.application.response.PostAllResponse;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.PostUploadResponse;
+import com.tf4.photospot.post.application.response.PostSaveResponse;
+import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.domain.Mention;
+import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
+import com.tf4.photospot.post.domain.PostTagRepository;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
@@ -46,6 +52,8 @@ public class PostService {
 	private final PostQueryRepository postQueryRepository;
 	private final PostJdbcRepository postJdbcRepository;
 	private final PostRepository postRepository;
+	private final PostTagRepository postTagRepository;
+	private final MentionRepository mentionRepository;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
 	private final PostLikeRepository postLikeRepository;
@@ -68,10 +76,21 @@ public class PostService {
 		return SlicePageDto.wrap(postQueryRepository.findPostPreviews(postSearchCond));
 	}
 
+	public PostAllResponse getPost(Long userId, Long postId) {
+		final PostWithLikeStatus postResponse = postQueryRepository.findPost(userId, postId);
+		if (postResponse == null) {
+			throw new ApiException(PostErrorCode.NOT_FOUND_POST);
+		}
+		final List<PostTag> postTags = postQueryRepository.findPostTagsIn(
+			Collections.singletonList(postResponse.post()));
+		final List<Mention> mentions = postQueryRepository.findMentionsIn(
+			Collections.singletonList(postResponse.post()));
+		return PostAllResponse.of(postResponse, postTags, mentions);
+	}
+
 	@Transactional
-	public PostUploadResponse upload(PostUploadRequest request) {
-		User writer = userRepository.findById(request.userId())
-			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+	public PostSaveResponse upload(PostUploadRequest request) {
+		User writer = findLoginUser(request.userId());
 		Spot spot = findSpotOrCreate(request.spotInfoDto());
 		// Todo : bubble
 		Photo photo = Photo.builder()
@@ -87,16 +106,17 @@ public class PostService {
 			.detailAddress(request.detailAddress())
 			.isPrivate(request.isPrivate())
 			.build();
-		return savePostAndRelatedEntities(post, spot.getId(), request.tags(), request.mentions());
+		return savePostAndRelatedEntities(post, spot, request.tags(), request.mentions());
 	}
 
-	private PostUploadResponse savePostAndRelatedEntities(Post post, Long spotId, List<Long> tagIds,
+	private PostSaveResponse savePostAndRelatedEntities(Post post, Spot spot, List<Long> tagIds,
 		List<Long> mentionIds) {
 		try {
 			postRepository.save(post);
-			savePostTags(post, spotId, tagIds);
-			saveMentions(post, mentionIds);
-			return new PostUploadResponse(post.getId());
+			spot.incPostCount();
+			savePostTags(post.getId(), spot.getId(), tagIds);
+			saveMentions(post.getId(), mentionIds);
+			return new PostSaveResponse(post.getId(), post.getSpot().getId());
 		} catch (Exception ex) {
 			s3Uploader.deleteFile(post.getPhoto().getPhotoUrl(), S3Directory.POST_FOLDER);
 			throw ex;
@@ -108,20 +128,20 @@ public class PostService {
 			.orElseGet(() -> spotRepository.save(spotInfoDto.toSpot()));
 	}
 
-	public void savePostTags(Post post, Long spotId, List<Long> tagIds) {
+	public void savePostTags(Long postId, Long spotId, List<Long> tagIds) {
 		if (CollectionUtils.isNullOrEmpty(tagIds)) {
 			return;
 		}
-		if (!postJdbcRepository.savePostTags(post.getId(), spotId, tagIds)) {
+		if (!postJdbcRepository.savePostTags(postId, spotId, tagIds)) {
 			throw new ApiException(PostErrorCode.NOT_FOUND_TAG);
 		}
 	}
 
-	public void saveMentions(Post post, List<Long> mentionedUserIds) {
+	public void saveMentions(Long postId, List<Long> mentionedUserIds) {
 		if (CollectionUtils.isNullOrEmpty(mentionedUserIds)) {
 			return;
 		}
-		if (!postJdbcRepository.saveMentions(post.getId(), mentionedUserIds)) {
+		if (!postJdbcRepository.saveMentions(postId, mentionedUserIds)) {
 			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
 		}
 	}
@@ -129,10 +149,8 @@ public class PostService {
 	@Retry
 	@Transactional
 	public void likePost(Long postId, Long userId) {
-		final User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		final Post post = postRepository.findById(postId)
-			.orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+		final User user = findLoginUser(userId);
+		final Post post = findPost(postId);
 		if (postQueryRepository.existsPostLike(post, user)) {
 			throw new ApiException(PostErrorCode.ALREADY_LIKE);
 		}
@@ -147,5 +165,51 @@ public class PostService {
 			.orElseThrow(() -> new ApiException(PostErrorCode.NO_EXISTS_LIKE));
 		postLike.cancel();
 		postLikeRepository.delete(postLike);
+	}
+
+	@Transactional
+	public PostUpdateResponse update(PostUpdateRequest request) {
+		User loginUser = findLoginUser(request.userId());
+		Post post = findPost(request.postId());
+		post.updateDetailAddress(loginUser, request.detailAddress());
+		updatePostTags(post, request.tags());
+		updateMentions(post, request.mentions());
+		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
+	}
+
+	private void updatePostTags(Post post, List<Long> tagIds) {
+		postJdbcRepository.deletePostTagsByPostId(post.getId());
+		savePostTags(post.getId(), post.getSpot().getId(), tagIds);
+	}
+
+	private void updateMentions(Post post, List<Long> mentionedUserIds) {
+		postJdbcRepository.deleteMentionsByPostId(post.getId());
+		saveMentions(post.getId(), mentionedUserIds);
+	}
+
+	@Transactional
+	public PostUpdateResponse updatePrivacyState(Long userId, Long postId, boolean isPrivate) {
+		User loginUser = findLoginUser(userId);
+		Post post = findPost(postId);
+		post.updatePrivacyState(loginUser, isPrivate);
+		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
+	}
+
+	// Todo : 방명록 존재하지 않는 스팟 바로바로 확인해서 삭제 해야 할지? 아니면 스케줄러?
+	@Transactional
+	public void delete(Long userId, Long postId) {
+		User loginUser = findLoginUser(userId);
+		Post post = findPost(postId);
+		post.delete(loginUser);
+		postTagRepository.deleteByPostId(postId);
+		mentionRepository.deleteByPostId(postId);
+	}
+
+	private User findLoginUser(Long userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+	}
+
+	private Post findPost(Long postId) {
+		return postRepository.findById(postId).orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
 	}
 }

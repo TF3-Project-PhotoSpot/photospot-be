@@ -45,26 +45,32 @@ public class TestFixture {
 		return Spot.builder()
 			.address("주소")
 			.coord(coord.toCoord())
+			.postCount(0L)
 			.build();
 	}
 
 	public static Post createPost(Spot spot, User user) {
+		spot.incPostCount();
 		return createPost(spot, user, 0L);
 	}
 
 	public static Post createPost(Spot spot, User user, boolean isPrivate) {
+		spot.incPostCount();
 		return createPost(spot, user, createPhoto(), 0L, isPrivate);
 	}
 
 	public static Post createPost(Spot spot, User user, Long likeCount) {
+		spot.incPostCount();
 		return createPost(spot, user, createPhoto(), likeCount, false);
 	}
 
 	public static Post createPost(Spot spot, User user, Photo photo) {
+		spot.incPostCount();
 		return createPost(spot, user, photo, 0L, false);
 	}
 
 	public static Post createPost(Spot spot, User user, Photo photo, Long likeCount, boolean isPrivate) {
+		spot.incPostCount();
 		return Post.builder()
 			.spot(spot)
 			.writer(user)

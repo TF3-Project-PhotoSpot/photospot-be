@@ -6,19 +6,19 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 
 public class CustomAuthenticationToken extends AbstractAuthenticationToken {
 
-	private final Map<String, String> identityInfo;
+	private final Map<String, String> identifyInfo;
 	private final String providerType;
 
-	public CustomAuthenticationToken(Map<String, String> identityInfo, String providerType) {
+	public CustomAuthenticationToken(Map<String, String> identifyInfo, String providerType) {
 		super(null);
-		this.identityInfo = identityInfo;
+		this.identifyInfo = identifyInfo;
 		this.providerType = providerType;
 		setAuthenticated(false);
 	}
 
 	@Override
 	public Object getPrincipal() {
-		return identityInfo;
+		return identifyInfo;
 	}
 
 	@Override

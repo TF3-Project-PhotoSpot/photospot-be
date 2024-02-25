@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.spot.domain.Spot;
@@ -81,9 +82,12 @@ public class Post extends BaseEntity {
 		this.isPrivate = isPrivate;
 	}
 
-	public void delete() {
+	public void delete(User loginUser) {
+		checkWriter(loginUser);
 		if (deletedAt == null) {
 			deletedAt = LocalDateTime.now();
+			getPhoto().delete();
+			getSpot().decPostCount();
 		}
 	}
 
@@ -97,5 +101,21 @@ public class Post extends BaseEntity {
 			throw new ApiException(PostErrorCode.CAN_NOT_CANCEL_LIKE);
 		}
 		likeCount--;
+	}
+
+	public void updateDetailAddress(User loginUser, String detailAddress) {
+		checkWriter(loginUser);
+		this.detailAddress = detailAddress;
+	}
+
+	public void updatePrivacyState(User loginUser, boolean status) {
+		checkWriter(loginUser);
+		this.isPrivate = status;
+	}
+
+	private void checkWriter(User user) {
+		if (!this.writer.equals(user)) {
+			throw new ApiException(AuthErrorCode.PERMISSION_DENIED);
+		}
 	}
 }

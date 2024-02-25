@@ -65,4 +65,16 @@ public class PostJdbcRepository {
 			""", params);
 		return rowNum == mentionedUsers.size();
 	}
+
+	public void deletePostTagsByPostId(Long postId) {
+		MapSqlParameterSource params = new MapSqlParameterSource()
+			.addValue("postId", postId);
+		jdbcTemplate.update("delete from post_tag where post_id = :postId", params);
+	}
+
+	public void deleteMentionsByPostId(Long postId) {
+		MapSqlParameterSource params = new MapSqlParameterSource()
+			.addValue("postId", postId);
+		jdbcTemplate.update("delete from mention where post_id = :postId", params);
+	}
 }

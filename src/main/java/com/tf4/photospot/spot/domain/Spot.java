@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.locationtech.jts.geom.Point;
 
 import com.tf4.photospot.global.entity.BaseEntity;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.PostErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -44,5 +46,16 @@ public class Spot extends BaseEntity {
 		this.address = address;
 		this.coord = coord;
 		this.postCount = postCount;
+	}
+
+	public void incPostCount() {
+		postCount++;
+	}
+
+	public void decPostCount() {
+		if (postCount == 0L) {
+			throw new ApiException(PostErrorCode.NOT_FOUND_POST);
+		}
+		postCount--;
 	}
 }
