@@ -70,9 +70,9 @@ public class JwtService {
 			.signWith(key).compact();
 	}
 
-	public Claims parseAccessToken(String authorizationHeader) {
-		String token = removePrefix(authorizationHeader);
-		return parseToken(token, true);
+	public Claims parseAccessToken(String token) {
+		String accessToken = removePrefix(token);
+		return parseToken(accessToken, true);
 	}
 
 	public Claims parseRefreshToken(String token) {
@@ -107,10 +107,10 @@ public class JwtService {
 		}
 	}
 
-	private String removePrefix(String header) {
-		if (header == null || !header.startsWith(JwtConstant.PREFIX)) {
+	private String removePrefix(String token) {
+		if (token == null || !token.startsWith(JwtConstant.PREFIX)) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
-		return header.substring(JwtConstant.PREFIX.length());
+		return token.substring(JwtConstant.PREFIX.length());
 	}
 }
