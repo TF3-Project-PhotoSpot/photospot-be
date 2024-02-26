@@ -29,3 +29,7 @@ include::api/post/post.adoc[]
 == Map API
 
 include::api/map/map.adoc[]
+
+== Album API
+
+include::api/album/album.adoc[]

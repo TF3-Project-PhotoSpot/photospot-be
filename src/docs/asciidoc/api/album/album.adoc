@@ -1,0 +1,54 @@
+=== 앨범 방명록 미리보기 목록 조회
+
+'''
+
+include::{snippets}/album-controller-docs-test/get-post-previews/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/get-post-previews/query-parameters.adoc[]
+include::{snippets}/album-controller-docs-test/get-post-previews/response-body.adoc[]
+include::{snippets}/album-controller-docs-test/get-post-previews/response-fields.adoc[]
+
+=== 앨범 방명록 상세 목록 조회
+
+'''
+
+include::{snippets}/album-controller-docs-test/get-posts/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/get-posts/query-parameters.adoc[]
+include::{snippets}/album-controller-docs-test/get-posts/response-body.adoc[]
+include::{snippets}/album-controller-docs-test/get-posts/response-fields.adoc[]
+
+=== 앨범 생성
+
+'''
+
+include::{snippets}/album-controller-docs-test/create-album/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/create-album/response-body.adoc[]
+include::{snippets}/album-controller-docs-test/create-album/response-fields.adoc[]
+
+=== 앨범 방명록 추가
+
+'''
+
+include::{snippets}/album-controller-docs-test/add-posts/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/add-posts/response-body.adoc[]
+include::{snippets}/album-controller-docs-test/add-posts/response-fields.adoc[]
+
+=== 앨범 방명록 삭제
+
+'''
+
+include::{snippets}/album-controller-docs-test/remove-posts/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/remove-posts/response-body.adoc[]
+
+=== 앨범 방명록 교체
+
+'''
+
+include::{snippets}/album-controller-docs-test/replace-posts/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/replace-posts/response-body.adoc[]
+
+=== 앨범 삭제
+
+'''
+
+include::{snippets}/album-controller-docs-test/remove-album/http-request.adoc[]
+include::{snippets}/album-controller-docs-test/remove-album/response-body.adoc[]

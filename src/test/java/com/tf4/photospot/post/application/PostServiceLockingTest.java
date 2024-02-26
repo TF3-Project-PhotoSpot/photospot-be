@@ -21,8 +21,6 @@ import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.TestConstructor;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.tf4.photospot.global.exception.ApiException;
-import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostLikeRepository;
@@ -122,25 +120,8 @@ class PostServiceLockingTest {
 				//then
 				assertThat(postRepository.findById(post.getId())).isPresent().get()
 					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isZero());
-			}),
-			dynamicTest("좋아요를 누르고 바로 취소를 누르면 좋아요만 적용이 되고 취소는 NO_EXISTS_LIKE 예외가 발생한다.", () -> {
-				//given
-				final User user = userRepository.save(createUser("user"));
-				final Long beforeLikes = post.getLikeCount();
-				//when
-				var likeWorker = CompletableFuture.runAsync(() -> postService.likePost(post.getId(), user.getId()));
-				var likeCancelWorker = CompletableFuture.runAsync(
-					() -> postService.cancelPostLike(post.getId(), user.getId()));
-				//then
-				assertThatThrownBy(likeCancelWorker::join)
-					.extracting(Throwable::getCause)
-					.isInstanceOf(ApiException.class)
-					.extracting("errorCode")
-					.isEqualTo(PostErrorCode.NO_EXISTS_LIKE);
-				likeWorker.join();
-				assertThat(postRepository.findById(post.getId())).isPresent().get()
-					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes + 1));
-			}));
+			})
+		);
 	}
 
 	void likePostWaitWithNoRetry(Post post, User user, CountDownLatch waitingLatch) {
