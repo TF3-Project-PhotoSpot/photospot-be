@@ -46,7 +46,6 @@ dependencies {
     implementation 'org.hibernate.orm:hibernate-spatial'
     implementation 'com.querydsl:querydsl-spatial'
 
-
     //AWS
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
