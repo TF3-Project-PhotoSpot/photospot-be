@@ -7,6 +7,7 @@ import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
 import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.auth.util.NicknameGenerator;
+import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
@@ -15,6 +16,7 @@ import com.tf4.photospot.user.application.response.OauthLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 
 @Transactional(readOnly = true)
@@ -74,10 +76,11 @@ public class AuthService {
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()));
 	}
 
-	public void logout(Long userId, String accessToken) {
-		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		Long expiration = jwtService.parseAccessToken(accessToken).getExpiration().getTime();
-		jwtRedisRepository.saveAccessTokenInBlackList(accessToken, expiration);
+	public void logout(String accessToken) {
+		Claims claims = jwtService.parseAccessToken(accessToken);
+		User user = userRepository.findById(claims.get(JwtConstant.USER_ID, Long.class))
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		jwtRedisRepository.saveAccessTokenInBlackList(accessToken, claims.getExpiration().getTime());
 		jwtRedisRepository.deleteByUserId(user.getId());
 	}
 
