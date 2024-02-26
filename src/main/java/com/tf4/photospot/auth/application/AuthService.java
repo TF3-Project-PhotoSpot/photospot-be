@@ -70,12 +70,15 @@ public class AuthService {
 		return userRepository.existsByNickname(nickname);
 	}
 
+	@Transactional
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
 		jwtService.validRefreshToken(userId, refreshToken);
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()));
+		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()),
+			jwtService.issueRefreshToken(user.getId()));
 	}
 
+	@Transactional
 	public void logout(String accessToken) {
 		Claims claims = jwtService.parseAccessToken(accessToken);
 		User user = userRepository.findById(claims.get(JwtConstant.USER_ID, Long.class))

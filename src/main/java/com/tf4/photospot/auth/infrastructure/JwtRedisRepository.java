@@ -43,6 +43,10 @@ public class JwtRedisRepository {
 		redisTemplate.expire(accessToken, expiration, TimeUnit.MILLISECONDS);
 	}
 
+	public boolean existsByUserId(Long userId) {
+		return Boolean.TRUE.equals(redisTemplate.hasKey(REFRESH_TOKEN_PREFIX + userId));
+	}
+
 	public boolean existsBlacklist(String accessToken) {
 		return Boolean.TRUE.equals(redisTemplate.hasKey(accessToken));
 	}
