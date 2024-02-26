@@ -29,7 +29,7 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@Test
 	void reissueToken() throws Exception {
 		// given
-		var reissueResponse = new ReissueTokenResponse("new_access_token_value");
+		var reissueResponse = new ReissueTokenResponse("new_access_token_value", "new_refresh_token_value");
 		given(authService.reissueToken(anyLong(), anyString())).willReturn(reissueResponse);
 
 		// when & then
@@ -42,7 +42,8 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 					headerWithName("Authorization").description("리프레시 토큰")
 				),
 				responseFields(
-					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰")
+					fieldWithPath("accessToken").type(JsonFieldType.STRING).description("재발급 된 액세스 토큰"),
+					fieldWithPath("refreshToken").type(JsonFieldType.STRING).description("재발급 된 리프레시 토큰")
 				)));
 	}
 }
