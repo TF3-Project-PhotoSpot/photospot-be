@@ -28,6 +28,11 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout
@@ -69,6 +74,13 @@ jobs:
           docker build -t $REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG .
           docker push $REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG
 
+      - name: Get redis password from Parameter Store
+        id: get-redis-pwd
+        uses: poad/get-aws-ssm-parameter@v2.0.0
+        with:
+          parameter-name: /config/photospot_dev/REDIS_PASSWORD
+          aws-region: ${{ env.REGION }}
+
       - name: Create ApplicationStart script
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -82,6 +94,7 @@ jobs:
           touch .env
           echo "PHOTOSPOT_IMAGE=$REGISTRY/$ECR_REPOSITORY:$PROFILE_NAME-$IMAGE_TAG" >> .env
           echo "PROFILE=$PROFILE_NAME" >> .env
+          echo "REDIS_PASSWORD=${{ steps.get-redis-pwd.outputs.value }}" >> .env
 
       - name: Upload to S3
         run: |
