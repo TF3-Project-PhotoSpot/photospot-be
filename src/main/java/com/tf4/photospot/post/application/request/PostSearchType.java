@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 public enum PostSearchType {
 	MY_POSTS(Set.of("id"), cond -> cond.userId() != null),
 	POSTS_OF_SPOT(Set.of("id", "likeCount"), cond -> cond.spotId() != null),
-	LIKE_POSTS(Set.of("id"), cond -> cond.userId() != null);
+	LIKE_POSTS(Set.of("id"), cond -> cond.userId() != null),
+	ALBUM_POSTS(Set.of("id"), cond -> cond.albumId() != null && cond.userId() != null);
 
 	private final Set<String> sortableProperties;
 	private final Predicate<PostSearchCondition> verifyRequiredCondition;

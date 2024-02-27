@@ -1,17 +1,20 @@
 package com.tf4.photospot.global.exception;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
@@ -19,6 +22,7 @@ import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.ValidationError;
 import com.tf4.photospot.global.exception.domain.CommonErrorCode;
 
+import jakarta.annotation.Nullable;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +33,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 	@ExceptionHandler(ApiException.class)
 	public ResponseEntity<Object> handleApiException(ApiException ex) {
 		return createResponse(ex.getErrorCode());
+	}
+
+	@Override
+	protected ResponseEntity<Object> handleHandlerMethodValidationException(
+		@NotNull HandlerMethodValidationException ex,
+		@Nullable HttpHeaders headers,
+		@NotNull HttpStatusCode status,
+		@NotNull WebRequest request
+	) {
+		final var errorMessages = ex.getAllValidationResults().stream()
+			.map(ParameterValidationResult::getResolvableErrors)
+			.flatMap(Collection::stream)
+			.map(error -> ValidationError.builder().message(error.getDefaultMessage()).build())
+			.toList();
+		return createResponse(CommonErrorCode.INVALID_PARAMETER, errorMessages);
 	}
 
 	@Override
