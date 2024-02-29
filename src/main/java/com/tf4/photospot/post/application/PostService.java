@@ -209,12 +209,15 @@ public class PostService {
 
 	@Transactional
 	public void report(Long userId, Long postId, String reason) {
-		User loginUser = findLoginUser(userId);
+		User reporter = findLoginUser(userId);
 		Post post = findPost(postId);
-		if (postQueryRepository.existsReport(post, loginUser)) {
+		if (postQueryRepository.existsReport(post, reporter)) {
 			throw new ApiException(PostErrorCode.ALREADY_REPORT);
 		}
-		Report report = post.reportFrom(loginUser, reason);
+		if (post.isWriter(reporter)) {
+			throw new ApiException(PostErrorCode.CNA_NOT_REPORT_OWN_POST);
+		}
+		Report report = post.reportFrom(reporter, reason);
 		reportRepository.save(report);
 	}
 

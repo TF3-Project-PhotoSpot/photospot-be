@@ -20,6 +20,7 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.EntityPathBase;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.global.util.QueryDslUtils;
@@ -33,6 +34,7 @@ import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
+import com.tf4.photospot.post.domain.QReport;
 import com.tf4.photospot.user.domain.QUser;
 import com.tf4.photospot.user.domain.User;
 
@@ -130,14 +132,14 @@ public class PostQueryRepository extends QueryDslUtils {
 			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
 			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond.userId()));
 			case LIKE_POSTS -> searchBuilder.and(equalsPostLike(cond.userId())).and(canVisible(cond.userId()));
-			case ALBUM_POSTS ->
-				searchBuilder.and(equalsAlbum(cond.albumId())).and(isPublicPost().or(albumUser.isNotNull()));
+			case ALBUM_POSTS -> searchBuilder.and(equalsAlbum(cond.albumId()))
+				.and((isPublicPost().and(isNotReported(cond.userId()))).or(albumUser.isNotNull()));
 		}
 		return searchBuilder;
 	}
 
 	private BooleanExpression canVisible(Long userId) {
-		return isPublicPost().or(equalsWriter(userId));
+		return (isPublicPost().and(isNotReported(userId))).or(equalsWriter(userId));
 	}
 
 	private static BooleanExpression isPublicPost() {
@@ -146,6 +148,15 @@ public class PostQueryRepository extends QueryDslUtils {
 
 	private static BooleanExpression isNotDeleted() {
 		return post.deletedAt.isNull();
+	}
+
+	private BooleanExpression isNotReported(Long userId) {
+		QReport report = new QReport("report");
+		return JPAExpressions
+			.selectOne()
+			.from(report)
+			.where(report.post.eq(post).and(report.reporter.id.eq(userId)))
+			.notExists();
 	}
 
 	private BooleanBuilder equalsPostLike(Long userId) {

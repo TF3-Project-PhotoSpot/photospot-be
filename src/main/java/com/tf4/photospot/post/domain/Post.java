@@ -116,8 +116,12 @@ public class Post extends BaseEntity {
 		this.isPrivate = status;
 	}
 
+	public boolean isWriter(User user) {
+		return this.writer.equals(user);
+	}
+
 	private void checkWriter(User user) {
-		if (!this.writer.equals(user)) {
+		if (!isWriter(user)) {
 			throw new ApiException(AuthErrorCode.PERMISSION_DENIED);
 		}
 	}
