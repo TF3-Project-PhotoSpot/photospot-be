@@ -78,4 +78,3 @@ public class PostJdbcRepository {
 		jdbcTemplate.update("delete from mention where post_id = :postId", params);
 	}
 }
-

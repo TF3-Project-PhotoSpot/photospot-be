@@ -353,7 +353,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		//when
 		mockMvc.perform(post("/api/v1/posts/{postId}/likes", 1L))
 			.andExpect(status().isOk())
-			.andDo(restDocsTemplateDefaultSuccess());
+			.andDo(restDocsTemplate(
+				pathParameters(parameterWithName("postId").description("방명록 ID")),
+				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
+			);
 	}
 
 	@Test
@@ -363,7 +366,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		//when
 		mockMvc.perform(delete("/api/v1/posts/{postId}/likes", 1L))
 			.andExpect(status().isOk())
-			.andDo(restDocsTemplateDefaultSuccess());
+			.andDo(restDocsTemplate(
+				pathParameters(parameterWithName("postId").description("방명록 ID")),
+				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
+			);
 	}
 
 	@Test
@@ -428,7 +434,9 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		// when & then
 		mockMvc.perform(delete("/api/v1/posts/{postId}", 1L))
 			.andExpect(status().isOk())
-			.andDo(restDocsTemplateDefaultSuccess());
+			.andDo(restDocsTemplate(
+				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
+			);
 	}
 
 	@Test
