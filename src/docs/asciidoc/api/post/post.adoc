@@ -77,7 +77,7 @@ include::{snippets}/post-controller-docs-test/upload-post/request-fields.adoc[]
 include::{snippets}/post-controller-docs-test/upload-post/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/upload-post/response-fields.adoc[]
 
-== 방명록 내용 수정
+=== 방명록 내용 수정
 
 '''
 
@@ -86,7 +86,7 @@ include::{snippets}/post-controller-docs-test/update-post/request-fields.adoc[]
 include::{snippets}/post-controller-docs-test/update-post/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/update-post/response-fields.adoc[]
 
-== 방명록 상태 수정
+=== 방명록 상태 수정
 
 '''
 
@@ -95,7 +95,7 @@ include::{snippets}/post-controller-docs-test/update-privacy-state/request-field
 include::{snippets}/post-controller-docs-test/update-privacy-state/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/update-privacy-state/response-fields.adoc[]
 
-== 방명록 삭제
+=== 방명록 삭제
 
 '''
 
@@ -103,7 +103,7 @@ include::{snippets}/post-controller-docs-test/delete-post/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/delete-post/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/delete-post/response-fields.adoc[]
 
-== 방명록 신고
+=== 방명록 신고
 
 '''
 
