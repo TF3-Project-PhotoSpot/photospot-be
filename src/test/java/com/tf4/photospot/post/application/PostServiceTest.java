@@ -18,9 +18,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import com.tf4.photospot.album.domain.AlbumPostRepository;
-import com.tf4.photospot.album.domain.AlbumRepository;
-import com.tf4.photospot.album.domain.AlbumUserRepository;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
@@ -158,11 +155,13 @@ class PostServiceTest extends IntegrationTestSupport {
 			//then
 			assertThatList(response.content().stream().map(PostPreviewResponse::postId).toList()).isEqualTo(
 				postIdsSortedLikeCountDesc);
-		}), dynamicTest("삭제 되었거나 비공개 방명록은 조회할 수 없다.", () -> {
+		}), dynamicTest("삭제 또는 신고 되었거나 비공개 방명록은 조회할 수 없다.", () -> {
 			//given
 			Post privatePost = createPost(spot, writer, true);
 			Post deletePost = createPost(spot, writer);
+			Post reportedPost = createPost(spot, writer);
 			deletePost.delete(writer);
+			reportedPost.reportFrom(reader, "불쾌한 사진");
 			postRepository.saveAll(List.of(privatePost, deletePost));
 
 			var latestPostRequest = PostSearchCondition.builder()
@@ -174,7 +173,8 @@ class PostServiceTest extends IntegrationTestSupport {
 			//when
 			SlicePageDto<PostPreviewResponse> response = postService.getPostPreviews(latestPostRequest);
 			//then
-			assertThat(response.content().get(0).postId()).isNotIn(privatePost.getId(), deletePost.getId());
+			assertThat(response.content().get(0).postId()).isNotIn(privatePost.getId(), deletePost.getId(),
+				reportedPost.getId());
 		}), dynamicTest("내 방명록만 조회 시 다른 유저가 작성한 방명록은 볼 수 없다.", () -> {
 			//given
 			final Post otherUserPost = postRepository.save(createPost(spot, reader, false));
@@ -611,9 +611,10 @@ class PostServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Stream<DynamicTest> reportPost() {
 		// given
+		User writer = createUser("작성자");
 		User reporter = createUser("신고자");
-		userRepository.save(reporter);
-		Post post = createPost(spotRepository.save(createSpot()), reporter);
+		userRepository.saveAll(List.of(writer, reporter));
+		Post post = createPost(spotRepository.save(createSpot()), writer);
 		postRepository.save(post);
 
 		return Stream.of(
@@ -633,6 +634,11 @@ class PostServiceTest extends IntegrationTestSupport {
 				// when & then
 				assertThatThrownBy(() -> postService.report(reporter.getId(), post.getId(), "타인을 비방하는 사진입니다."))
 					.isInstanceOf(ApiException.class).hasMessage(PostErrorCode.ALREADY_REPORT.getMessage());
+			}),
+			dynamicTest("본인이 작성한 방명록을 신고하는 경우 예외를 던진다.", () -> {
+				// when & then
+				assertThatThrownBy(() -> postService.report(post.getWriter().getId(), post.getId(), "이상한 사진입니다."))
+					.isInstanceOf(ApiException.class).hasMessage(PostErrorCode.CNA_NOT_REPORT_OWN_POST.getMessage());
 			})
 		);
 	}

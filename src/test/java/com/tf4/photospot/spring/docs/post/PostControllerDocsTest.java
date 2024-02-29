@@ -451,6 +451,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 				.content(mapper.writeValueAsString(request))
 				.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andDo(restDocsTemplateDefaultSuccess());
+			.andDo(restDocsTemplate(
+				responseFields(
+					fieldWithPath("message").type(JsonFieldType.STRING).description("성공")
+				)
+			));
 	}
 }
