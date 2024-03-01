@@ -29,6 +29,7 @@ import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
 import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
+import com.tf4.photospot.post.presentation.response.TagListResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -166,5 +167,10 @@ public class PostController {
 		@PathVariable("postId") Long postId) {
 		postService.delete(userId, postId);
 		return ApiResponse.SUCCESS;
+	}
+
+	@GetMapping("/tags")
+	public TagListResponse getTags() {
+		return new TagListResponse(postService.getTags());
 	}
 }
