@@ -251,7 +251,9 @@ class AlbumServiceTest extends IntegrationTestSupport {
 				//when
 				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
 				//then
-				assertThat(albumResponses).extracting("photoUrl").doesNotContain("photoUrl4");
+				assertThat(albumResponses).extracting("photoUrl")
+					.isNotEmpty()
+					.doesNotContain("photoUrl4");
 			}),
 			dynamicTest("가장 최근에 추가된 방명록이 비공개 되는 경우 앨범 유저의 방명록이면 조회할 수 있다.", () -> {
 				//given
@@ -288,7 +290,9 @@ class AlbumServiceTest extends IntegrationTestSupport {
 				//when
 				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
 				//then
-				assertThat(albumResponses).extracting("photoUrl").doesNotContain("photoUrl6");
+				assertThat(albumResponses).extracting("photoUrl")
+					.isNotEmpty()
+					.doesNotContain("photoUrl6");
 			})
 		);
 	}
