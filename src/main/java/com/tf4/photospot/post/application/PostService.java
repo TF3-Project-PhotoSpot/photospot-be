@@ -3,6 +3,7 @@ package com.tf4.photospot.post.application;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Slice;
@@ -211,5 +212,13 @@ public class PostService {
 
 	private Post findPost(Long postId) {
 		return postRepository.findById(postId).orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+	}
+
+	public Optional<String> getFirstPostImage(PostSearchCondition postSearchCond) {
+		List<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(postSearchCond).getContent();
+		if (postPreviews.isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(postPreviews.get(0)).map(PostPreviewResponse::photoUrl);
 	}
 }

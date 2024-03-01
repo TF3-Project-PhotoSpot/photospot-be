@@ -21,12 +21,16 @@ import com.tf4.photospot.album.application.AlbumService;
 import com.tf4.photospot.album.application.response.CreateAlbumPostResponse;
 import com.tf4.photospot.album.presentation.request.PostIdListHttpRequest;
 import com.tf4.photospot.mockobject.WithCustomMockUser;
+import com.tf4.photospot.post.application.PostService;
 
 @WithCustomMockUser
 @WebMvcTest(controllers = AlbumController.class)
 class AlbumControllerTest {
 	@MockBean
 	private AlbumService albumService;
+
+	@MockBean
+	private PostService postService;
 
 	@Autowired
 	private MockMvc mockMvc;
