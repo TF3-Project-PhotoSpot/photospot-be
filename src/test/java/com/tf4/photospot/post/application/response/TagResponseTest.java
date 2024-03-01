@@ -12,6 +12,6 @@ class TagResponseTest {
 		//given
 		final TagResponse tagResponse = TagResponse.builder().tagId(1L).tagName("tag").build();
 		//when //then
-		assertThat(tagResponse.iconUrl()).isEqualTo("");
+		assertThat(tagResponse.iconUrl()).isEmpty();
 	}
 }
