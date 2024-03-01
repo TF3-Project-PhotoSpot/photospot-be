@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.album.application.response.AlbumPreviewResponse;
 import com.tf4.photospot.album.application.response.CreateAlbumPostResponse;
 import com.tf4.photospot.album.domain.Album;
 import com.tf4.photospot.album.domain.AlbumRepository;
@@ -93,5 +94,9 @@ public class AlbumService {
 		if (!albumQueryRepository.exixtsUserAlbum(userId, albumId)) {
 			throw new ApiException(AlbumErrorCode.NO_AUTHORITY_ALBUM);
 		}
+	}
+
+	public List<AlbumPreviewResponse> getAlbums(Long userId) {
+		return albumJdbcRepository.getAlbumPreviews(userId);
 	}
 }
