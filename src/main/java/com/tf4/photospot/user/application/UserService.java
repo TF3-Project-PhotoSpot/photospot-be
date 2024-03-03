@@ -20,10 +20,15 @@ public class UserService {
 
 	@Transactional
 	public UserProfileResponse updateProfile(Long userId, String imageUrl) {
-		// 필요한 부분?
 		User loginUser = userRepository.findById(userId)
 			.orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
 		loginUser.updateProfile(imageUrl);
 		return new UserProfileResponse(imageUrl);
+	}
+
+	public String findAccountByUserId(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER))
+			.getAccount();
 	}
 }

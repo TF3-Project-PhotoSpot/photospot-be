@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
+import com.tf4.photospot.auth.presentation.request.KakaoUnlinkCallbackInfo;
 import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
@@ -13,14 +14,18 @@ import com.tf4.photospot.user.application.request.LoginUserInfo;
 import com.tf4.photospot.user.application.response.OauthLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
+import com.tf4.photospot.user.infrastructure.UserQueryRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@Transactional(readOnly = true)
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthService {
 	private final UserRepository userRepository;
+	private final UserQueryRepository userQueryRepository;
 	private final JwtService jwtService;
 	private final AppleService appleService;
 	private final KakaoService kakaoService;
@@ -71,5 +76,38 @@ public class AuthService {
 		jwtService.validRefreshToken(userId, refreshToken);
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()));
+	}
+
+	public void unlinkKakaoAccount(String account) {
+		kakaoService.unlink(Long.valueOf(account));
+	}
+
+	// Todo : 액세스토큰, 리프레시토큰 처리 추가
+	@Transactional
+	public void deleteUser(Long userId) {
+		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
+		userQueryRepository.deleteByUserId(user.getId());
+	}
+
+	// Todo : db 업데이트 실패했을 때 재시도하는 로직 추가?
+	@Transactional
+	public void deleteUnlinkedKakaoUser(String adminKey, KakaoUnlinkCallbackInfo info) {
+		kakaoService.validateRequest(adminKey, info.appId());
+		userRepository.findUserByProviderTypeAndAccount(OauthAttributes.KAKAO.getProvider(), info.account())
+			.ifPresentOrElse(user -> {
+				try {
+					userQueryRepository.deleteByUserId(user.getId());
+					createCallbackLog("성공", info, null);
+				} catch (Exception ex) {
+					createCallbackLog("실패", info, "DB 업데이트 과정에서 오류가 발생했습니다.");
+				}
+			}, () -> createCallbackLog("실패", info, "존재하지 않거나 이미 탈퇴한 사용자입니다."));
+	}
+
+	private void createCallbackLog(String result, KakaoUnlinkCallbackInfo info, String reason) {
+		String baseMsg = String.format("카카오 연결 끊기 콜백 처리 %s, 사용자 계정 : %s, 요청 경로 : %s", result, info.account(),
+			info.refererType());
+		String fullMsg = reason != null ? baseMsg + ", 비고 : " + reason : baseMsg;
+		log.info(fullMsg);
 	}
 }
