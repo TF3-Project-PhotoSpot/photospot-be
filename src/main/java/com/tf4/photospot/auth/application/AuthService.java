@@ -70,7 +70,6 @@ public class AuthService {
 		return userRepository.existsByNickname(nickname);
 	}
 
-	@Transactional
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
 		jwtService.validRefreshToken(userId, refreshToken);
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
@@ -87,7 +86,9 @@ public class AuthService {
 		jwtRedisRepository.deleteByUserId(user.getId());
 	}
 
-	public boolean existsBlacklist(String accessToken) {
-		return jwtRedisRepository.existsBlacklist(accessToken);
+	public void existsBlacklist(String accessToken) {
+		if (jwtRedisRepository.existsBlacklist(accessToken)) {
+			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+		}
 	}
 }

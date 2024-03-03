@@ -41,7 +41,7 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 			auth = new UsernamePasswordAuthenticationToken(new LoginUserDto(userId), null, null);
 		} else {
 			String accessToken = request.getHeader(JwtConstant.AUTHORIZATION_HEADER);
-			checkBlacklist(accessToken);
+			authService.existsBlacklist(accessToken);
 			Claims claims = jwtService.parseAccessToken(accessToken);
 			Long userId = claims.get(JwtConstant.USER_ID, Long.class);
 			String authorities = String.valueOf(claims.get(JwtConstant.USER_AUTHORITIES));
@@ -50,12 +50,6 @@ public class JwtTokenValidatorFilter extends OncePerRequestFilter {
 		}
 		SecurityContextHolder.getContext().setAuthentication(auth);
 		filterChain.doFilter(request, response);
-	}
-
-	private void checkBlacklist(String accessToken) {
-		if (authService.existsBlacklist(accessToken)) {
-			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
-		}
 	}
 
 	private String extractRefreshTokenFromHeader(HttpServletRequest request) {

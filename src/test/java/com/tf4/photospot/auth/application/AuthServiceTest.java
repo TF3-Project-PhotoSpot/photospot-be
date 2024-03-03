@@ -98,7 +98,8 @@ public class AuthServiceTest extends IntegrationTestSupport {
 				// then
 				assertAll(
 					() -> assertThat(jwtRedisRepository.findByUserId(loginUser.getId())).isEqualTo(Optional.empty()),
-					() -> assertTrue(authService.existsBlacklist(accessToken))
+					() -> assertThatThrownBy(() -> authService.existsBlacklist(accessToken))
+						.isInstanceOf(ApiException.class).hasMessage(AuthErrorCode.INVALID_ACCESS_TOKEN.getMessage())
 				);
 			}),
 			DynamicTest.dynamicTest("유효하지 않은 액세스 토큰으로 로그아웃 요청 시 예외를 던진다.", () -> {
