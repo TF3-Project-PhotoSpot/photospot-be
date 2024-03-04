@@ -3,6 +3,7 @@ package com.tf4.photospot.post.application;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Slice;
@@ -26,6 +27,7 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
@@ -211,5 +213,23 @@ public class PostService {
 
 	private Post findPost(Long postId) {
 		return postRepository.findById(postId).orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+	}
+
+	public Optional<String> getFirstPostImage(PostSearchCondition postSearchCond) {
+		List<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(postSearchCond).getContent();
+		if (postPreviews.isEmpty()) {
+			return Optional.empty();
+		}
+		return Optional.ofNullable(postPreviews.get(0)).map(PostPreviewResponse::photoUrl);
+	}
+
+	public List<TagResponse> getTags() {
+		return postQueryRepository.getTags().stream()
+			.map(tag -> TagResponse.builder()
+				.tagId(tag.getId())
+				.tagName(tag.getName())
+				.iconUrl(tag.getIconUrl())
+				.build())
+			.toList();
 	}
 }

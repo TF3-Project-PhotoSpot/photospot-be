@@ -32,6 +32,8 @@ import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
+import com.tf4.photospot.post.domain.Tag;
+import com.tf4.photospot.post.domain.TagRepository;
 import com.tf4.photospot.user.domain.QUser;
 import com.tf4.photospot.user.domain.User;
 
@@ -41,6 +43,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostQueryRepository extends QueryDslUtils {
 	private final JPAQueryFactory queryFactory;
+	private final TagRepository tagRepository;
 
 	public Slice<PostPreviewResponse> findPostPreviews(PostSearchCondition cond) {
 		final PostSearchType searchType = cond.type();
@@ -176,5 +179,9 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(postLike.post, post).fetchJoin()
 			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
 			.fetchOne());
+	}
+
+	public List<Tag> getTags() {
+		return tagRepository.findAll();
 	}
 }
