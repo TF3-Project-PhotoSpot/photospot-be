@@ -1,0 +1,7 @@
+=== 북마크 폴더 생성
+
+'''
+
+include::{snippets}/bookmark-controller-docs-test/create-bookmark-folder/http-request.adoc[]
+include::{snippets}/bookmark-controller-docs-test/create-bookmark-folder/response-body.adoc[]
+include::{snippets}/bookmark-controller-docs-test/create-bookmark-folder/response-fields.adoc[]

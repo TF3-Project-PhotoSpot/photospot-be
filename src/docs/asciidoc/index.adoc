@@ -37,3 +37,7 @@ include::api/map/map.adoc[]
 == Album API
 
 include::api/album/album.adoc[]
+
+== Bookmark API
+
+include::api/bookmark/bookmark.adoc[]
