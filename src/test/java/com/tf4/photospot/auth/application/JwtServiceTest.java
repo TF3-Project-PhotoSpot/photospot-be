@@ -1,8 +1,11 @@
 package com.tf4.photospot.auth.application;
 
 import static com.tf4.photospot.global.config.jwt.JwtConstant.*;
+import static com.tf4.photospot.support.TestFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
 
 import java.util.Collection;
 import java.util.Date;
@@ -14,9 +17,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
-import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
@@ -33,10 +37,12 @@ import lombok.RequiredArgsConstructor;
 public class JwtServiceTest extends IntegrationTestSupport {
 	private final JwtService jwtService;
 	private final JwtProperties jwtProperties;
-	private final JwtRepository jwtRepository;
 	private final UserRepository userRepository;
 
-	@DisplayName("리프레시 토큰을 발급하고 DB에 저장한다.")
+	@SpyBean
+	private final JwtRedisRepository jwtRedisRepository;
+
+	@DisplayName("리프레시 토큰을 발급하고 Redis에 저장한다.")
 	@Test
 	void issueTokens() {
 		// given
@@ -45,13 +51,56 @@ public class JwtServiceTest extends IntegrationTestSupport {
 		String refreshToken = jwtService.issueRefreshToken(savedUser.getId());
 
 		// when
-		RefreshToken userRefreshToken = jwtRepository.findByUserId(savedUser.getId()).orElseThrow();
+		RefreshToken userRefreshToken = jwtRedisRepository.findByUserId(savedUser.getId()).orElseThrow();
 
 		// then
 		assertAll(
 			() -> assertThat(userRefreshToken.getUserId()).isEqualTo(savedUser.getId()),
 			() -> assertThat(userRefreshToken.getToken()).isEqualTo(refreshToken)
 		);
+	}
+
+	@TestFactory
+	Collection<DynamicTest> issueToken() {
+		// given
+		User user = userRepository.save(createUser("사용자"));
+		jwtRedisRepository.save(new RefreshToken(user.getId(), "old_refresh_token"));
+
+		return List.of(
+			DynamicTest.dynamicTest("리프레시 토큰 발급 시 db에서 기존 토큰을 삭제하고 새로운 토큰을 저장한다.", () -> {
+				// when
+				jwtService.issueRefreshToken(user.getId());
+
+				// then
+				assertThat(jwtRedisRepository.findByUserId(user.getId()).orElseThrow().getToken())
+					.isNotEqualTo("old_refresh_token");
+			}),
+			DynamicTest.dynamicTest("새로운 리프레시 토큰 저장에 실패하면 모든 작업을 롤백한다.", () -> {
+				// given
+				jwtRedisRepository.save(new RefreshToken(user.getId(), "old_refresh_token"));
+				doNothing().when(jwtRedisRepository).deleteByUserId(user.getId());
+				doThrow(new RuntimeException("임의의 예외 발생")).when(jwtRedisRepository).save(any(RefreshToken.class));
+
+				// when & then
+				assertThatThrownBy(() -> jwtService.issueRefreshToken(user.getId())).hasMessage("임의의 예외 발생");
+				assertThat(jwtRedisRepository.findByUserId(user.getId()).orElseThrow().getToken())
+					.isEqualTo("old_refresh_token");
+			})
+		);
+	}
+
+	@Test
+	void reissue() {
+		// given
+		User user = userRepository.save(createUser("사용자"));
+		jwtRedisRepository.save(new RefreshToken(user.getId(), "old_refresh_token"));
+		doNothing().when(jwtRedisRepository).deleteByUserId(user.getId());
+		doThrow(new RuntimeException("임의의 예외 발생")).when(jwtRedisRepository).save(any(RefreshToken.class));
+
+		// when & then
+		assertThatThrownBy(() -> jwtService.issueRefreshToken(user.getId())).hasMessage("임의의 예외 발생");
+		assertThat(jwtRedisRepository.findByUserId(user.getId()).orElseThrow().getToken()).isEqualTo(
+			"old_refresh_token");
 	}
 
 	@DisplayName("액세스 토큰 parse 시나리오")
@@ -190,20 +239,19 @@ public class JwtServiceTest extends IntegrationTestSupport {
 				String wrongRefreshToken = "invalid refresh token";
 
 				// when & then
-				assertThatThrownBy(() -> jwtService.validRefreshToken(savedUser.getId(), wrongRefreshToken))
+				assertThatThrownBy(() -> jwtService.validateRefreshToken(savedUser.getId(), wrongRefreshToken))
 					.isInstanceOf(ApiException.class)
 					.hasMessage(AuthErrorCode.INVALID_REFRESH_TOKEN.getMessage());
 			}),
 			DynamicTest.dynamicTest("해당 사용자에 대한 토큰이 DB에 없는 경우 예외를 발생한다", () -> {
 				// given
-				jwtService.removeRefreshToken(savedUser.getId());
+				jwtRedisRepository.deleteByUserId(savedUser.getId());
 
 				// when & then
-				assertThatThrownBy(() -> jwtService.validRefreshToken(savedUser.getId(), refreshToken))
+				assertThatThrownBy(() -> jwtService.validateRefreshToken(savedUser.getId(), refreshToken))
 					.isInstanceOf(ApiException.class)
 					.hasMessage(AuthErrorCode.UNAUTHORIZED_USER.getMessage());
 			})
 		);
 	}
-
 }

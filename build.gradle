@@ -46,7 +46,6 @@ dependencies {
     implementation 'org.hibernate.orm:hibernate-spatial'
     implementation 'com.querydsl:querydsl-spatial'
 
-
     //AWS
     implementation platform("io.awspring.cloud:spring-cloud-aws-dependencies:3.1.0")
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-parameter-store'
@@ -137,26 +136,29 @@ tasks.named('test') {
 jacocoTestReport {
     reports {
         xml.required = true
+        html.required = true
     }
     def Qdomains = []
     for (qPattern in '**/QA'..'**/QZ') {
         Qdomains.add(qPattern + '*')
     }
     afterEvaluate {
-        classDirectories.setFrom(files(classDirectories.files.collect {
-            fileTree(dir: it, excludes: [
-                    "**/GlobalExceptionHandler.class",
-                    "**/ApplePublicKeyResponse*",
-                    "**/AppleService.class",
-                    "**/KakaoService.class",
-                    "**/*Request.*",
-                    "**/*Response.*",
-                    "**/*Dto.*",
-                    "**/*Constant.*",
-                    "**/config/*",
-                    "**/filter/*"
-            ] + Qdomains)
-        }))
+        classDirectories.setFrom(
+                files(classDirectories.files.collect {
+                    fileTree(dir: it, excludes: [
+                            '**/GlobalExceptionHandler.java',
+                            '**/ApplePublicKeyResponse*',
+                            '**/AppleService.class',
+                            '**/KakaoService.class',
+                            '**/*Request.*',
+                            '**/*Response.*',
+                            '**/*Dto.*',
+                            '**/*Constant.*',
+                            '**/config/**/*',
+                            '**/filter/**/*'
+                    ] + Qdomains)
+                })
+        )
     }
     finalizedBy 'jacocoTestCoverageVerification'
 }
@@ -178,16 +180,16 @@ jacocoTestCoverageVerification {
             }
 
             excludes = [
-                    "**/GlobalExceptionHandler.class",
-                    "**/ApplePublicKeyResponse*",
-                    "**/AppleService.class",
-                    "**/KakaoService.class",
-                    "**/*Request.*",
-                    "**/*Response.*",
-                    "**/*Dto.*",
-                    "**/*Constant.*",
-                    "**/config/*",
-                    "**/filter/*"
+                    '*.GlobalExceptionHandler',
+                    '*.ApplePublicKeyResponse*',
+                    '*.AppleService',
+                    '*.KakaoService',
+                    '*.*Request',
+                    '*.*Response',
+                    '*.*Dto',
+                    '*.*Constant',
+                    '*.config.*',
+                    '*.filter.*'
             ] + Qdomains
         }
     }
@@ -195,20 +197,20 @@ jacocoTestCoverageVerification {
 
 checkstyle {
     maxWarnings = 0
-    toolVersion = "10.4"
-    configFile = file("checkstyle/naver-checkstyle-rules.xml")
-    configProperties = ["suppressionFile": "checkstyle/naver-checkstyle-suppressions.xml"]
+    toolVersion = '10.4'
+    configFile = file('checkstyle/naver-checkstyle-rules.xml')
+    configProperties = ['suppressionFile': 'checkstyle/naver-checkstyle-suppressions.xml']
     sourceSets = [sourceSets.main] // CompileQuerydsl 오류 해결
 }
 
 sonar {
     properties {
-        property "sonar.projectKey", "TF3-Project-PhotoSpot_photospot-be"
-        property "sonar.organization", "tf4project-f1bean-f2donghun-f3jaii-tjeegu-f4yana-photospot"
-        property "sonar.host.url", "https://sonarcloud.io"
+        property 'sonar.projectKey', "TF3-Project-PhotoSpot_photospot-be"
+        property 'sonar.organization', "tf4project-f1bean-f2donghun-f3jaii-tjeegu-f4yana-photospot"
+        property 'sonar.host.url', "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-        property 'sonar.exclusions', '**/GlobalExceptionHandler.class, **/*Request.*, **/*Response.*, **/*Dto.*, **/*Constant.*' +
-                '**/config/*, **/filter/*, **/ApplePublicKeyResponse*, **/AppleService.class, **/KakaoService.class'
+        property 'sonar.coverage.exclusions', '**/GlobalExceptionHandler.java, **/AppleService.java, **/KakaoService.java' +
+                '**/ApplePublicKeyResponse*, **/*Request.*, **/*Response.*, **/*Dto.*, **/*Constant.*, **/config/**/*, **/filter/**/*'
     }
 }

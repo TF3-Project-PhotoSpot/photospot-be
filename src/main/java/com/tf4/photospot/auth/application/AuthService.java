@@ -5,8 +5,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.auth.presentation.request.KakaoUnlinkCallbackInfo;
 import com.tf4.photospot.auth.util.NicknameGenerator;
+import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
@@ -16,6 +18,7 @@ import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 import com.tf4.photospot.user.infrastructure.UserQueryRepository;
 
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService {
 	private final UserRepository userRepository;
 	private final UserQueryRepository userQueryRepository;
+	private final JwtRedisRepository jwtRedisRepository;
 	private final JwtService jwtService;
 	private final AppleService appleService;
 	private final KakaoService kakaoService;
@@ -49,7 +53,6 @@ public class AuthService {
 				userRepository.save(new LoginUserInfo(provider, account).toUser(generateNickname()))));
 	}
 
-	// Todo : 클라이언트에서 accessToken 전달 시 PREFIX도 함께 오는지 확인 후 수정
 	private String validateAndGetKakaoUserInfo(String accessToken, String id) {
 		return kakaoService.getTokenInfo(accessToken, id).account();
 	}
@@ -73,9 +76,26 @@ public class AuthService {
 	}
 
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
-		jwtService.validRefreshToken(userId, refreshToken);
+		jwtService.validateRefreshToken(userId, refreshToken);
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
-		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()));
+		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()),
+			jwtService.issueRefreshToken(user.getId()));
+	}
+
+	@Transactional
+	public void logout(String accessToken) {
+		Claims claims = jwtService.parseAccessToken(accessToken);
+		User user = userRepository.findById(claims.get(JwtConstant.USER_ID, Long.class))
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		jwtRedisRepository.saveAccessTokenInBlackList(accessToken, claims.getExpiration().getTime());
+		jwtRedisRepository.deleteByUserId(user.getId());
+	}
+
+	public void existsBlacklist(String accessToken) {
+		jwtService.validateAccessToken(accessToken);
+		if (jwtRedisRepository.existsBlacklist(accessToken)) {
+			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
+		}
 	}
 
 	public void unlinkKakaoAccount(String account) {

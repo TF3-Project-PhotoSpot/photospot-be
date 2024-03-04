@@ -16,6 +16,7 @@ import org.junit.jupiter.api.TestFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import com.tf4.photospot.album.application.response.AlbumPreviewResponse;
 import com.tf4.photospot.album.application.response.CreateAlbumPostResponse;
 import com.tf4.photospot.album.domain.Album;
 import com.tf4.photospot.album.domain.AlbumPost;
@@ -200,6 +201,98 @@ class AlbumServiceTest extends IntegrationTestSupport {
 				assertThat(albumRepository.findById(albumId)).isEmpty();
 				assertThat(albumPostRepository.findAll()).isEmpty();
 				assertThat(albumQueryRepository.exixtsUserAlbum(user.getId(), albumId)).isFalse();
+			})
+		);
+	}
+
+	@DisplayName("앨범 리스트 조회")
+	@TestFactory
+	Stream<DynamicTest> albumListTest() {
+		//given
+		final Spot spot = spotRepository.save(createSpot());
+		final User user1 = userRepository.save(createUser("user1"));
+		final User user2 = userRepository.save(createUser("user2"));
+		final Album album1 = albumRepository.save(new Album("album1"));
+		final Album album2 = albumRepository.save(new Album("album2"));
+		final Album emptyAlbum = albumRepository.save(new Album("album3"));
+		albumUserRepository.save(new AlbumUser(user1, album1));
+		albumUserRepository.save(new AlbumUser(user1, album2));
+		albumUserRepository.save(new AlbumUser(user2, album1));
+		albumUserRepository.save(new AlbumUser(user2, album2));
+		Post post1 = postRepository.save(createPost(spot, user1, createPhoto("photoUrl1")));
+		Post post2 = postRepository.save(createPost(spot, user1, createPhoto("photoUrl2")));
+		albumService.addPosts(List.of(post1.getId()), album1.getId(), user1.getId());
+		albumService.addPosts(List.of(post2.getId()), album2.getId(), user1.getId());
+
+		return Stream.of(
+			dynamicTest("앨범은 먼저 생성된 순서대로 조회한다.", () -> {
+				//when
+				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
+				//then
+				assertThat(albumResponses).hasSize(2);
+				assertThat(albumResponses).extracting("albumId")
+					.containsExactly(album1.getId(), album2.getId());
+			}),
+			dynamicTest("가장 최근에 추가된 앨범 방명록을 미리보기로 조회한다.", () -> {
+				//when
+				Post latestPost = postRepository.save(createPost(spot, user1, createPhoto("photoUrl3")));
+				albumService.addPosts(List.of(latestPost.getId()), album1.getId(), user1.getId());
+				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
+				//then
+				assertThat(albumResponses).hasSize(2);
+				assertThat(albumResponses).extracting("photoUrl").containsAnyOf("photoUrl3");
+			}),
+			dynamicTest("가장 최근에 추가된 방명록이 비공개 되는 경우 앨범 유저의 방명록이 아니면 조회할 수 없다.", () -> {
+				//given
+				final User user3 = userRepository.save(createUser("user3"));
+				Post privatePost = postRepository.save(createPost(spot, user3,
+					createPhoto("photoUrl4"), 0L, true));
+				albumService.addPosts(List.of(privatePost.getId()), album1.getId(), user1.getId());
+				//when
+				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
+				//then
+				assertThat(albumResponses).extracting("photoUrl")
+					.isNotEmpty()
+					.doesNotContain("photoUrl4");
+			}),
+			dynamicTest("가장 최근에 추가된 방명록이 비공개 되는 경우 앨범 유저의 방명록이면 조회할 수 있다.", () -> {
+				//given
+				Post privatePost = postRepository.save(createPost(spot, user1,
+					createPhoto("photoUrl5"), 0L, true));
+				albumService.addPosts(List.of(privatePost.getId()), album1.getId(), user1.getId());
+				//when
+				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
+				//then
+				assertThat(albumResponses).extracting("photoUrl").containsAnyOf("photoUrl5");
+			}),
+			dynamicTest("비어있는 앨범 조회시 imageUrl이 \"\" 로 조회된다.", () -> {
+				//given
+				final AlbumPreviewResponse emptyAlbumPreviewResponse = AlbumPreviewResponse.builder()
+					.albumId(emptyAlbum.getId())
+					.name(emptyAlbum.getName())
+					.photoUrl("")
+					.build();
+				albumUserRepository.save(new AlbumUser(user1, emptyAlbum));
+				//when
+				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
+				//then
+				final Optional<AlbumPreviewResponse> emptyAlbumResult = albumResponses.stream()
+					.filter(albumResponse -> albumResponse.albumId().equals(emptyAlbum.getId()))
+					.findFirst();
+				assertThat(emptyAlbumResult).isPresent().get().isEqualTo(emptyAlbumPreviewResponse);
+			}),
+			dynamicTest("가장 최근에 추가된 앨범 방명록이 삭제 되는 경우 조회 되지 않는다.", () -> {
+				Post latestPost = postRepository.save(createPost(spot, user1, createPhoto("photoUrl6")));
+				albumService.addPosts(List.of(latestPost.getId()), album1.getId(), user1.getId());
+				latestPost.delete(user1);
+				postRepository.save(latestPost);
+				em.flush();
+				//when
+				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
+				//then
+				assertThat(albumResponses).extracting("photoUrl")
+					.isNotEmpty()
+					.doesNotContain("photoUrl6");
 			})
 		);
 	}

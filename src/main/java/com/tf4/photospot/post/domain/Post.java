@@ -118,4 +118,8 @@ public class Post extends BaseEntity {
 			throw new ApiException(AuthErrorCode.PERMISSION_DENIED);
 		}
 	}
+
+	public String getPhotoUrl() {
+		return photo.getPhotoUrl();
+	}
 }
