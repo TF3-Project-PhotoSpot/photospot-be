@@ -13,10 +13,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.JwtService;
 import com.tf4.photospot.global.filter.CustomAuthenticationFilter;
 import com.tf4.photospot.global.filter.CustomExceptionFilter;
+import com.tf4.photospot.global.filter.CustomLogoutFilter;
 import com.tf4.photospot.global.filter.JwtTokenValidatorFilter;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationEntryPoint;
 import com.tf4.photospot.global.filter.details.CustomAuthenticationProvider;
@@ -49,8 +51,9 @@ public class SecurityConfig {
 				.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 				.disable())
 			.addFilterBefore(customAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(new JwtTokenValidatorFilter(jwtService), CustomAuthenticationFilter.class)
-			.addFilterBefore(new CustomExceptionFilter(), JwtTokenValidatorFilter.class)
+			.addFilterBefore(new JwtTokenValidatorFilter(jwtService, authService), CustomAuthenticationFilter.class)
+			.addFilterBefore(new CustomLogoutFilter(authService, new ObjectMapper()), JwtTokenValidatorFilter.class)
+			.addFilterBefore(new CustomExceptionFilter(), CustomLogoutFilter.class)
 			.exceptionHandling(exceptionHandling -> exceptionHandling
 				.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		return http.build();
@@ -78,5 +81,4 @@ public class SecurityConfig {
 	public CustomAuthenticationSuccessHandler customAuthenticationSuccessHandler() {
 		return new CustomAuthenticationSuccessHandler(jwtService);
 	}
-
 }

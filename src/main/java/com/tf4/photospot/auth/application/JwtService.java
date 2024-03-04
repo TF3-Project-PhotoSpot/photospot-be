@@ -10,12 +10,14 @@ import javax.crypto.SecretKey;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.auth.domain.JwtRepository;
 import com.tf4.photospot.auth.domain.RefreshToken;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.user.domain.User;
+import com.tf4.photospot.user.domain.UserRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,23 +27,25 @@ import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SecurityException;
 
-@Transactional(readOnly = true)
 @Service
+@Transactional(readOnly = true)
 public class JwtService {
-
-	private final JwtRepository jwtRepository;
+	private final JwtRedisRepository jwtRedisRepository;
 	private final JwtProperties jwtProperties;
+	private final UserRepository userRepository;
 
 	private final SecretKey key;
 
-	public JwtService(JwtRepository jwtRepository, JwtProperties jwtProperties) {
-		this.jwtRepository = jwtRepository;
+	public JwtService(JwtRedisRepository jwtRedisRepository, JwtProperties jwtProperties,
+		UserRepository userRepository) {
+		this.jwtRedisRepository = jwtRedisRepository;
 		this.jwtProperties = jwtProperties;
+		this.userRepository = userRepository;
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 	}
 
 	public String issueAccessToken(Long userId, String authorities) {
-		return generateAccessToken(userId, authorities, new Date());
+		return generateAccessToken(findUser(userId).getId(), authorities, new Date());
 	}
 
 	private String generateAccessToken(Long userId, String authorities, Date expiration) {
@@ -55,11 +59,14 @@ public class JwtService {
 			.signWith(key).compact();
 	}
 
-	@Transactional
 	public String issueRefreshToken(Long userId) {
-		String refreshToken = generateRefreshToken(userId, new Date());
-		jwtRepository.save(new RefreshToken(userId, refreshToken));
-		return refreshToken;
+		Long loginUserId = findUser(userId).getId();
+		String token = generateRefreshToken(loginUserId, new Date());
+		if (jwtRedisRepository.existsByUserId(loginUserId)) {
+			jwtRedisRepository.deleteByUserId(loginUserId);
+		}
+		jwtRedisRepository.save(new RefreshToken(loginUserId, token));
+		return token;
 	}
 
 	private String generateRefreshToken(Long userId, Date expiration) {
@@ -71,9 +78,9 @@ public class JwtService {
 			.signWith(key).compact();
 	}
 
-	public Claims parseAccessToken(String authorizationHeader) {
-		String token = removePrefix(authorizationHeader);
-		return parseToken(token, true);
+	public Claims parseAccessToken(String token) {
+		String accessToken = removePrefix(token);
+		return parseToken(accessToken, true);
 	}
 
 	public Claims parseRefreshToken(String token) {
@@ -99,8 +106,8 @@ public class JwtService {
 		}
 	}
 
-	public void validRefreshToken(Long userId, String refreshToken) {
-		RefreshToken token = jwtRepository.findByUserId(userId)
+	public void validateRefreshToken(Long userId, String refreshToken) {
+		RefreshToken token = jwtRedisRepository.findByUserId(userId)
 			.orElseThrow(() -> new ApiException(AuthErrorCode.UNAUTHORIZED_USER));
 
 		if (!token.isTokenMatching(refreshToken)) {
@@ -108,15 +115,18 @@ public class JwtService {
 		}
 	}
 
-	private String removePrefix(String header) {
-		if (header == null || !header.startsWith(JwtConstant.PREFIX)) {
+	public void validateAccessToken(String accessToken) {
+		if (accessToken == null || !accessToken.startsWith(PREFIX)) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
-		return header.substring(JwtConstant.PREFIX.length());
 	}
 
-	@Transactional
-	public void removeRefreshToken(Long userId) {
-		jwtRepository.deleteById(userId);
+	private String removePrefix(String token) {
+		validateAccessToken(token);
+		return token.substring(JwtConstant.PREFIX.length());
+	}
+
+	private User findUser(Long userId) {
+		return userRepository.findById(userId).orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
 	}
 }
