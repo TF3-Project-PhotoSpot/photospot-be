@@ -63,4 +63,9 @@ public class SpotService {
 	public List<SpotCoordResponse> findSpotsOfMyPosts(Long userId) {
 		return spotQueryRepository.findSpotsOfMyPosts(userId);
 	}
+
+	public Spot getSpot(Long spotId) {
+		return spotRepository.findById(spotId)
+			.orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
+	}
 }
