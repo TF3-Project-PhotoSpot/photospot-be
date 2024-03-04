@@ -13,8 +13,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
 import com.tf4.photospot.auth.presentation.request.LoginDto;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.support.IntegrationTestSupport;
@@ -84,7 +84,7 @@ public class AuthControllerTest extends IntegrationTestSupport {
 
 		// when & then
 		mockMvc.perform(delete("/api/v1/auth/logout")
-				.header("Authorization", "access_token_in_blacklist"))
+				.header("Authorization", "Bearer access_token_in_blacklist"))
 			.andDo(print())
 			.andExpect(status().isUnauthorized())
 			.andExpect(jsonPath("$.code").value(AuthErrorCode.INVALID_ACCESS_TOKEN.name()))
