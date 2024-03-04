@@ -106,7 +106,7 @@ public class JwtService {
 		}
 	}
 
-	public void validRefreshToken(Long userId, String refreshToken) {
+	public void validateRefreshToken(Long userId, String refreshToken) {
 		RefreshToken token = jwtRedisRepository.findByUserId(userId)
 			.orElseThrow(() -> new ApiException(AuthErrorCode.UNAUTHORIZED_USER));
 
@@ -115,10 +115,14 @@ public class JwtService {
 		}
 	}
 
-	private String removePrefix(String token) {
-		if (token == null || !token.startsWith(JwtConstant.PREFIX)) {
+	public void validateAccessToken(String accessToken) {
+		if (accessToken == null || !accessToken.startsWith(PREFIX)) {
 			throw new ApiException(AuthErrorCode.UNAUTHORIZED_USER);
 		}
+	}
+
+	private String removePrefix(String token) {
+		validateAccessToken(token);
 		return token.substring(JwtConstant.PREFIX.length());
 	}
 

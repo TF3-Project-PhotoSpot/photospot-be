@@ -239,7 +239,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 				String wrongRefreshToken = "invalid refresh token";
 
 				// when & then
-				assertThatThrownBy(() -> jwtService.validRefreshToken(savedUser.getId(), wrongRefreshToken))
+				assertThatThrownBy(() -> jwtService.validateRefreshToken(savedUser.getId(), wrongRefreshToken))
 					.isInstanceOf(ApiException.class)
 					.hasMessage(AuthErrorCode.INVALID_REFRESH_TOKEN.getMessage());
 			}),
@@ -248,7 +248,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 				jwtRedisRepository.deleteByUserId(savedUser.getId());
 
 				// when & then
-				assertThatThrownBy(() -> jwtService.validRefreshToken(savedUser.getId(), refreshToken))
+				assertThatThrownBy(() -> jwtService.validateRefreshToken(savedUser.getId(), refreshToken))
 					.isInstanceOf(ApiException.class)
 					.hasMessage(AuthErrorCode.UNAUTHORIZED_USER.getMessage());
 			})

@@ -71,7 +71,7 @@ public class AuthService {
 	}
 
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
-		jwtService.validRefreshToken(userId, refreshToken);
+		jwtService.validateRefreshToken(userId, refreshToken);
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()),
 			jwtService.issueRefreshToken(user.getId()));
@@ -87,6 +87,7 @@ public class AuthService {
 	}
 
 	public void existsBlacklist(String accessToken) {
+		jwtService.validateAccessToken(accessToken);
 		if (jwtRedisRepository.existsBlacklist(accessToken)) {
 			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
 		}
