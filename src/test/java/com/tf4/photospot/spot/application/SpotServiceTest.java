@@ -19,6 +19,10 @@ import org.locationtech.jts.geom.Point;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
+import com.tf4.photospot.bookmark.domain.Bookmark;
+import com.tf4.photospot.bookmark.domain.BookmarkFolder;
+import com.tf4.photospot.bookmark.domain.BookmarkFolderRepository;
+import com.tf4.photospot.bookmark.domain.BookmarkRepository;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -30,11 +34,7 @@ import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
 import com.tf4.photospot.spot.application.response.SpotResponse;
-import com.tf4.photospot.spot.domain.BookmarFolderRepository;
-import com.tf4.photospot.spot.domain.BookmarkFolder;
 import com.tf4.photospot.spot.domain.Spot;
-import com.tf4.photospot.spot.domain.SpotBookmark;
-import com.tf4.photospot.spot.domain.SpotBookmarkRepository;
 import com.tf4.photospot.spot.domain.SpotRepository;
 import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.support.TestFixture;
@@ -49,8 +49,8 @@ class SpotServiceTest extends IntegrationTestSupport {
 	private final SpotRepository spotRepository;
 	private final PostRepository postRepository;
 	private final UserRepository userRepository;
-	private final SpotBookmarkRepository spotBookmarkRepository;
-	private final BookmarFolderRepository bookmarFolderRepository;
+	private final BookmarkRepository bookmarkRepository;
+	private final BookmarkFolderRepository bookmarkFolderRepository;
 
 	@DisplayName("내가 쓴 방명록의 스팟 목록 조회")
 	@TestFactory
@@ -114,9 +114,9 @@ class SpotServiceTest extends IntegrationTestSupport {
 			dynamicTest("북마크 등록 여부를 알려준다.", () -> {
 				//given
 				BookmarkFolder defaultBookmark = BookmarkFolder.createDefaultBookmark(user);
-				bookmarFolderRepository.save(defaultBookmark);
-				SpotBookmark spotBookmark = createSpotBookmark(user, spot, defaultBookmark);
-				spotBookmarkRepository.save(spotBookmark);
+				bookmarkFolderRepository.save(defaultBookmark);
+				Bookmark spotBookmark = createSpotBookmark(user, spot, defaultBookmark);
+				bookmarkRepository.save(spotBookmark);
 				//when
 				SpotResponse response = spotService.findSpot(searchCondition);
 				//then
