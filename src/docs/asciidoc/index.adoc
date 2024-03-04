@@ -22,6 +22,10 @@ include::api/auth/auth.adoc[]
 
 include::api/spot/spot.adoc[]
 
+== photo API
+
+include::api/photo/photo.adoc[]
+
 == Post API
 
 include::api/post/post.adoc[]
