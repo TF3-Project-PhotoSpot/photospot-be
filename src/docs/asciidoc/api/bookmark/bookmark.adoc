@@ -5,3 +5,11 @@
 include::{snippets}/bookmark-controller-docs-test/create-bookmark-folder/http-request.adoc[]
 include::{snippets}/bookmark-controller-docs-test/create-bookmark-folder/response-body.adoc[]
 include::{snippets}/bookmark-controller-docs-test/create-bookmark-folder/response-fields.adoc[]
+
+=== 북마크 추가
+
+'''
+
+include::{snippets}/bookmark-controller-docs-test/add-bookmark/http-request.adoc[]
+include::{snippets}/bookmark-controller-docs-test/add-bookmark/response-body.adoc[]
+include::{snippets}/bookmark-controller-docs-test/add-bookmark/response-fields.adoc[]

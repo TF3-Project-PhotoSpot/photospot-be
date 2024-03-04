@@ -12,8 +12,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Bookmark extends BaseEntity {
@@ -29,12 +31,15 @@ public class Bookmark extends BaseEntity {
 	@JoinColumn(name = "bookmark_folder_id")
 	private BookmarkFolder bookmarkFolder;
 
+	private String name;
+
 	private String description;
 
 	@Builder
-	public Bookmark(Spot spot, BookmarkFolder bookmarkFolder, String description) {
+	public Bookmark(Spot spot, BookmarkFolder bookmarkFolder, String name, String description) {
 		this.spot = spot;
 		this.bookmarkFolder = bookmarkFolder;
+		this.name = name;
 		this.description = description;
 	}
 }

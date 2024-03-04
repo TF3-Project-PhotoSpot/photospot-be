@@ -175,4 +175,13 @@ public class TestFixture {
 	public static Album createAlbum() {
 		return new Album("album");
 	}
+
+	public static BookmarkFolder createBookmarkFolder(User user, String name) {
+		return BookmarkFolder.builder()
+			.user(user)
+			.name(name)
+			.description("description")
+			.color("color")
+			.build();
+	}
 }
