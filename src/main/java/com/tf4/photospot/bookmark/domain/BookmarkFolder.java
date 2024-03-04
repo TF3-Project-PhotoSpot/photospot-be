@@ -1,4 +1,4 @@
-package com.tf4.photospot.spot.domain;
+package com.tf4.photospot.bookmark.domain;
 
 import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.user.domain.User;
@@ -12,34 +12,42 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SpotBookmark extends BaseEntity {
+public class BookmarkFolder extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "spot_id")
-	private Spot spot;
-
-	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "bookmark_folder_id")
-	private BookmarkFolder bookmarkFolder;
+	private String name;
 
 	private String description;
 
+	private String color;
+
+	private int totalCount;
+
 	@Builder
-	public SpotBookmark(Spot spot, User user, BookmarkFolder bookmarkFolder, String description) {
-		this.spot = spot;
+	public BookmarkFolder(User user, String name, String description, String color, int totalCount) {
 		this.user = user;
-		this.bookmarkFolder = bookmarkFolder;
+		this.name = name;
 		this.description = description;
+		this.color = color;
+		this.totalCount = totalCount;
+	}
+
+	public static BookmarkFolder createDefaultBookmark(User user) {
+		return BookmarkFolder.builder()
+			.user(user)
+			.name("내 장소")
+			.build();
 	}
 }

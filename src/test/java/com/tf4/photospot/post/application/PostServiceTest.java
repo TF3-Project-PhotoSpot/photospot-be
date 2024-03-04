@@ -18,9 +18,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
-import com.tf4.photospot.album.domain.AlbumPostRepository;
-import com.tf4.photospot.album.domain.AlbumRepository;
-import com.tf4.photospot.album.domain.AlbumUserRepository;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
