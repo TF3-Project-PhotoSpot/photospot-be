@@ -130,4 +130,8 @@ public class Post extends BaseEntity {
 		reportCount++;
 		return new Report(reporter, this, reason);
 	}
+
+	public String getPhotoUrl() {
+		return photo.getPhotoUrl();
+	}
 }

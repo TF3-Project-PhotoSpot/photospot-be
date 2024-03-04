@@ -18,7 +18,7 @@ jobs:
       IMAGE_TAG: ${{ github.sha }}
       REGION: ap-northeast-2
 
-    # 테스트용 Docker MySQL
+    # 테스트용 Docker MySQL, Redis
     services:
       mysql:
         image: mysql:8
@@ -28,6 +28,11 @@ jobs:
         ports:
           - 3306:3306
         options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
 
     steps:
       - name: Checkout

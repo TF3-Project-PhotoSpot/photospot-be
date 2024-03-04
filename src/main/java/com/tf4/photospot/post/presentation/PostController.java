@@ -30,6 +30,7 @@ import com.tf4.photospot.post.presentation.request.PostReportRequest;
 import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
 import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
 import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
+import com.tf4.photospot.post.presentation.response.TagListResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -176,5 +177,10 @@ public class PostController {
 		@RequestBody PostReportRequest request) {
 		postService.report(userId, postId, request.reason());
 		return ApiResponse.SUCCESS;
+	}
+
+	@GetMapping("/tags")
+	public TagListResponse getTags() {
+		return new TagListResponse(postService.getTags());
 	}
 }

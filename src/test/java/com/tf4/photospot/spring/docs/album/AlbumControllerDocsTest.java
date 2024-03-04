@@ -8,17 +8,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.album.application.AlbumService;
+import com.tf4.photospot.album.application.response.AlbumPreviewResponse;
 import com.tf4.photospot.album.application.response.CreateAlbumPostResponse;
 import com.tf4.photospot.album.presentation.AlbumController;
 import com.tf4.photospot.album.presentation.request.CreateAlbumHttpRequest;
 import com.tf4.photospot.album.presentation.request.PostIdListHttpRequest;
 import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -28,10 +31,11 @@ import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class AlbumControllerDocsTest extends RestDocsSupport {
 	private final AlbumService albumService = mock(AlbumService.class);
+	private final PostService postService = mock(PostService.class);
 
 	@Override
 	protected Object initController() {
-		return new AlbumController(albumService);
+		return new AlbumController(albumService, postService);
 	}
 
 	@Test
@@ -210,5 +214,32 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 				pathParameters(parameterWithName("albumId").description("앨범 ID")),
 				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
 			);
+	}
+
+	@Test
+	void getAlbums() throws Exception {
+		//given
+		var postImageResponse = Optional.of("photoUrl");
+		var albumsResponses = List.of(
+			new AlbumPreviewResponse(1L, "album", "photoUrl"),
+			new AlbumPreviewResponse(1L, "emptyAlbum", "")
+		);
+		given(postService.getFirstPostImage(any(PostSearchCondition.class))).willReturn(postImageResponse);
+		given(albumService.getAlbums(anyLong())).willReturn(albumsResponses);
+		//when
+		mockMvc.perform(get("/api/v1/albums"))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(
+					fieldWithPath("myPost").type(JsonFieldType.STRING).description("내 방명록 미리보기 이미지 url")
+						.attributes(defaultValue("\"\"")),
+					fieldWithPath("likePost").type(JsonFieldType.STRING).description("좋아요한 방명록 미리보기 이미지 url")
+						.attributes(defaultValue("\"\"")),
+					fieldWithPath("albums").type(JsonFieldType.ARRAY).description("앨범 리스트"),
+					fieldWithPath("albums[].albumId").type(JsonFieldType.NUMBER).description("앨범 id"),
+					fieldWithPath("albums[].name").type(JsonFieldType.STRING).description("앨범 이름"),
+					fieldWithPath("albums[].photoUrl").type(JsonFieldType.STRING).description("앨범 미리보기 이미지 url")
+						.attributes(defaultValue("\"\""))
+				)));
 	}
 }

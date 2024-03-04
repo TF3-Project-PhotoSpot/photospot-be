@@ -457,4 +457,25 @@ public class PostControllerDocsTest extends RestDocsSupport {
 				)
 			));
 	}
+
+	@Test
+	void getTags() throws Exception {
+		// given
+		final List<TagResponse> responses = List.of(
+			TagResponse.builder().tagId(1L).tagName("tag1").iconUrl("iconUrl").build(),
+			TagResponse.builder().tagId(2L).tagName("tag2").iconUrl("iconUrl").build()
+		);
+		given(postService.getTags()).willReturn(responses);
+		// when & then
+		mockMvc.perform(get("/api/v1/posts/tags"))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(
+					fieldWithPath("tags").type(JsonFieldType.ARRAY).description("태그 목록"),
+					fieldWithPath("tags[].tagId").type(JsonFieldType.NUMBER).description("태그 id"),
+					fieldWithPath("tags[].iconUrl").type(JsonFieldType.STRING).description("태그 icon url")
+						.attributes(defaultValue("\"\"")),
+					fieldWithPath("tags[].tagName").type(JsonFieldType.STRING).description("태그 이름"))
+			));
+	}
 }

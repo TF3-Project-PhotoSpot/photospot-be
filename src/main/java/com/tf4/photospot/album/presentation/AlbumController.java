@@ -2,6 +2,7 @@ package com.tf4.photospot.album.presentation;
 
 import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.SortDefault;
@@ -18,11 +19,13 @@ import com.tf4.photospot.album.application.AlbumService;
 import com.tf4.photospot.album.application.response.CreateAlbumPostResponse;
 import com.tf4.photospot.album.presentation.request.CreateAlbumHttpRequest;
 import com.tf4.photospot.album.presentation.request.PostIdListHttpRequest;
+import com.tf4.photospot.album.presentation.response.AlbumListPreviewResponse;
 import com.tf4.photospot.album.presentation.response.CreateAlbumHttpResponse;
 import com.tf4.photospot.album.presentation.response.CreateAlbumPostsHttpResponse;
 import com.tf4.photospot.global.argument.AuthUserId;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
@@ -36,6 +39,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AlbumController {
 	private final AlbumService albumService;
+	private final PostService postService;
 
 	@GetMapping("/{albumId}/posts/preview")
 	public SlicePageDto<PostPreviewResponse> getAlbumPostPreviews(
@@ -112,5 +116,21 @@ public class AlbumController {
 	) {
 		albumService.remove(albumId, userId);
 		return ApiResponse.SUCCESS;
+	}
+
+	@GetMapping
+	public AlbumListPreviewResponse getMyAlbumPageView(
+		@AuthUserId Long userId
+	) {
+		final PageRequest latestOne = PageRequest.of(0, 1, Sort.by("id").descending());
+		var myPostSearch = PostSearchCondition.builder()
+			.userId(userId).type(PostSearchType.MY_POSTS).pageable(latestOne).build();
+		var likedPostSearch = PostSearchCondition.builder()
+			.userId(userId).type(PostSearchType.LIKE_POSTS).pageable(latestOne).build();
+		return AlbumListPreviewResponse.builder()
+			.myPost(postService.getFirstPostImage(myPostSearch).orElseGet(() -> ""))
+			.likePost(postService.getFirstPostImage(likedPostSearch).orElseGet(() -> ""))
+			.albums(albumService.getAlbums(userId))
+			.build();
 	}
 }

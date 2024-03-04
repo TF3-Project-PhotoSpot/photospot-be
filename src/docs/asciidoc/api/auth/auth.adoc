@@ -3,16 +3,23 @@
 '''
 
 include::{snippets}/security-controller-docs-test/login/http-request.adoc[]
-include::{snippets}/security-controller-docs-test/login/request-headers.adoc[]
 include::{snippets}/security-controller-docs-test/login/request-fields.adoc[]
 include::{snippets}/security-controller-docs-test/login/response-body.adoc[]
 include::{snippets}/security-controller-docs-test/login/response-fields.adoc[]
+
+=== 로그아웃
+
+'''
+
+include::{snippets}/security-controller-docs-test/logout/http-request.adoc[]
+include::{snippets}/security-controller-docs-test/logout/request-headers.adoc[]
+include::{snippets}/security-controller-docs-test/logout/response-body.adoc[]
 
 === 액세트 토큰 재발급
 
 '''
 
 include::{snippets}/auth-controller-docs-test/reissue-token/http-request.adoc[]
-include::{snippets}/auth-controller-docs-test/reissue-token/request-cookies.adoc[]
+include::{snippets}/auth-controller-docs-test/reissue-token/request-headers.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-body.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-fields.adoc[]

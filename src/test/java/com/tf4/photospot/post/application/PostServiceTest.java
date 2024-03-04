@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageRequest;
@@ -32,6 +33,7 @@ import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
 import com.tf4.photospot.post.domain.Post;
@@ -598,6 +600,19 @@ class PostServiceTest extends IntegrationTestSupport {
 			// then
 			assertTrue(post.isPrivate());
 		}));
+	}
+
+	@DisplayName("태그 목록을 조회한다.")
+	@Test
+	void getTags() {
+		//given
+		tagRepository.saveAll(createTags("tag1", "tag2", "tag3"));
+		//when
+		final List<TagResponse> tagResponses = postService.getTags();
+		//then
+		assertThat(tagResponses).hasSize(3);
+		assertThat(tagResponses).extracting("tagName")
+			.contains("tag1", "tag2", "tag3");
 	}
 
 	private PostUploadHttpRequest createUploadHttpRequest(String detailAddress, List<Long> tagIds,

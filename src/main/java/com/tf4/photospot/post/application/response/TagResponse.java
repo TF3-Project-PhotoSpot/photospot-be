@@ -3,6 +3,7 @@ package com.tf4.photospot.post.application.response;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.domain.Tag;
 
+import io.micrometer.common.util.StringUtils;
 import lombok.Builder;
 
 public record TagResponse(
@@ -12,6 +13,9 @@ public record TagResponse(
 ) {
 	@Builder
 	public TagResponse {
+		if (StringUtils.isEmpty(iconUrl)) {
+			iconUrl = "";
+		}
 	}
 
 	public static TagResponse from(PostTag postTag) {
