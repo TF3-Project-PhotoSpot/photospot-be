@@ -40,7 +40,8 @@ public class User extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public User(String nickname, String providerType, String account) {
+	public User(Long id, String nickname, String providerType, String account) {
+		this.id = id;
 		this.nickname = nickname;
 		this.providerType = providerType;
 		this.account = account;
@@ -51,4 +52,7 @@ public class User extends BaseEntity {
 		this.profileUrl = profileUrl;
 	}
 
+	public boolean isSame(Long userId) {
+		return id.equals(userId);
+	}
 }
