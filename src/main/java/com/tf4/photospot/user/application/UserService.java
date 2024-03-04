@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.user.application.response.UserProfileResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
@@ -25,5 +26,10 @@ public class UserService {
 			.orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
 		loginUser.updateProfile(imageUrl);
 		return new UserProfileResponse(imageUrl);
+	}
+
+	public User getUser(Long userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 	}
 }

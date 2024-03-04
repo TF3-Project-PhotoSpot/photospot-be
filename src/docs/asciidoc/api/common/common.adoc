@@ -1,18 +1,18 @@
-=== Success Example
+=== 성공 응답
 
 '''
 
 include::{snippets}/common-docs-test/common-success/response-fields.adoc[]
 include::{snippets}/common-docs-test/common-success/response-body.adoc[]
 
-=== Error Example
+=== 에러 응답
 
 '''
 
 include::{snippets}/common-docs-test/common-error/response-fields.adoc[]
 include::{snippets}/common-docs-test/common-error/response-body.adoc[]
 
-=== Enums
+=== 에러 코드
 
 '''
 

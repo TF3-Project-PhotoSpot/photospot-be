@@ -1,8 +1,9 @@
 package com.tf4.photospot.spot.infrastructure;
 
+import static com.tf4.photospot.bookmark.domain.QBookmark.*;
+import static com.tf4.photospot.bookmark.domain.QBookmarkFolder.*;
 import static com.tf4.photospot.post.domain.QPost.*;
 import static com.tf4.photospot.spot.domain.QSpot.*;
-import static com.tf4.photospot.spot.domain.QSpotBookmark.*;
 
 import java.util.List;
 
@@ -68,8 +69,9 @@ public class SpotQueryRepository {
 
 	public Boolean existsBookmark(Long spotId, Long userId) {
 		Integer exists = queryFactory.selectOne()
-			.from(spotBookmark)
-			.where(spotBookmark.spot.id.eq(spotId).and(spotBookmark.user.id.eq(userId)))
+			.from(bookmark)
+			.join(bookmark.bookmarkFolder, bookmarkFolder)
+			.where(bookmarkFolder.user.id.eq(userId).and(bookmark.spot.id.eq(spotId)))
 			.fetchFirst();
 		return exists != null;
 	}
