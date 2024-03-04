@@ -102,11 +102,11 @@ public class AuthService {
 		kakaoService.unlink(Long.valueOf(account));
 	}
 
-	// Todo : 액세스토큰, 리프레시토큰 처리 추가
 	@Transactional
-	public void deleteUser(Long userId) {
+	public void deleteUser(Long userId, String accessToken) {
 		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
 		userQueryRepository.deleteByUserId(user.getId());
+		logout(accessToken);
 	}
 
 	// Todo : db 업데이트 실패했을 때 재시도하는 로직 추가?

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tf4.photospot.auth.application.AuthService;
@@ -35,15 +36,14 @@ public class AuthController {
 	}
 
 	@PostMapping("/unlink")
-	public ApiResponse unlinkUser(@AuthUserId Long userId) {
-		authService.unlinkKakaoAccount(userService.findAccountByUserId(userId));
-		authService.deleteUser(userId);
-		return ApiResponse.SUCCESS;
-	}
-
-	@PostMapping("/delete")
-	public ApiResponse deleteUser(@AuthUserId Long userId) {
-		authService.deleteUser(userId);
+	public ApiResponse unlinkUser(
+		@AuthUserId Long userId,
+		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String accessToken,
+		@RequestParam(name = "isLinked", defaultValue = "true") Boolean isLinked) {
+		if (Boolean.TRUE.equals(isLinked)) {
+			authService.unlinkKakaoAccount(userService.findAccountByUserId(userId));
+		}
+		authService.deleteUser(userId, accessToken);
 		return ApiResponse.SUCCESS;
 	}
 
