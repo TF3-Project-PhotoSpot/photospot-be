@@ -3,6 +3,7 @@ package com.tf4.photospot.auth.application;
 import static com.tf4.photospot.support.TestFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -41,7 +42,7 @@ public class AuthServiceTest extends IntegrationTestSupport {
 		String account = "account_value";
 
 		return List.of(
-			DynamicTest.dynamicTest("최초 로그인 시 사용자 정보를 DB에 저장한다.", () -> {
+			dynamicTest("최초 로그인 시 사용자 정보를 DB에 저장한다.", () -> {
 				//when
 				var loginResponse = authService.oauthLogin(providerType, account);
 
@@ -51,7 +52,7 @@ public class AuthServiceTest extends IntegrationTestSupport {
 					() -> assertThat(userRepository.findAll()).hasSize(1)
 				);
 			}),
-			DynamicTest.dynamicTest("기존에 로그인 했던 사용자는 DB에 저장하지 않는다.", () -> {
+			dynamicTest("기존에 로그인 했던 사용자는 DB에 저장하지 않는다.", () -> {
 				//when
 				var loginResponse2 = authService.oauthLogin(providerType, account);
 				User savedUser = userRepository.findUserByProviderTypeAndAccount(providerType, account).orElseThrow();
@@ -91,7 +92,7 @@ public class AuthServiceTest extends IntegrationTestSupport {
 		String accessToken = "Bearer " + jwtService.issueAccessToken(loginUser.getId(), loginUser.getRole().getType());
 
 		return Stream.of(
-			DynamicTest.dynamicTest("로그아웃을 하면 Redis에 저장된 리프레시 토큰을 삭제하고 블랙리스트에 액세스 토큰을 추가한다.", () -> {
+			dynamicTest("로그아웃을 하면 Redis에 저장된 리프레시 토큰을 삭제하고 블랙리스트에 액세스 토큰을 추가한다.", () -> {
 				// when
 				authService.logout(accessToken);
 
@@ -102,7 +103,7 @@ public class AuthServiceTest extends IntegrationTestSupport {
 						.isInstanceOf(ApiException.class).hasMessage(AuthErrorCode.INVALID_ACCESS_TOKEN.getMessage())
 				);
 			}),
-			DynamicTest.dynamicTest("유효하지 않은 액세스 토큰으로 로그아웃 요청 시 예외를 던진다.", () -> {
+			dynamicTest("유효하지 않은 액세스 토큰으로 로그아웃 요청 시 예외를 던진다.", () -> {
 				// given
 				String wrongAccessToken = "wrong_access_token";
 

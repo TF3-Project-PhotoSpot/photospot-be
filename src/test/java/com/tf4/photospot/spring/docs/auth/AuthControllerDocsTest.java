@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -53,20 +54,13 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@DisplayName("회원 탈퇴")
 	void unlinkUser() throws Exception {
 		// when
-		mockMvc.perform(post("/api/v1/auth/unlink"))
+		mockMvc.perform(post("/api/v1/auth/unlink")
+				.header("Authorization", "Bearer access_token"))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
-				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공"))
-			));
-	}
-
-	@Test
-	@DisplayName("회원 삭제")
-	void deleteUser() throws Exception {
-		// when
-		mockMvc.perform(post("/api/v1/auth/delete"))
-			.andExpect(status().isOk())
-			.andDo(restDocsTemplate(
+				requestHeaders(headerWithName("Authorization").description("액세스 토큰")),
+				queryParameters(parameterWithName("isLinked").description("현재 계정 연결 상태").optional()
+					.attributes(constraints("기본적으로 true"), defaultValue(true))),
 				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공"))
 			));
 	}
