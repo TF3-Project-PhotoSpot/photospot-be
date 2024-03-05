@@ -33,6 +33,7 @@ import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
@@ -163,8 +164,8 @@ class PostServiceTest extends IntegrationTestSupport {
 			Post deletePost = createPost(spot, writer);
 			Post reportedPost = createPost(spot, writer);
 			deletePost.delete(writer);
-			reportedPost.reportFrom(reader, "불쾌한 사진");
-			postRepository.saveAll(List.of(privatePost, deletePost));
+			postRepository.saveAll(List.of(privatePost, deletePost, reportedPost));
+			reportRepository.save(reportedPost.reportFrom(reader, "불쾌한 사진"));
 
 			var latestPostRequest = PostSearchCondition.builder()
 				.spotId(spot.getId())
@@ -434,6 +435,23 @@ class PostServiceTest extends IntegrationTestSupport {
 			var response = postService.getPosts(postSearchCondition);
 			assertThat(response.content()).extracting(PostDetailResponse::id)
 				.containsExactly(like3.getPost().getId(), like2.getPost().getId(), like1.getPost().getId());
+		}), dynamicTest("내가 좋아요한 방명록 중 삭제됐거나 신고한 방명록이 있으면 해당 방명록은 상세 목록에서 제외한다.", () -> {
+			// given
+			final PostLike likedPost = postLikeRepository.save(createPostLike(posts.get(0), reader));
+			final PostLike likedAndDeletedPost = postLikeRepository.save(createPostLike(posts.get(1), reader));
+			final PostLike likedAndReportedPost = postLikeRepository.save(createPostLike(posts.get(2), reader));
+			likedAndDeletedPost.getPost().delete(writer);
+			reportRepository.save(likedAndReportedPost.getPost().reportFrom(reader, "불쾌한 사진"));
+			final PostSearchCondition searchCondition = PostSearchCondition.builder()
+				.userId(reader.getId())
+				.type(PostSearchType.LIKE_POSTS)
+				.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+				.build();
+			// when
+			List<PostDetailResponse> response = postService.getPosts(searchCondition).content();
+			// then
+			assertThat(response.get(0).id()).isIn(likedPost.getPost().getId())
+				.isNotIn(likedAndReportedPost.getPost().getId(), likedAndDeletedPost.getPost().getId());
 		}));
 	}
 
@@ -461,7 +479,6 @@ class PostServiceTest extends IntegrationTestSupport {
 			// then
 			assertAll(
 				() -> assertEquals(post.getLikeCount(), 0L),
-				() -> assertEquals(post.getReportCount(), 0L),
 				() -> assertEquals(post.getSpot().getPostCount(), 1L),
 				() -> assertThat(response.photoUrl()).contains(S3Directory.POST_FOLDER.getPath())
 					.doesNotContain(S3Directory.TEMP_FOLDER.getPath()),
@@ -624,6 +641,7 @@ class PostServiceTest extends IntegrationTestSupport {
 	}
 
 	@TestFactory
+	@DisplayName("방명록 신고 시나리오")
 	Stream<DynamicTest> reportPost() {
 		// given
 		User writer = createUser("작성자");
@@ -641,7 +659,6 @@ class PostServiceTest extends IntegrationTestSupport {
 				// then
 				assertAll(
 					() -> assertEquals(report.getReporter(), reporter),
-					() -> assertEquals(report.getPost().getReportCount(), 1),
 					() -> assertEquals(report.getReason(), "불쾌감을 유발하는 사진입니다.")
 				);
 			}),
@@ -654,6 +671,43 @@ class PostServiceTest extends IntegrationTestSupport {
 				// when & then
 				assertThatThrownBy(() -> postService.report(post.getWriter().getId(), post.getId(), "이상한 사진입니다."))
 					.isInstanceOf(ApiException.class).hasMessage(PostErrorCode.CNA_NOT_REPORT_OWN_POST.getMessage());
+			})
+		);
+	}
+
+	@TestFactory
+	@DisplayName("신고 방명록 목록 조회 시나리오")
+	Stream<DynamicTest> getReportedPosts() {
+		// given
+		Spot spot = spotRepository.save(createSpot());
+		User writer = userRepository.save(createUser("작성자"));
+		User reporter = userRepository.save(createUser("신고자"));
+
+		return Stream.of(
+			dynamicTest("내가 신고한 방명록 목록을 조회한다.", () -> {
+				// given
+				Post post1 = postRepository.save(createPost(spot, writer));
+				Post post2 = postRepository.save(createPost(spot, writer));
+				reportRepository.save(post1.reportFrom(reporter, "불쾌한 사진"));
+				reportRepository.save(post2.reportFrom(reporter, "징그러운 사진"));
+
+				// when
+				var myReports = postService.getReports(reporter.getId());
+
+				// then
+				assertAll(
+					() -> assertThat(myReports).hasSize(2),
+					() -> assertThat(myReports.stream().map(ReportResponse::postId).toList()).containsExactly(
+						post1.getId(), post2.getId()),
+					() -> assertThat(myReports).allMatch(report -> report.spotAddress().equals(spot.getAddress()))
+				);
+			}),
+			dynamicTest("신고한 목록이 없으면 빈 리스트를 반환한다.", () -> {
+				// when
+				var emptyReports = postService.getReports(writer.getId());
+
+				// then
+				assertThat(emptyReports).isEmpty();
 			})
 		);
 	}
