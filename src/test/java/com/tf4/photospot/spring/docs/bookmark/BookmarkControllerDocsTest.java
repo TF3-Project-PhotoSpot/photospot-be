@@ -3,8 +3,11 @@ package com.tf4.photospot.spring.docs.bookmark;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.restdocs.payload.JsonFieldType;
@@ -12,9 +15,12 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.tf4.photospot.bookmark.application.BookmarkService;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
+import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
 import com.tf4.photospot.bookmark.presentation.BookmarkController;
 import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
+import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class BookmarkControllerDocsTest extends RestDocsSupport {
@@ -76,5 +82,47 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("id").type(JsonFieldType.NUMBER).description("북마크 id")
 				)
 			));
+	}
+
+	@Test
+	void getBookmarks() throws Exception {
+		//given
+		final BookmarkListResponse response = BookmarkListResponse.builder()
+			.bookmarks(List.of(BookmarkResponse.builder()
+				.id(1L)
+				.spotId(1L)
+				.name("북마크")
+				.description("설명")
+				.photoUrls(List.of("photoUrl1", "photoUrl2"))
+				.build()))
+			.hasNext(false)
+			.build();
+		given(bookmarkService.getBookmarks(any(ReadBookmarkRequest.class))).willReturn(response);
+		//when
+		mockMvc.perform(get("/api/v1/bookmarkFolders/{bookmarkFolderId}/bookmarks", 1L)
+				.queryParam("postPreviewCount", "5")
+				.queryParam("page", "0")
+				.queryParam("size", "10"))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				queryParameters(
+					parameterWithName("postPreviewCount").description("미리보기 사진 개수")
+						.optional().attributes(constraints("미리보기 사진은 1~10개만 가능합니다."), defaultValue(5)),
+					parameterWithName("page").description("페이지")
+						.optional().attributes(constraints("0부터 시작"), defaultValue(0)),
+					parameterWithName("size").description("페이지당 개수")
+						.optional().attributes(defaultValue(10))
+				),
+				responseFields(
+					fieldWithPath("bookmarks").type(JsonFieldType.ARRAY).description("주변 추천 스팟 리스트")
+						.attributes(defaultValue("emptyList")),
+					fieldWithPath("bookmarks[].id").type(JsonFieldType.NUMBER).description("북마크 ID"),
+					fieldWithPath("bookmarks[].spotId").type(JsonFieldType.NUMBER).description("스팟 ID"),
+					fieldWithPath("bookmarks[].name").type(JsonFieldType.STRING).description("북마크 이름"),
+					fieldWithPath("bookmarks[].description").type(JsonFieldType.STRING).description("북마크 설명"),
+					fieldWithPath("bookmarks[].photoUrls").type(JsonFieldType.ARRAY).description("최신 방명록 사진")
+						.attributes(defaultValue("emptyList")),
+					fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
+				)));
 	}
 }

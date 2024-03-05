@@ -184,4 +184,12 @@ public class TestFixture {
 			.color("color")
 			.build();
 	}
+
+	public static Bookmark createBookmark(BookmarkFolder bookmarkFolder, Spot spot) {
+		return Bookmark.builder()
+			.bookmarkFolder(bookmarkFolder)
+			.spot(spot)
+			.name("name")
+			.build();
+	}
 }
