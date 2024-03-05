@@ -22,3 +22,11 @@ include::{snippets}/bookmark-controller-docs-test/get-bookmarks/http-request.ado
 include::{snippets}/bookmark-controller-docs-test/get-bookmarks/query-parameters.adoc[]
 include::{snippets}/bookmark-controller-docs-test/get-bookmarks/response-body.adoc[]
 include::{snippets}/bookmark-controller-docs-test/get-bookmarks/response-fields.adoc[]
+
+=== 북마크 폴더 리스트 조회
+
+'''
+
+include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/http-request.adoc[]
+include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/response-body.adoc[]
+include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/response-fields.adoc[]
