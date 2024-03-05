@@ -17,6 +17,7 @@ import org.springframework.data.domain.Sort;
 
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
 import com.tf4.photospot.bookmark.domain.Bookmark;
@@ -65,7 +66,19 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 			dynamicTest("폴더를 생성한다", () ->
 				assertDoesNotThrow(() -> bookmarkService.createFolder(createBookmarkFolder))),
 			dynamicTest("폴더에 북마크를 추가한다", () ->
-				assertDoesNotThrow(() -> bookmarkService.addBookmark(createBookmark)))
+				assertDoesNotThrow(() -> bookmarkService.addBookmark(createBookmark))),
+			dynamicTest("폴더 리스트를 조회한다", () -> {
+				List<BookmarkFolderResponse> bookmarkFolderResponses = bookmarkService.getBookmarkFolders(user.getId());
+				assertThat(bookmarkFolderResponses.size()).isEqualTo(2);
+				assertThat(bookmarkFolderResponses.get(0)).satisfies(
+					response -> assertThat(response.id()).isEqualTo(bookmarkFolder.getId()),
+					response -> assertThat(response.name()).isEqualTo(bookmarkFolder.getName()),
+					response -> assertThat(response.description()).isEqualTo(bookmarkFolder.getDescription()),
+					response -> assertThat(response.bookmarkCount()).isEqualTo(bookmarkFolder.getTotalCount()),
+					response -> assertThat(response.color()).isEqualTo(bookmarkFolder.getColor()),
+					response -> assertThat(response.maxBookmarkCount()).isEqualTo(BookmarkFolder.MAX_BOOKMARKED)
+				);
+			})
 		);
 	}
 
