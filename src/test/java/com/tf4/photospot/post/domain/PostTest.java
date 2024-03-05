@@ -136,13 +136,9 @@ public class PostTest {
 	@Test
 	void reportFromTest() {
 		// when
-		Long beforeLikeCount = post.getReportCount();
 		Report report = post.reportFrom(otherUser, "신고 이유");
 
 		// then
-		assertAll(
-			() -> assertThat(report.getPost()).isEqualTo(post),
-			() -> assertThat(post.getReportCount()).isEqualTo(beforeLikeCount + 1)
-		);
+		assertThat(report.getPost()).isEqualTo(post);
 	}
 }

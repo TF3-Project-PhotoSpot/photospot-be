@@ -64,8 +64,6 @@ public class Post extends BaseEntity {
 
 	private Long likeCount;
 
-	private Long reportCount;
-
 	private boolean isPrivate;
 
 	private LocalDateTime deletedAt;
@@ -74,14 +72,12 @@ public class Post extends BaseEntity {
 	private Integer version;
 
 	@Builder
-	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount, Long reportCount,
-		boolean isPrivate) {
+	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount, boolean isPrivate) {
 		this.writer = writer;
 		this.photo = photo;
 		this.spot = spot;
 		this.detailAddress = detailAddress;
 		this.likeCount = likeCount == null ? 0L : likeCount;
-		this.reportCount = reportCount == null ? 0L : reportCount;
 		this.isPrivate = isPrivate;
 	}
 
@@ -127,7 +123,6 @@ public class Post extends BaseEntity {
 	}
 
 	public Report reportFrom(User reporter, String reason) {
-		reportCount++;
 		return new Report(reporter, this, reason);
 	}
 
