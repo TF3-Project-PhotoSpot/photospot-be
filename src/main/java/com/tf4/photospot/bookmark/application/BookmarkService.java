@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
 import com.tf4.photospot.bookmark.domain.Bookmark;
@@ -67,5 +68,11 @@ public class BookmarkService {
 			.bookmarks(bookmarkResponses)
 			.hasNext(bookmarks.hasNext())
 			.build();
+	}
+
+	public List<BookmarkFolderResponse> getBookmarkFolders(Long userId) {
+		return bookmarkQueryRepository.findBookmarkFolders(userId).stream()
+			.map(BookmarkFolderResponse::from)
+			.toList();
 	}
 }
