@@ -1,5 +1,6 @@
 package com.tf4.photospot.spot.application;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.data.domain.Slice;
@@ -43,8 +44,8 @@ public class SpotService {
 		if (recommendedSpots.isEmpty()) {
 			return RecommendedSpotListResponse.emptyResponse();
 		}
-		List<PostPreviewResponse> postPreviews = postJdbcRepository.findRecentlyPostThumbnailsInSpotIds(
-			recommendedSpots.stream().map(Spot::getId).toList(), request.postPreviewCount());
+		final List<PostPreviewResponse> postPreviews = getRecentPostPreviewsInSpots(recommendedSpots.getContent(),
+			request.postPreviewCount());
 		return RecommendedSpotListResponse.of(recommendedSpots, postPreviews);
 	}
 
@@ -67,5 +68,12 @@ public class SpotService {
 	public Spot getSpot(Long spotId) {
 		return spotRepository.findById(spotId)
 			.orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
+	}
+
+	public List<PostPreviewResponse> getRecentPostPreviewsInSpots(List<Spot> spots, int postPreviewCount) {
+		if (spots.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return postJdbcRepository.findRecentPostPreviewsInSpots(spots, postPreviewCount);
 	}
 }

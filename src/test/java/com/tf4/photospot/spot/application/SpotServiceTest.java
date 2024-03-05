@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.DynamicTest.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -246,5 +247,25 @@ class SpotServiceTest extends IntegrationTestSupport {
 			//then
 			assertThat(response.spots()).isEmpty();
 		}
+	}
+
+	@DisplayName("특정 스팟들의 최신 방명록 미리보기를 조회한다.")
+	@Test
+	void getPostPreviewsInSpots() {
+		//given
+		User user = createUser("이성빈");
+		final Spot spot1 = spotRepository.save(createSpot());
+		final Spot spot2 = spotRepository.save(createSpot());
+		postRepository.saveAll(createList(() -> createPost(spot1, user, createPhoto()), 5));
+		postRepository.saveAll(createList(() -> createPost(spot2, user, createPhoto()), 5));
+
+		//when
+		var postPreviewsGroupBySpot = spotService.getRecentPostPreviewsInSpots(List.of(spot1, spot2), 5)
+			.stream()
+			.collect(Collectors.groupingBy(PostPreviewResponse::spotId))
+			.values();
+		//then
+		assertThat(postPreviewsGroupBySpot).allSatisfy(postPreviews ->
+			assertThat(postPreviews).isSortedAccordingTo(comparingLong(PostPreviewResponse::postId).reversed()));
 	}
 }
