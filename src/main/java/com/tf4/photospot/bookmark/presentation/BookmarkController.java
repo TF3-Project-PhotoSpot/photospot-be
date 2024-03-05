@@ -20,6 +20,7 @@ import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
 import com.tf4.photospot.bookmark.presentation.response.AddBookmarkHttpResponse;
+import com.tf4.photospot.bookmark.presentation.response.BookmarkFolderListHttpResponse;
 import com.tf4.photospot.bookmark.presentation.response.CreateBookmarkFolderResponse;
 import com.tf4.photospot.global.argument.AuthUserId;
 
@@ -78,5 +79,12 @@ public class BookmarkController {
 			.pageable(pageRequest)
 			.build();
 		return bookmarkService.getBookmarks(request);
+	}
+
+	@GetMapping("/api/v1/bookmarkFolders")
+	public BookmarkFolderListHttpResponse getBookmarkFolders(
+		@AuthUserId Long userId
+	) {
+		return new BookmarkFolderListHttpResponse(bookmarkService.getBookmarkFolders(userId));
 	}
 }

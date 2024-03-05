@@ -15,6 +15,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.tf4.photospot.bookmark.application.BookmarkService;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
 import com.tf4.photospot.bookmark.presentation.BookmarkController;
@@ -123,6 +124,37 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("bookmarks[].photoUrls").type(JsonFieldType.ARRAY).description("최신 방명록 사진")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
+				)));
+	}
+
+	@Test
+	void getBookmarkFolders() throws Exception {
+		//given
+		final List<BookmarkFolderResponse> response = List.of(BookmarkFolderResponse.builder()
+			.id(1L)
+			.name("folderName")
+			.description("description")
+			.color("color")
+			.bookmarkCount(5)
+			.maxBookmarkCount(200)
+			.build());
+		given(bookmarkService.getBookmarkFolders(anyLong())).willReturn(response);
+		//when
+		mockMvc.perform(get("/api/v1/bookmarkFolders"))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(
+					fieldWithPath("bookmarkFolders").type(JsonFieldType.ARRAY).description("북마크 폴더 리스트")
+						.attributes(defaultValue("emptyList")),
+					fieldWithPath("bookmarkFolders[].id").type(JsonFieldType.NUMBER).description("북마크 폴더 ID"),
+					fieldWithPath("bookmarkFolders[].name").type(JsonFieldType.STRING).description("북마크 폴더 이름"),
+					fieldWithPath("bookmarkFolders[].description").type(JsonFieldType.STRING)
+						.description("북마크 폴더 설명").attributes(defaultValue("\"\"")),
+					fieldWithPath("bookmarkFolders[].color").type(JsonFieldType.STRING).description("북마크 폴더 색상"),
+					fieldWithPath("bookmarkFolders[].bookmarkCount").type(JsonFieldType.NUMBER)
+						.description("현재 북마크 개수"),
+					fieldWithPath("bookmarkFolders[].maxBookmarkCount").type(JsonFieldType.NUMBER)
+						.description("최대 북마크 개수")
 				)));
 	}
 }
