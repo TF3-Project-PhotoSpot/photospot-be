@@ -27,6 +27,7 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
@@ -247,5 +248,10 @@ public class PostService {
 				.iconUrl(tag.getIconUrl())
 				.build())
 			.toList();
+	}
+
+	public List<ReportResponse> getReports(Long userId) {
+		User user = findLoginUser(userId);
+		return postQueryRepository.findReports(user.getId());
 	}
 }
