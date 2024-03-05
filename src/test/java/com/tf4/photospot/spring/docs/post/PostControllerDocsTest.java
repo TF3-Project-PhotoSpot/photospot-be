@@ -23,6 +23,7 @@ import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.PostUpdateResponse;
+import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
@@ -454,6 +455,30 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.andDo(restDocsTemplate(
 				responseFields(
 					fieldWithPath("message").type(JsonFieldType.STRING).description("성공")
+				)
+			));
+	}
+
+	@Test
+	void getReports() throws Exception {
+		// given
+		var reports = List.of(
+			new ReportResponse(1L, 1L, "작성자1", "방명록1 스팟 주소", "불쾌한 사진"),
+			new ReportResponse(2L, 2L, "작성자2", "방명록2 스팟 주소", "징그러운 사진")
+		);
+		given(postService.getReports(anyLong())).willReturn(reports);
+
+		// when & then
+		mockMvc.perform(get("/api/v1/posts/reports"))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(
+					fieldWithPath("reports").type(JsonFieldType.ARRAY).description("사용자가 신고한 방명록 목록"),
+					fieldWithPath("reports[].postId").type(JsonFieldType.NUMBER).description("신고한 방명록 아이디"),
+					fieldWithPath("reports[].writerId").type(JsonFieldType.NUMBER).description("신고한 방명록 작성자 아이디"),
+					fieldWithPath("reports[].writerNickname").type(JsonFieldType.STRING).description("신고한 방명록 작성자 닉네임"),
+					fieldWithPath("reports[].spotAddress").type(JsonFieldType.STRING).description("신고한 방명록 스팟 주소"),
+					fieldWithPath("reports[].reason").type(JsonFieldType.STRING).description("신고 이유")
 				)
 			));
 	}

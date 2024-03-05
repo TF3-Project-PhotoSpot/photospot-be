@@ -110,6 +110,7 @@ include::{snippets}/post-controller-docs-test/delete-post/response-fields.adoc[]
 include::{snippets}/post-controller-docs-test/get-tags/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/get-tags/response-body.adoc[]
 include::{snippets}/post-controller-docs-test/get-tags/response-fields.adoc[]
+
 === 방명록 신고
 
 '''
@@ -117,3 +118,11 @@ include::{snippets}/post-controller-docs-test/get-tags/response-fields.adoc[]
 include::{snippets}/post-controller-docs-test/report-post/http-request.adoc[]
 include::{snippets}/post-controller-docs-test/report-post/request-body.adoc[]
 include::{snippets}/post-controller-docs-test/report-post/response-fields.adoc[]
+
+=== 방명록 신고 목록 조회
+
+'''
+
+include::{snippets}/post-controller-docs-test/get-reports/http-request.adoc[]
+include::{snippets}/post-controller-docs-test/get-reports/response-body.adoc[]
+include::{snippets}/post-controller-docs-test/get-reports/response-fields.adoc[]

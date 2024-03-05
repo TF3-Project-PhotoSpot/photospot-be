@@ -483,7 +483,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_방명록_내용_수정">방명록 내용 수정</a></li>
 <li><a href="#_방명록_상태_수정">방명록 상태 수정</a></li>
 <li><a href="#_방명록_삭제">방명록 삭제</a></li>
+<li><a href="#_태그_목록_조회">태그 목록 조회</a></li>
 <li><a href="#_방명록_신고">방명록 신고</a></li>
+<li><a href="#_방명록_신고_목록_조회">방명록 신고 목록 조회</a></li>
 </ul>
 </li>
 <li><a href="#_map_api">Map API</a>
@@ -1054,9 +1056,6 @@ Host: localhost:8080</code></pre>
 Authorization: refresh_token_value
 Host: localhost:8080</code></pre>
 </div>
-</div>
-<div class="paragraph">
-<p>Unresolved directive in api/auth/auth.adoc - include::/Users/ojeegu/coding/project/build/generated-snippets/auth-controller-docs-test/reissue-token/request-cookies.adoc[]</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
@@ -3137,7 +3136,6 @@ Host: localhost:8080</code></pre>
 </table>
 </div>
 </div>
-</div>
 <div class="sect2">
 <h3 id="_방명록_신고"><a class="link" href="#_방명록_신고">방명록 신고</a></h3>
 <hr>
@@ -3162,7 +3160,7 @@ Host: localhost:8080
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_21"><a class="link" href="#_response_fields_21">Response Fields</a></h4>
+<h4 id="_response_fields_22"><a class="link" href="#_response_fields_22">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3184,6 +3182,92 @@ Host: localhost:8080
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">성공</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_방명록_신고_목록_조회"><a class="link" href="#_방명록_신고_목록_조회">방명록 신고 목록 조회</a></h3>
+<hr>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/posts/reports HTTP/1.1
+Host: localhost:8080</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
+  "reports" : [ {
+    "postId" : 1,
+    "writerId" : 1,
+    "writerNickname" : "작성자1",
+    "spotAddress" : "방명록1 스팟 주소",
+    "reason" : "불쾌한 사진"
+  }, {
+    "postId" : 2,
+    "writerId" : 2,
+    "writerNickname" : "작성자2",
+    "spotAddress" : "방명록2 스팟 주소",
+    "reason" : "징그러운 사진"
+  } ]
+}</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_response_fields_23"><a class="link" href="#_response_fields_23">Response Fields</a></h4>
+<table class="tableblock frame-all grid-all stretch">
+<colgroup>
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+<col style="width: 25%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top">Path</th>
+<th class="tableblock halign-left valign-top">Type</th>
+<th class="tableblock halign-left valign-top">Default</th>
+<th class="tableblock halign-left valign-top">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reports</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Array</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">사용자가 신고한 방명록 목록</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reports[].postId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">신고한 방명록 아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reports[].writerId</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">신고한 방명록 작성자 아이디</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reports[].writerNickname</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">신고한 방명록 작성자 닉네임</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reports[].spotAddress</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">신고한 방명록 스팟 주소</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>reports[].reason</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">신고 이유</p></td>
 </tr>
 </tbody>
 </table>
@@ -3259,7 +3343,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_22"><a class="link" href="#_response_fields_22">Response Fields</a></h4>
+<h4 id="_response_fields_24"><a class="link" href="#_response_fields_24">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3386,7 +3470,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_23"><a class="link" href="#_response_fields_23">Response Fields</a></h4>
+<h4 id="_response_fields_25"><a class="link" href="#_response_fields_25">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3510,7 +3594,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_24"><a class="link" href="#_response_fields_24">Response Fields</a></h4>
+<h4 id="_response_fields_26"><a class="link" href="#_response_fields_26">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3645,7 +3729,7 @@ Host: localhost:8080
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_25"><a class="link" href="#_response_fields_25">Response Fields</a></h4>
+<h4 id="_response_fields_27"><a class="link" href="#_response_fields_27">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3696,7 +3780,7 @@ Host: localhost:8080
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_26"><a class="link" href="#_response_fields_26">Response Fields</a></h4>
+<h4 id="_response_fields_28"><a class="link" href="#_response_fields_28">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3815,7 +3899,7 @@ Host: localhost:8080</code></pre>
 </div>
 </div>
 <div class="sect3">
-<h4 id="_response_fields_27"><a class="link" href="#_response_fields_27">Response Fields</a></h4>
+<h4 id="_response_fields_29"><a class="link" href="#_response_fields_29">Response Fields</a></h4>
 <table class="tableblock frame-all grid-all stretch">
 <colgroup>
 <col style="width: 25%;">
@@ -3878,7 +3962,7 @@ Host: localhost:8080</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-03-02 00:13:21 +0900
+Last updated 2024-03-05 01:49:28 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
