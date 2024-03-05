@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.spot.domain.Spot;
 
 @Repository
 public class PostJdbcRepository {
@@ -22,9 +23,9 @@ public class PostJdbcRepository {
 	 *	스팟별로 파티션을 나눠서 최신 방명록을 postPreviewCount만큼 필터링합니다.
 	 * 	필터링이 된 방명록의 미리보기 정보(사진)를 가져옵니다.
 	 * */
-	public List<PostPreviewResponse> findRecentlyPostThumbnailsInSpotIds(List<Long> spotIds, int postPreviewCount) {
+	public List<PostPreviewResponse> findRecentPostPreviewsInSpots(List<Spot> spots, int postPreviewCount) {
 		MapSqlParameterSource params = new MapSqlParameterSource()
-			.addValue("spotIds", spotIds)
+			.addValue("spotIds", spots.stream().map(Spot::getId).toList())
 			.addValue("postPreviewCount", postPreviewCount);
 		return jdbcTemplate.query("""
 			select post.id as post_id, spot_id, photo_url
