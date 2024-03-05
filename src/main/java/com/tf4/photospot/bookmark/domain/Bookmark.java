@@ -42,4 +42,8 @@ public class Bookmark extends BaseEntity {
 		this.name = name;
 		this.description = description;
 	}
+
+	public Long getSpotId() {
+		return spot.getId();
+	}
 }

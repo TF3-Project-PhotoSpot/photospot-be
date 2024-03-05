@@ -1,17 +1,26 @@
 package com.tf4.photospot.bookmark.application;
 
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
+import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
 import com.tf4.photospot.bookmark.domain.Bookmark;
 import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.bookmark.domain.BookmarkFolderRepository;
 import com.tf4.photospot.bookmark.domain.BookmarkRepository;
 import com.tf4.photospot.bookmark.infrastructure.BookmarkQueryRepository;
+import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.BookmarkErrorCode;
+import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.user.application.UserService;
@@ -43,5 +52,20 @@ public class BookmarkService {
 		final Spot spot = spotService.getSpot(createBookmark.spotId());
 		final Bookmark bookmark = bookmarkFolder.add(createBookmark, spot);
 		return bookmarkRepository.save(bookmark).getId();
+	}
+
+	public BookmarkListResponse getBookmarks(ReadBookmarkRequest request) {
+		Slice<Bookmark> bookmarks = bookmarkQueryRepository.findBookmarksOfFolder(
+			request.bookmarkFolderId(), request.userId(), request.pageable());
+		final Map<Long, List<PostPreviewResponse>> postPreviewsGroupBySpot = spotService.getRecentPostPreviewsInSpots(
+				bookmarks.map(Bookmark::getSpot).toList(), request.postPreviewCount())
+			.stream()
+			.collect(Collectors.groupingBy(PostPreviewResponse::spotId));
+		final List<BookmarkResponse> bookmarkResponses = bookmarks.map(bookmark ->
+			BookmarkResponse.of(bookmark, postPreviewsGroupBySpot.get(bookmark.getSpotId()))).getContent();
+		return BookmarkListResponse.builder()
+			.bookmarks(bookmarkResponses)
+			.hasNext(bookmarks.hasNext())
+			.build();
 	}
 }
