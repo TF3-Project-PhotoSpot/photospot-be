@@ -79,9 +79,19 @@ public class BookmarkService {
 
 	@Transactional
 	public void removeBookmarks(Long bookmarkFolderId, Long userId, List<Long> bookmarkIds) {
-		final BookmarkFolder bookmarkFolder = bookmarkQueryRepository.findBookmarkFolder(bookmarkFolderId, userId)
-			.orElseThrow(() -> new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER));
+		final BookmarkFolder bookmarkFolder = getMyBookmarkFolder(bookmarkFolderId, userId);
 		final int removedBookmarkCount = bookmarkQueryRepository.deleteBookmarks(bookmarkFolder, bookmarkIds);
 		bookmarkFolder.decrease(removedBookmarkCount);
+	}
+
+	@Transactional
+	public void deleteBookmarkFolder(Long bookmarkFolderId, Long userId) {
+		final BookmarkFolder bookmarkFolder = getMyBookmarkFolder(bookmarkFolderId, userId);
+		bookmarkQueryRepository.deleteBookmarkFolder(bookmarkFolder);
+	}
+
+	private BookmarkFolder getMyBookmarkFolder(Long bookmarkFolderId, Long userId) {
+		return bookmarkQueryRepository.findBookmarkFolder(bookmarkFolderId, userId)
+			.orElseThrow(() -> new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER));
 	}
 }
