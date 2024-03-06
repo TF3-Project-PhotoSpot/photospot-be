@@ -7,8 +7,6 @@ import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.bookmark.domain.BookmarkFolderRepository;
 import com.tf4.photospot.bookmark.domain.BookmarkRepository;
 import com.tf4.photospot.bookmark.infrastructure.BookmarkQueryRepository;
-import com.tf4.photospot.global.exception.ApiException;
-import com.tf4.photospot.global.exception.domain.BookmarkErrorCode;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.domain.User;
 
@@ -23,9 +21,6 @@ public class BookmarkService {
 	private final BookmarkFolderRepository bookmarkFolderRepository;
 
 	public Long createFolder(CreateBookmarkFolder createBookmarkFolder) {
-		if (bookmarkQueryRepository.existsFolderName(createBookmarkFolder.userId(), createBookmarkFolder.name())) {
-			throw new ApiException(BookmarkErrorCode.EXISTS_FOLDER_NAME);
-		}
 		final User user = userService.getUser(createBookmarkFolder.userId());
 		final BookmarkFolder bookmarkFolder = createBookmarkFolder.create(user);
 		return bookmarkFolderRepository.save(bookmarkFolder).getId();
