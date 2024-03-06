@@ -5,6 +5,7 @@ import static com.tf4.photospot.bookmark.domain.QBookmarkFolder.*;
 import static com.tf4.photospot.spot.domain.QSpot.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -43,5 +44,18 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 
 	private static OrderSpecifier<Long> getBookmarkFolderOrder(Sort.Direction direction) {
 		return direction.isDescending() ? bookmarkFolder.id.desc() : bookmarkFolder.id.asc();
+	}
+
+	public Optional<BookmarkFolder> findBookmarkFolder(Long bookmarkFolderId, Long userId) {
+		return Optional.ofNullable(queryFactory.selectFrom(bookmarkFolder)
+			.where(bookmarkFolder.id.eq(bookmarkFolderId).and(bookmarkFolder.user.id.eq(userId)))
+			.fetchOne());
+	}
+
+	public int deleteBookmarks(BookmarkFolder bookmarkFolder, List<Long> bookmarkIds) {
+		final long deleted = queryFactory.delete(bookmark)
+			.where(bookmark.bookmarkFolder.eq(bookmarkFolder).and(bookmark.id.in(bookmarkIds)))
+			.execute();
+		return (int)deleted;
 	}
 }

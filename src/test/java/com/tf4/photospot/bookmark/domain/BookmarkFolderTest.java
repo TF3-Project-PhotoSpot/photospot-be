@@ -69,4 +69,33 @@ class BookmarkFolderTest {
 			.extracting("errorCode")
 			.isEqualTo(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
 	}
+
+	@DisplayName("북마크 개수를 감소시킨다.")
+	@Test
+	void decreaseBookmark() {
+		//given
+		final int totalCount = 10;
+		final int decreaseCount = 5;
+		var user = User.builder().id(1L).nickname("nickname").build();
+		var bookmarkFolder = BookmarkFolder.builder().user(user).name("name").totalCount(totalCount).build();
+		//when
+		bookmarkFolder.decrease(decreaseCount);
+		//then
+		assertThat(bookmarkFolder.getTotalCount()).isEqualTo(totalCount - decreaseCount);
+	}
+
+	@DisplayName("남아있는 북마크 개수 이상을 감소시키면 예외가 발생한다.")
+	@Test
+	void failDecreaseBookmark() {
+		//given
+		final int totalCount = 10;
+		final int decreaseCount = 15;
+		var user = User.builder().id(1L).nickname("nickname").build();
+		var bookmarkFolder = BookmarkFolder.builder().user(user).name("name").totalCount(totalCount).build();
+		//when
+		//then
+		assertThatThrownBy(() -> bookmarkFolder.decrease(decreaseCount))
+			.extracting("errorCode")
+			.isEqualTo(BookmarkErrorCode.CANNOT_DELETE_OVER_REMAINING_BOOKMARKS);
+	}
 }

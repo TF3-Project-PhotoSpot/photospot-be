@@ -2,14 +2,17 @@ package com.tf4.photospot.spring.docs.bookmark;
 
 import static org.mockito.BDDMockito.*;
 import static org.springframework.http.MediaType.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.delete;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.bookmark.application.BookmarkService;
@@ -23,6 +26,7 @@ import com.tf4.photospot.bookmark.presentation.BookmarkController;
 import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
+import com.tf4.photospot.bookmark.presentation.request.RemoveBookmarkHttpRequest;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class BookmarkControllerDocsTest extends RestDocsSupport {
@@ -159,5 +163,23 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 						.description("현재 북마크 개수"),
 					fieldWithPath("maxBookmarkCount").type(JsonFieldType.NUMBER).description("최대 북마크 개수")
 				)));
+	}
+
+	@Test
+	void removeBookmarks() throws Exception {
+		//given
+		RemoveBookmarkHttpRequest request = new RemoveBookmarkHttpRequest(List.of(1L, 2L));
+		willDoNothing().given(bookmarkService).removeBookmarks(anyLong(), anyLong(), anyList());
+		//when
+		mockMvc.perform(delete("/api/v1/bookmarkFolders/{bookmarkFolderId}/bookmarks", 1L)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(request))
+			)
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				requestFields(fieldWithPath("bookmarkIds").type(JsonFieldType.ARRAY).description("북마크 id 리스트")),
+				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
+			);
 	}
 }

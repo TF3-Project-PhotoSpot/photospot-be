@@ -30,3 +30,11 @@ include::{snippets}/bookmark-controller-docs-test/get-bookmarks/response-fields.
 include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/http-request.adoc[]
 include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/response-body.adoc[]
 include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/response-fields.adoc[]
+
+=== 북마크 삭제
+
+'''
+
+include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/http-request.adoc[]
+include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/response-body.adoc[]
+include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/response-fields.adoc[]
