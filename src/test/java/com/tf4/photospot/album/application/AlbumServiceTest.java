@@ -225,6 +225,11 @@ class AlbumServiceTest extends IntegrationTestSupport {
 		albumService.addPosts(List.of(post2.getId()), album2.getId(), user1.getId());
 
 		return Stream.of(
+			dynamicTest("앨범이 없으면 빈 리스트가 조회된다.", () -> {
+				//when
+				final User user3 = userRepository.save(createUser("user3"));
+				assertThat(albumService.getAlbums(user3.getId())).isEmpty();
+			}),
 			dynamicTest("앨범은 먼저 생성된 순서대로 조회한다.", () -> {
 				//when
 				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());

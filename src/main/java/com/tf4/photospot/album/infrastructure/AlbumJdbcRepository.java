@@ -1,5 +1,6 @@
 package com.tf4.photospot.album.infrastructure;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,16 +33,10 @@ public class AlbumJdbcRepository {
 	}
 
 	public List<AlbumPreviewResponse> getAlbumPreviews(Long userId) {
-		final List<AlbumPreviewResponse> albumPreviews = jdbcTemplate.query("""
-						select album.id, album.name
-						from album
-						join album_user on album.id = album_user.album_id
-						where album_user.user_id = :userId
-						order by album.id
-			""", new MapSqlParameterSource("userId", userId), (rs, row) -> AlbumPreviewResponse.builder()
-			.albumId(rs.getLong("id"))
-			.name(rs.getString("name"))
-			.build());
+		final List<AlbumPreviewResponse> albumPreviews = findAllAlbumPreviews(userId);
+		if (albumPreviews.isEmpty()) {
+			return Collections.emptyList();
+		}
 		final List<Long> albumIds = albumPreviews.stream().map(AlbumPreviewResponse::albumId).toList();
 		final Map<Long, AlbumPreviewResponse> albumPreviewsWithImage = new HashMap<>();
 		jdbcTemplate.query("""
@@ -70,5 +65,18 @@ public class AlbumJdbcRepository {
 		return albumPreviews.stream()
 			.map(albumPreview -> albumPreviewsWithImage.getOrDefault(albumPreview.albumId(), albumPreview))
 			.toList();
+	}
+
+	private List<AlbumPreviewResponse> findAllAlbumPreviews(Long userId) {
+		return jdbcTemplate.query("""
+						select album.id, album.name
+						from album
+						join album_user on album.id = album_user.album_id
+						where album_user.user_id = :userId
+						order by album.id
+			""", new MapSqlParameterSource("userId", userId), (rs, row) -> AlbumPreviewResponse.builder()
+			.albumId(rs.getLong("id"))
+			.name(rs.getString("name"))
+			.build());
 	}
 }
