@@ -112,4 +112,13 @@ public class BookmarkController {
 		bookmarkService.removeBookmarks(bookmarkFolderId, userId, request.bookmarkIds());
 		return ApiResponse.SUCCESS;
 	}
+
+	@DeleteMapping("/api/v1/bookmarkFolders/{bookmarkFolderId}")
+	public ApiResponse deleteBookmarkFolder(
+		@PathVariable(name = "bookmarkFolderId") Long bookmarkFolderId,
+		@AuthUserId Long userId
+	) {
+		bookmarkService.deleteBookmarkFolder(bookmarkFolderId, userId);
+		return ApiResponse.SUCCESS;
+	}
 }
