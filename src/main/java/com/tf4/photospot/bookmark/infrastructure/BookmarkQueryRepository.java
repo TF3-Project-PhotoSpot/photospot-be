@@ -58,4 +58,13 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 			.execute();
 		return (int)deleted;
 	}
+
+	public void deleteBookmarkFolder(BookmarkFolder folder) {
+		queryFactory.delete(bookmark)
+			.where(bookmark.bookmarkFolder.eq(folder))
+			.execute();
+		queryFactory.delete(bookmarkFolder)
+			.where(bookmarkFolder.eq(folder))
+			.execute();
+	}
 }

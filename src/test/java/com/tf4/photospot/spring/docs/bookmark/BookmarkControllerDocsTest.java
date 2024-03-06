@@ -182,4 +182,16 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
 			);
 	}
+
+	@Test
+	void deleteBookmarkFolder() throws Exception {
+		//given
+		willDoNothing().given(bookmarkService).deleteBookmarkFolder(anyLong(), anyLong());
+		//when
+		mockMvc.perform(delete("/api/v1/bookmarkFolders/{bookmarkFolderId}", 1L))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
+			);
+	}
 }
