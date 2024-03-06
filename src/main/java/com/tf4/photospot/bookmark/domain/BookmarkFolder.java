@@ -71,4 +71,11 @@ public class BookmarkFolder extends BaseEntity {
 			throw new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
 		}
 	}
+
+	public void decrease(final int deletedBookmarkCount) {
+		if (totalCount < deletedBookmarkCount) {
+			throw new ApiException(BookmarkErrorCode.CANNOT_DELETE_OVER_REMAINING_BOOKMARKS);
+		}
+		totalCount -= deletedBookmarkCount;
+	}
 }

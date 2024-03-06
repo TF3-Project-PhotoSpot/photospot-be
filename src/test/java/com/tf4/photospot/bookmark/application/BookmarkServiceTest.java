@@ -34,6 +34,7 @@ import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -44,6 +45,7 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 	private final BookmarkFolderRepository bookmarkFolderRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final PostRepository postRepository;
+	private final EntityManager em;
 
 	@DisplayName("북마크 폴더 테스트")
 	@TestFactory
@@ -85,6 +87,36 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 					response -> assertThat(response.bookmarkCount()).isEqualTo(bookmarkFolder.getTotalCount()),
 					response -> assertThat(response.color()).isEqualTo(bookmarkFolder.getColor())
 				);
+			}),
+			dynamicTest("폴더에 북마크를 삭제한다", () -> {
+				final BookmarkFolder folder = bookmarkFolderRepository.save(createBookmarkFolder(user, "folder"));
+				final Long bookmarkId = bookmarkService.addBookmark(CreateBookmark.builder()
+					.bookmarkFolderId(folder.getId())
+					.userId(user.getId())
+					.spotId(spot.getId())
+					.name("bookmarkFolder")
+					.build());
+				final Bookmark bookmark = bookmarkRepository.findById(bookmarkId).get();
+				bookmarkService.removeBookmarks(folder.getId(), user.getId(), List.of(bookmark.getId()));
+				em.flush();
+				em.clear();
+				assertThat(bookmarkFolderRepository.findById(folder.getId())).isPresent().get()
+					.satisfies(response -> assertThat(response.getTotalCount()).isZero());
+				assertThat(bookmarkRepository.findById(bookmark.getId())).isEmpty();
+			}),
+			dynamicTest("폴더 주인이 아니면 북마크를 삭제할 수 없다.", () -> {
+				final Spot spot1 = spotRepository.save(createSpot());
+				final Long bookmarkId = bookmarkService.addBookmark(CreateBookmark.builder()
+					.bookmarkFolderId(bookmarkFolder.getId())
+					.userId(user.getId())
+					.spotId(spot1.getId())
+					.name("bookmarkFolder")
+					.build());
+				final User otherUser = userRepository.save(createUser("user"));
+				assertThatThrownBy(() -> bookmarkService.removeBookmarks(bookmarkFolder.getId(), otherUser.getId(),
+					List.of(bookmarkId)))
+					.extracting("errorCode")
+					.isEqualTo(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
 			})
 		);
 	}
