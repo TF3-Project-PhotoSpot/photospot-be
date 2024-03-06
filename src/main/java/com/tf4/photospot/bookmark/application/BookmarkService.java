@@ -76,4 +76,12 @@ public class BookmarkService {
 			.map(BookmarkFolderResponse::from)
 			.toList();
 	}
+
+	@Transactional
+	public void removeBookmarks(Long bookmarkFolderId, Long userId, List<Long> bookmarkIds) {
+		final BookmarkFolder bookmarkFolder = bookmarkQueryRepository.findBookmarkFolder(bookmarkFolderId, userId)
+			.orElseThrow(() -> new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER));
+		final int removedBookmarkCount = bookmarkQueryRepository.deleteBookmarks(bookmarkFolder, bookmarkIds);
+		bookmarkFolder.decrease(removedBookmarkCount);
+	}
 }
