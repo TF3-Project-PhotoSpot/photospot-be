@@ -8,6 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,10 +26,12 @@ import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
+import com.tf4.photospot.bookmark.presentation.request.RemoveBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.response.AddBookmarkHttpResponse;
 import com.tf4.photospot.bookmark.presentation.response.BookmarkFolderListHttpResponse;
 import com.tf4.photospot.bookmark.presentation.response.CreateBookmarkFolderResponse;
 import com.tf4.photospot.global.argument.AuthUserId;
+import com.tf4.photospot.global.dto.ApiResponse;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -98,5 +101,15 @@ public class BookmarkController {
 			.bookmarkFolders(bookmarkFolders)
 			.maxBookmarkCount(BookmarkFolder.MAX_BOOKMARKED)
 			.build();
+	}
+
+	@DeleteMapping("/api/v1/bookmarkFolders/{bookmarkFolderId}/bookmarks")
+	public ApiResponse deleteBookmarks(
+		@PathVariable(name = "bookmarkFolderId") Long bookmarkFolderId,
+		@AuthUserId Long userId,
+		@RequestBody @Valid RemoveBookmarkHttpRequest request
+	) {
+		bookmarkService.removeBookmarks(bookmarkFolderId, userId, request.bookmarkIds());
+		return ApiResponse.SUCCESS;
 	}
 }
