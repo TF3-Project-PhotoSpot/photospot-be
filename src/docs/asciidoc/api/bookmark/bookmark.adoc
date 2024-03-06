@@ -38,3 +38,11 @@ include::{snippets}/bookmark-controller-docs-test/get-bookmark-folders/response-
 include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/http-request.adoc[]
 include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/response-body.adoc[]
 include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/response-fields.adoc[]
+
+=== 북마크 폴더 삭제
+
+'''
+
+include::{snippets}/bookmark-controller-docs-test/delete-bookmark-folder/http-request.adoc[]
+include::{snippets}/bookmark-controller-docs-test/delete-bookmark-folder/response-body.adoc[]
+include::{snippets}/bookmark-controller-docs-test/delete-bookmark-folder/response-fields.adoc[]

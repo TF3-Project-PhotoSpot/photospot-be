@@ -117,6 +117,18 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 					List.of(bookmarkId)))
 					.extracting("errorCode")
 					.isEqualTo(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
+			}),
+			dynamicTest("내 폴더만 삭제할 수 있다.", () -> {
+				final User otherUser = userRepository.save(createUser("user"));
+				assertThatThrownBy(() ->
+					bookmarkService.deleteBookmarkFolder(bookmarkFolder.getId(), otherUser.getId()))
+					.extracting("errorCode")
+					.isEqualTo(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
+			}),
+			dynamicTest("폴더를 삭제한다.", () -> {
+				assertDoesNotThrow(() -> bookmarkService.deleteBookmarkFolder(bookmarkFolder.getId(), user.getId()));
+				em.clear();
+				assertThat(bookmarkFolderRepository.findById(bookmarkFolder.getId())).isEmpty();
 			})
 		);
 	}
