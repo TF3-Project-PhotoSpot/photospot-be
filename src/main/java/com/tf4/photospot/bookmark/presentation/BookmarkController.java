@@ -56,7 +56,6 @@ public class BookmarkController {
 			.userId(userId)
 			.spotId(request.spotId())
 			.name(request.name())
-			.description(request.description())
 			.build()
 		);
 		return new AddBookmarkHttpResponse(bookmarkId);
