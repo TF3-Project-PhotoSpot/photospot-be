@@ -1,5 +1,8 @@
 package com.tf4.photospot.bookmark.presentation;
 
+import java.awt.print.Pageable;
+import java.util.List;
+
 import org.hibernate.validator.constraints.Range;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +19,9 @@ import com.tf4.photospot.bookmark.application.BookmarkService;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
+import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
+import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
+import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
@@ -83,8 +89,14 @@ public class BookmarkController {
 
 	@GetMapping("/api/v1/bookmarkFolders")
 	public BookmarkFolderListHttpResponse getBookmarkFolders(
-		@AuthUserId Long userId
+		@AuthUserId Long userId,
+		@RequestParam(name = "direction", defaultValue = "desc") String direction
 	) {
-		return new BookmarkFolderListHttpResponse(bookmarkService.getBookmarkFolders(userId));
+		final List<BookmarkFolderResponse> bookmarkFolders = bookmarkService.getBookmarkFolders(
+			ReadBookmarkFolderList.of(userId, direction));
+		return BookmarkFolderListHttpResponse.builder()
+			.bookmarkFolders(bookmarkFolders)
+			.maxBookmarkCount(BookmarkFolder.MAX_BOOKMARKED)
+			.build();
 	}
 }

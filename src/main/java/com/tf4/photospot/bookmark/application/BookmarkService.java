@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
@@ -70,8 +71,8 @@ public class BookmarkService {
 			.build();
 	}
 
-	public List<BookmarkFolderResponse> getBookmarkFolders(Long userId) {
-		return bookmarkQueryRepository.findBookmarkFolders(userId).stream()
+	public List<BookmarkFolderResponse> getBookmarkFolders(ReadBookmarkFolderList request) {
+		return bookmarkQueryRepository.findBookmarkFolders(request).stream()
 			.map(BookmarkFolderResponse::from)
 			.toList();
 	}

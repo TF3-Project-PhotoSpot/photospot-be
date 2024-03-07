@@ -9,8 +9,7 @@ public record BookmarkFolderResponse(
 	String name,
 	String description,
 	String color,
-	int bookmarkCount,
-	int maxBookmarkCount
+	int bookmarkCount
 ) {
 	@Builder
 	public BookmarkFolderResponse {
@@ -23,7 +22,6 @@ public record BookmarkFolderResponse(
 			.description(bookmarkFolder.getDescription())
 			.color(bookmarkFolder.getColor())
 			.bookmarkCount(bookmarkFolder.getTotalCount())
-			.maxBookmarkCount(BookmarkFolder.MAX_BOOKMARKED)
 			.build();
 	}
 }

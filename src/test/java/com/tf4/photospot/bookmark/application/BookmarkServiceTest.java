@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Sort;
 
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
@@ -62,21 +64,26 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 			.spotId(spot.getId())
 			.name("bookmarkFolder")
 			.build();
+		final ReadBookmarkFolderList readBookmarkFolderList = ReadBookmarkFolderList.builder()
+			.userId(user.getId())
+			.build();
 		return Stream.of(
 			dynamicTest("폴더를 생성한다", () ->
 				assertDoesNotThrow(() -> bookmarkService.createFolder(createBookmarkFolder))),
 			dynamicTest("폴더에 북마크를 추가한다", () ->
 				assertDoesNotThrow(() -> bookmarkService.addBookmark(createBookmark))),
 			dynamicTest("폴더 리스트를 조회한다", () -> {
-				List<BookmarkFolderResponse> bookmarkFolderResponses = bookmarkService.getBookmarkFolders(user.getId());
+				List<BookmarkFolderResponse> bookmarkFolderResponses = bookmarkService.getBookmarkFolders(
+					readBookmarkFolderList);
 				assertThat(bookmarkFolderResponses.size()).isEqualTo(2);
-				assertThat(bookmarkFolderResponses.get(0)).satisfies(
+				assertThat(bookmarkFolderResponses).isSortedAccordingTo(
+					Comparator.comparing(BookmarkFolderResponse::id).reversed());
+				assertThat(bookmarkFolderResponses.get(1)).satisfies(
 					response -> assertThat(response.id()).isEqualTo(bookmarkFolder.getId()),
 					response -> assertThat(response.name()).isEqualTo(bookmarkFolder.getName()),
 					response -> assertThat(response.description()).isEqualTo(bookmarkFolder.getDescription()),
 					response -> assertThat(response.bookmarkCount()).isEqualTo(bookmarkFolder.getTotalCount()),
-					response -> assertThat(response.color()).isEqualTo(bookmarkFolder.getColor()),
-					response -> assertThat(response.maxBookmarkCount()).isEqualTo(BookmarkFolder.MAX_BOOKMARKED)
+					response -> assertThat(response.color()).isEqualTo(bookmarkFolder.getColor())
 				);
 			})
 		);
