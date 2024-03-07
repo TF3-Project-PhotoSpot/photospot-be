@@ -112,7 +112,6 @@ public class TestFixture {
 		return Bookmark.builder()
 			.spot(spot)
 			.bookmarkFolder(bookmarkFolder)
-			.description("기본 폴더")
 			.build();
 	}
 

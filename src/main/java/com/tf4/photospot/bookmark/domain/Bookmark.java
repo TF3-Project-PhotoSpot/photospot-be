@@ -33,17 +33,18 @@ public class Bookmark extends BaseEntity {
 
 	private String name;
 
-	private String description;
-
 	@Builder
-	public Bookmark(Spot spot, BookmarkFolder bookmarkFolder, String name, String description) {
+	public Bookmark(Spot spot, BookmarkFolder bookmarkFolder, String name) {
 		this.spot = spot;
 		this.bookmarkFolder = bookmarkFolder;
 		this.name = name;
-		this.description = description;
 	}
 
 	public Long getSpotId() {
 		return spot.getId();
+	}
+
+	public String getSpotAddress() {
+		return spot.getAddress();
 	}
 }

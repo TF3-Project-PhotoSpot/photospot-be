@@ -1,6 +1,5 @@
 package com.tf4.photospot.spot.application;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.springframework.data.domain.Slice;
@@ -71,9 +70,6 @@ public class SpotService {
 	}
 
 	public List<PostPreviewResponse> getRecentPostPreviewsInSpots(List<Spot> spots, int postPreviewCount) {
-		if (spots.isEmpty()) {
-			return Collections.emptyList();
-		}
 		return postJdbcRepository.findRecentPostPreviewsInSpots(spots, postPreviewCount);
 	}
 }
