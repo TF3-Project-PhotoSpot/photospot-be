@@ -8,9 +8,12 @@ import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
 import com.tf4.photospot.bookmark.domain.Bookmark;
 import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.global.util.QueryDslUtils;
@@ -31,10 +34,14 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 		return orderBy(query, bookmark, pageable).toSlice(query, pageable);
 	}
 
-	public List<BookmarkFolder> findBookmarkFolders(Long userId) {
+	public List<BookmarkFolder> findBookmarkFolders(ReadBookmarkFolderList request) {
 		return queryFactory.selectFrom(bookmarkFolder)
-			.where(bookmarkFolder.user.id.eq(userId))
-			.orderBy(bookmarkFolder.id.asc())
+			.where(bookmarkFolder.user.id.eq(request.userId()))
+			.orderBy(getBookmarkFolderOrder(request.direction()))
 			.fetch();
+	}
+
+	private static OrderSpecifier<Long> getBookmarkFolderOrder(Sort.Direction direction) {
+		return direction.isDescending() ? bookmarkFolder.id.desc() : bookmarkFolder.id.asc();
 	}
 }

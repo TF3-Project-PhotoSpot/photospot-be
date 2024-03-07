@@ -15,6 +15,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import com.tf4.photospot.bookmark.application.BookmarkService;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
+import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
@@ -136,13 +137,16 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 			.description("description")
 			.color("color")
 			.bookmarkCount(5)
-			.maxBookmarkCount(200)
 			.build());
-		given(bookmarkService.getBookmarkFolders(anyLong())).willReturn(response);
+		given(bookmarkService.getBookmarkFolders(any(ReadBookmarkFolderList.class))).willReturn(response);
 		//when
-		mockMvc.perform(get("/api/v1/bookmarkFolders"))
+		mockMvc.perform(get("/api/v1/bookmarkFolders")
+				.queryParam("direction", "desc"))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
+				queryParameters(
+					parameterWithName("direction").description("정렬 방향").optional()
+						.attributes(constraints("asc, desc"), defaultValue("desc"))),
 				responseFields(
 					fieldWithPath("bookmarkFolders").type(JsonFieldType.ARRAY).description("북마크 폴더 리스트")
 						.attributes(defaultValue("emptyList")),
@@ -153,8 +157,7 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("bookmarkFolders[].color").type(JsonFieldType.STRING).description("북마크 폴더 색상"),
 					fieldWithPath("bookmarkFolders[].bookmarkCount").type(JsonFieldType.NUMBER)
 						.description("현재 북마크 개수"),
-					fieldWithPath("bookmarkFolders[].maxBookmarkCount").type(JsonFieldType.NUMBER)
-						.description("최대 북마크 개수")
+					fieldWithPath("maxBookmarkCount").type(JsonFieldType.NUMBER).description("최대 북마크 개수")
 				)));
 	}
 }
