@@ -13,7 +13,7 @@ public record BookmarkResponse(
 	Long id,
 	Long spotId,
 	String name,
-	String description,
+	String address,
 	List<String> photoUrls
 ) {
 	@Builder
@@ -25,7 +25,7 @@ public record BookmarkResponse(
 			.id(bookmark.getId())
 			.spotId(bookmark.getSpotId())
 			.name(bookmark.getName())
-			.description(bookmark.getDescription())
+			.address(bookmark.getSpotAddress())
 			.photoUrls(getPhotoUrls(postPreviewResponses))
 			.build();
 	}
