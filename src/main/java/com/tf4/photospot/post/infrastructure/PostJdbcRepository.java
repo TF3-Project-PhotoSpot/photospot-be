@@ -1,5 +1,6 @@
 package com.tf4.photospot.post.infrastructure;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -24,6 +25,9 @@ public class PostJdbcRepository {
 	 * 	필터링이 된 방명록의 미리보기 정보(사진)를 가져옵니다.
 	 * */
 	public List<PostPreviewResponse> findRecentPostPreviewsInSpots(List<Spot> spots, int postPreviewCount) {
+		if (spots.isEmpty()) {
+			return Collections.emptyList();
+		}
 		MapSqlParameterSource params = new MapSqlParameterSource()
 			.addValue("spotIds", spots.stream().map(Spot::getId).toList())
 			.addValue("postPreviewCount", postPreviewCount);

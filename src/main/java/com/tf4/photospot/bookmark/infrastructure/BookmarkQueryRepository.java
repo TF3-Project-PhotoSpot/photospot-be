@@ -2,6 +2,7 @@ package com.tf4.photospot.bookmark.infrastructure;
 
 import static com.tf4.photospot.bookmark.domain.QBookmark.*;
 import static com.tf4.photospot.bookmark.domain.QBookmarkFolder.*;
+import static com.tf4.photospot.spot.domain.QSpot.*;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -21,6 +22,7 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 	public Slice<Bookmark> findBookmarksOfFolder(Long bookmarkFolderId, Long userId, Pageable pageable) {
 		var query = queryFactory.select(bookmark)
 			.from(bookmark)
+			.join(bookmark.spot, spot).fetchJoin()
 			.join(bookmark.bookmarkFolder, bookmarkFolder)
 			.where(bookmarkFolder.id.eq(bookmarkFolderId).and(bookmarkFolder.user.id.eq(userId)));
 		return orderBy(query, bookmark, pageable).toSlice(query, pageable);

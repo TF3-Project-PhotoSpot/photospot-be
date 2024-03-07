@@ -11,15 +11,14 @@ public record CreateBookmark(
 	Long bookmarkFolderId,
 	Long userId,
 	Long spotId,
-	String name,
-	String description
+	String name
 ) {
-	private static final String EMPTY_DESCRIPTION = "";
+	private static final String EMPTY_NAME = "";
 
 	@Builder
 	public CreateBookmark {
-		if (StringUtils.isEmpty(description)) {
-			description = EMPTY_DESCRIPTION;
+		if (StringUtils.isEmpty(EMPTY_NAME)) {
+			name = EMPTY_NAME;
 		}
 	}
 
@@ -28,7 +27,6 @@ public record CreateBookmark(
 			.spot(spot)
 			.bookmarkFolder(bookmarkFolder)
 			.name(name)
-			.description(description)
 			.build();
 	}
 }

@@ -60,7 +60,6 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 			.userId(user.getId())
 			.spotId(spot.getId())
 			.name("bookmarkFolder")
-			.description("description")
 			.build();
 		return Stream.of(
 			dynamicTest("폴더를 생성한다", () ->

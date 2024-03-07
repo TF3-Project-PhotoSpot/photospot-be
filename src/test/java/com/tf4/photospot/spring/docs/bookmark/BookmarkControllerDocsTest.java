@@ -92,7 +92,7 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 				.id(1L)
 				.spotId(1L)
 				.name("북마크")
-				.description("설명")
+				.address("스팟 주소")
 				.photoUrls(List.of("photoUrl1", "photoUrl2"))
 				.build()))
 			.hasNext(false)
@@ -119,7 +119,7 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("bookmarks[].id").type(JsonFieldType.NUMBER).description("북마크 ID"),
 					fieldWithPath("bookmarks[].spotId").type(JsonFieldType.NUMBER).description("스팟 ID"),
 					fieldWithPath("bookmarks[].name").type(JsonFieldType.STRING).description("북마크 이름"),
-					fieldWithPath("bookmarks[].description").type(JsonFieldType.STRING).description("북마크 설명"),
+					fieldWithPath("bookmarks[].address").type(JsonFieldType.STRING).description("스팟 주소"),
 					fieldWithPath("bookmarks[].photoUrls").type(JsonFieldType.ARRAY).description("최신 방명록 사진")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
