@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
 import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
+import com.tf4.photospot.bookmark.application.response.BookmarkCoord;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
@@ -98,5 +99,9 @@ public class BookmarkService {
 			.orElseThrow(() -> new ApiException(BookmarkErrorCode.INVALID_BOOKMARK_FOLDER_ID));
 		bookmarkFolder.verifyMyBookmark(userId);
 		return bookmarkFolder;
+	}
+
+	public List<BookmarkCoord> getAllMyBookmarkCoord(Long userId) {
+		return bookmarkQueryRepository.findAllMyBookmarkCoord(userId);
 	}
 }

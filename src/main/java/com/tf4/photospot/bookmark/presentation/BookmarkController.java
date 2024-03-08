@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,6 +28,8 @@ import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpR
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
 import com.tf4.photospot.bookmark.presentation.request.RemoveBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.response.AddBookmarkHttpResponse;
+import com.tf4.photospot.bookmark.presentation.response.BookmarkCoordFolderHttpResponse;
+import com.tf4.photospot.bookmark.presentation.response.BookmarkCoordFolderListHttpResponse;
 import com.tf4.photospot.bookmark.presentation.response.BookmarkFolderListHttpResponse;
 import com.tf4.photospot.bookmark.presentation.response.CreateBookmarkFolderResponse;
 import com.tf4.photospot.global.argument.AuthUserId;
@@ -35,12 +38,13 @@ import com.tf4.photospot.global.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+@RequestMapping("/api/v1/bookmarkFolders")
 @RestController
 @RequiredArgsConstructor
 public class BookmarkController {
 	private final BookmarkService bookmarkService;
 
-	@PostMapping("/api/v1/bookmarkFolders")
+	@PostMapping
 	public CreateBookmarkFolderResponse createBookmarkFolder(
 		@AuthUserId Long userId,
 		@RequestBody @Valid CreateBookmarkFolderHttpRequest request
@@ -54,7 +58,7 @@ public class BookmarkController {
 		return new CreateBookmarkFolderResponse(bookmarkFolderId);
 	}
 
-	@PostMapping("/api/v1/bookmarkFolders/{bookmarkFolderId}/bookmarks")
+	@PostMapping("/{bookmarkFolderId}/bookmarks")
 	public AddBookmarkHttpResponse addBookmark(
 		@PathVariable(name = "bookmarkFolderId") Long bookmarkFolderId,
 		@AuthUserId Long userId,
@@ -70,7 +74,7 @@ public class BookmarkController {
 		return new AddBookmarkHttpResponse(bookmarkId);
 	}
 
-	@GetMapping("/api/v1/bookmarkFolders/{bookmarkFolderId}/bookmarks")
+	@GetMapping("/{bookmarkFolderId}/bookmarks")
 	public BookmarkListResponse getBookmarks(
 		@PathVariable(name = "bookmarkFolderId") Long bookmarkFolderId,
 		@AuthUserId Long userId,
@@ -89,7 +93,7 @@ public class BookmarkController {
 		return bookmarkService.getBookmarks(request);
 	}
 
-	@GetMapping("/api/v1/bookmarkFolders")
+	@GetMapping
 	public BookmarkFolderListHttpResponse getBookmarkFolders(
 		@AuthUserId Long userId,
 		@RequestParam(name = "direction", defaultValue = "desc") String direction
@@ -102,7 +106,7 @@ public class BookmarkController {
 			.build();
 	}
 
-	@DeleteMapping("/api/v1/bookmarkFolders/{bookmarkFolderId}/bookmarks")
+	@DeleteMapping("/{bookmarkFolderId}/bookmarks")
 	public ApiResponse deleteBookmarks(
 		@PathVariable(name = "bookmarkFolderId") Long bookmarkFolderId,
 		@AuthUserId Long userId,
@@ -112,12 +116,21 @@ public class BookmarkController {
 		return ApiResponse.SUCCESS;
 	}
 
-	@DeleteMapping("/api/v1/bookmarkFolders/{bookmarkFolderId}")
+	@DeleteMapping("/{bookmarkFolderId}")
 	public ApiResponse deleteBookmarkFolder(
 		@PathVariable(name = "bookmarkFolderId") Long bookmarkFolderId,
 		@AuthUserId Long userId
 	) {
 		bookmarkService.deleteBookmarkFolder(bookmarkFolderId, userId);
 		return ApiResponse.SUCCESS;
+	}
+
+	@GetMapping("/mine")
+	public BookmarkCoordFolderListHttpResponse getAllMyBookmarkCoord(
+		@AuthUserId Long userId
+	) {
+		final List<BookmarkCoordFolderHttpResponse> bookmarkFolders = BookmarkCoordFolderHttpResponse.from(
+			bookmarkService.getAllMyBookmarkCoord(userId));
+		return new BookmarkCoordFolderListHttpResponse(bookmarkFolders);
 	}
 }

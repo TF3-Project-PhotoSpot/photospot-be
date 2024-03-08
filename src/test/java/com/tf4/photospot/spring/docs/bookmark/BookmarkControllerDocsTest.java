@@ -12,6 +12,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.locationtech.jts.geom.Point;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
@@ -19,6 +20,7 @@ import com.tf4.photospot.bookmark.application.BookmarkService;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
 import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
+import com.tf4.photospot.bookmark.application.response.BookmarkCoord;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
@@ -27,9 +29,12 @@ import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
 import com.tf4.photospot.bookmark.presentation.request.RemoveBookmarkHttpRequest;
+import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class BookmarkControllerDocsTest extends RestDocsSupport {
+	private static final CoordinateDto DEFAULT_COORD = new CoordinateDto(127.0468177, 37.6676198);
+
 	private final BookmarkService bookmarkService = mock(BookmarkService.class);
 
 	@Override
@@ -193,5 +198,35 @@ public class BookmarkControllerDocsTest extends RestDocsSupport {
 			.andDo(restDocsTemplate(
 				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공")))
 			);
+	}
+
+	@Test
+	void getAllMyBookmarkCoord() throws Exception {
+		//given
+		final Point coord = DEFAULT_COORD.toCoord();
+		final List<BookmarkCoord> response = List.of(
+			new BookmarkCoord(1L, "color", 1L, 1L, coord),
+			new BookmarkCoord(1L, "color", 2L, 2L, coord),
+			new BookmarkCoord(2L, "color", 3L, 2L, coord)
+		);
+		given(bookmarkService.getAllMyBookmarkCoord(anyLong())).willReturn(response);
+		//when
+		mockMvc.perform(get("/api/v1/bookmarkFolders/mine"))
+			.andExpect(status().isOk())
+			.andDo(restDocsTemplate(
+				responseFields(
+					fieldWithPath("bookmarkFolders[].bookmarkFolderId").type(JsonFieldType.NUMBER)
+						.description("북마크 폴더 ID"),
+					fieldWithPath("bookmarkFolders[].color").type(JsonFieldType.STRING).description("북마크 폴더 색상"),
+					fieldWithPath("bookmarkFolders[].bookmarks[]").type(JsonFieldType.ARRAY).description("북마크 리스트"),
+					fieldWithPath("bookmarkFolders[].bookmarks[].bookmarkId").type(JsonFieldType.NUMBER)
+						.description("북마크 ID"),
+					fieldWithPath("bookmarkFolders[].bookmarks[].spotId").type(JsonFieldType.NUMBER)
+						.description("스팟 ID"),
+					fieldWithPath("bookmarkFolders[].bookmarks[].coord.lon").type(JsonFieldType.NUMBER)
+						.description("경도"),
+					fieldWithPath("bookmarkFolders[].bookmarks[].coord.lat").type(JsonFieldType.NUMBER)
+						.description("위도")
+				)));
 	}
 }
