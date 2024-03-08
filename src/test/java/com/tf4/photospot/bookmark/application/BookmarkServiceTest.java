@@ -27,6 +27,7 @@ import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.bookmark.domain.BookmarkFolderRepository;
 import com.tf4.photospot.bookmark.domain.BookmarkRepository;
 import com.tf4.photospot.bookmark.presentation.request.ReadBookmarkRequest;
+import com.tf4.photospot.global.exception.domain.BookmarkErrorCode;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
