@@ -17,6 +17,8 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
 import com.tf4.photospot.bookmark.domain.Bookmark;
 import com.tf4.photospot.bookmark.domain.BookmarkFolder;
+import com.tf4.photospot.global.exception.ApiException;
+import com.tf4.photospot.global.exception.domain.BookmarkErrorCode;
 import com.tf4.photospot.global.util.QueryDslUtils;
 
 import lombok.RequiredArgsConstructor;
@@ -46,9 +48,9 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 		return direction.isDescending() ? bookmarkFolder.id.desc() : bookmarkFolder.id.asc();
 	}
 
-	public Optional<BookmarkFolder> findBookmarkFolder(Long bookmarkFolderId, Long userId) {
+	public Optional<BookmarkFolder> findBookmarkFolder(Long bookmarkFolderId) {
 		return Optional.ofNullable(queryFactory.selectFrom(bookmarkFolder)
-			.where(bookmarkFolder.id.eq(bookmarkFolderId).and(bookmarkFolder.user.id.eq(userId)))
+			.where(bookmarkFolder.id.eq(bookmarkFolderId))
 			.fetchOne());
 	}
 
@@ -56,6 +58,9 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 		final long deleted = queryFactory.delete(bookmark)
 			.where(bookmark.bookmarkFolder.eq(bookmarkFolder).and(bookmark.id.in(bookmarkIds)))
 			.execute();
+		if (bookmarkIds.size() != deleted) {
+			throw new ApiException(BookmarkErrorCode.DELETED_BOOKMARKS_DO_NOT_MATCH);
+		}
 		return (int)deleted;
 	}
 
@@ -66,5 +71,13 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 		queryFactory.delete(bookmarkFolder)
 			.where(bookmarkFolder.eq(folder))
 			.execute();
+	}
+
+	public boolean existsBookmark(Long bookmarkFolderId, Long spotId) {
+		final Integer exists = queryFactory.selectOne()
+			.from(bookmark)
+			.where(bookmark.bookmarkFolder.id.eq(bookmarkFolderId).and(bookmark.spot.id.eq(spotId)))
+			.fetchFirst();
+		return exists != null;
 	}
 }
