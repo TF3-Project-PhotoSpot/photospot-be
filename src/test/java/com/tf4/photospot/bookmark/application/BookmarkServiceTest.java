@@ -1,5 +1,6 @@
 package com.tf4.photospot.bookmark.application;
 
+import static com.tf4.photospot.global.util.PointConverter.*;
 import static com.tf4.photospot.support.TestFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -7,6 +8,8 @@ import static org.junit.jupiter.api.DynamicTest.*;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
 import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
+import com.tf4.photospot.bookmark.application.response.BookmarkCoord;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.response.BookmarkResponse;
@@ -192,5 +196,38 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 			response -> assertThat(response.spotId()).isEqualTo(spot1.getId()),
 			response -> assertThat(response.photoUrls().size()).isEqualTo(5)
 		);
+	}
+
+	@DisplayName("내 모든 북마크 좌표를 조회한다.")
+	@Test
+	void getAllMyBookmarkCoord() {
+		//given
+		final User user = userRepository.save(createUser("이성빈"));
+		var bookmarkFolder1 = bookmarkFolderRepository.save(createBookmarkFolder(user, "folder1"));
+		var bookmarkFolder2 = bookmarkFolderRepository.save(createBookmarkFolder(user, "folder2"));
+		bookmarkFolderRepository.save(createBookmarkFolder(user, "folder3"));
+		var spot1 = spotRepository.save(createSpot());
+		var spot2 = spotRepository.save(createSpot());
+		var spot3 = spotRepository.save(createSpot());
+		bookmarkRepository.save(createBookmark(bookmarkFolder1, spot1));
+		bookmarkRepository.save(createBookmark(bookmarkFolder1, spot2));
+		bookmarkRepository.save(createBookmark(bookmarkFolder1, spot3));
+		final Bookmark bookmark2 = bookmarkRepository.save(createBookmark(bookmarkFolder2, spot2));
+		//when
+		final List<BookmarkCoord> response = bookmarkService.getAllMyBookmarkCoord(user.getId());
+
+		//then
+		final Optional<BookmarkCoord> bookmarkCoordOfbookmarkFolder2 = response.stream()
+			.filter(bookmarkCoord -> Objects.equals(bookmarkCoord.bookmarkFolderId(), bookmarkFolder2.getId()))
+			.findFirst();
+		assertThat(response.size()).isEqualTo(4);
+		assertThat(bookmarkCoordOfbookmarkFolder2).isPresent().get()
+			.satisfies(bookmarkCoord -> {
+				assertThat(bookmarkCoord.bookmarkFolderId()).isEqualTo(bookmarkFolder2.getId());
+				assertThat(bookmarkCoord.bookmarkFolderColor()).isEqualTo(bookmarkFolder2.getColor());
+				assertThat(bookmarkCoord.bookmarkId()).isEqualTo(bookmark2.getId());
+				assertThat(bookmarkCoord.spotId()).isEqualTo(spot2.getId());
+				assertThat(convert(bookmarkCoord.coord())).isEqualTo(convert(spot2.getCoord()));
+			});
 	}
 }
