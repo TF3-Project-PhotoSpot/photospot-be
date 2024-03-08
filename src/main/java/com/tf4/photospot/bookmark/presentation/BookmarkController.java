@@ -1,6 +1,5 @@
 package com.tf4.photospot.bookmark.presentation;
 
-import java.awt.print.Pageable;
 import java.util.List;
 
 import org.hibernate.validator.constraints.Range;
@@ -19,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tf4.photospot.bookmark.application.BookmarkService;
 import com.tf4.photospot.bookmark.application.request.CreateBookmark;
 import com.tf4.photospot.bookmark.application.request.CreateBookmarkFolder;
-import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
 import com.tf4.photospot.bookmark.application.response.BookmarkFolderResponse;
+import com.tf4.photospot.bookmark.application.response.BookmarkListResponse;
 import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.bookmark.presentation.request.AddBookmarkHttpRequest;
 import com.tf4.photospot.bookmark.presentation.request.CreateBookmarkFolderHttpRequest;
