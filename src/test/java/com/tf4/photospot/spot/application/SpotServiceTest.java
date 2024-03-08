@@ -265,7 +265,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 			.collect(Collectors.groupingBy(PostPreviewResponse::spotId))
 			.values();
 		//then
-		assertThat(postPreviewsGroupBySpot).allSatisfy(postPreviews ->
+		assertThat(postPreviewsGroupBySpot).isNotEmpty().allSatisfy(postPreviews ->
 			assertThat(postPreviews).isSortedAccordingTo(comparingLong(PostPreviewResponse::postId).reversed()));
 	}
 }
