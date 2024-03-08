@@ -98,4 +98,17 @@ class BookmarkFolderTest {
 			.extracting("errorCode")
 			.isEqualTo(BookmarkErrorCode.CANNOT_DELETE_OVER_REMAINING_BOOKMARKS);
 	}
+
+	@DisplayName("내 폴더인지 검증한다.")
+	@Test
+	void deleteOnlyMyBookmarkFolder() {
+		//given
+		var user = User.builder().id(1L).nickname("nickname").build();
+		var ohterUser = User.builder().id(2L).nickname("nickname").build();
+		var bookmarkFolder = BookmarkFolder.builder().user(user).name("name").build();
+		//when then
+		assertThatThrownBy(() -> bookmarkFolder.verifyMyBookmark(ohterUser.getId()))
+			.extracting("errorCode")
+			.isEqualTo(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
+	}
 }

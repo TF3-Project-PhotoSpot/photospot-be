@@ -51,6 +51,9 @@ public class BookmarkService {
 	public Long addBookmark(CreateBookmark createBookmark) {
 		final BookmarkFolder bookmarkFolder = bookmarkFolderRepository.findById(createBookmark.bookmarkFolderId())
 			.orElseThrow(() -> new ApiException(BookmarkErrorCode.INVALID_BOOKMARK_FOLDER_ID));
+		if (bookmarkQueryRepository.existsBookmark(createBookmark.bookmarkFolderId(), createBookmark.spotId())) {
+			throw new ApiException(BookmarkErrorCode.ALREADY_BOOKMARKED_IN_FOLDER);
+		}
 		final Spot spot = spotService.getSpot(createBookmark.spotId());
 		final Bookmark bookmark = bookmarkFolder.add(createBookmark, spot);
 		return bookmarkRepository.save(bookmark).getId();
@@ -91,7 +94,9 @@ public class BookmarkService {
 	}
 
 	private BookmarkFolder getMyBookmarkFolder(Long bookmarkFolderId, Long userId) {
-		return bookmarkQueryRepository.findBookmarkFolder(bookmarkFolderId, userId)
-			.orElseThrow(() -> new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER));
+		final BookmarkFolder bookmarkFolder = bookmarkQueryRepository.findBookmarkFolder(bookmarkFolderId)
+			.orElseThrow(() -> new ApiException(BookmarkErrorCode.INVALID_BOOKMARK_FOLDER_ID));
+		bookmarkFolder.verifyMyBookmark(userId);
+		return bookmarkFolder;
 	}
 }
