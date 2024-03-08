@@ -64,11 +64,9 @@ public class BookmarkFolder extends BaseEntity {
 	}
 
 	private void verifyBookmarkAddition(Long userId) {
+		verifyMyBookmark(userId);
 		if (totalCount == MAX_BOOKMARKED) {
 			throw new ApiException(BookmarkErrorCode.MAX_BOOKMARKED);
-		}
-		if (!user.isSame(userId)) {
-			throw new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
 		}
 	}
 
@@ -77,5 +75,12 @@ public class BookmarkFolder extends BaseEntity {
 			throw new ApiException(BookmarkErrorCode.CANNOT_DELETE_OVER_REMAINING_BOOKMARKS);
 		}
 		totalCount -= deletedBookmarkCount;
+	}
+
+	public void verifyMyBookmark(Long userId) {
+		if (user.isSame(userId)) {
+			return;
+		}
+		throw new ApiException(BookmarkErrorCode.NO_AUTHORITY_BOOKMARK_FOLDER);
 	}
 }

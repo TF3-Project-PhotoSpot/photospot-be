@@ -74,6 +74,10 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 				assertDoesNotThrow(() -> bookmarkService.createFolder(createBookmarkFolder))),
 			dynamicTest("폴더에 북마크를 추가한다", () ->
 				assertDoesNotThrow(() -> bookmarkService.addBookmark(createBookmark))),
+			dynamicTest("폴더에 북마크를 중복으로 추가할 수 없다", () ->
+				assertThatThrownBy(() -> bookmarkService.addBookmark(createBookmark))
+					.extracting("errorCode")
+					.isEqualTo(BookmarkErrorCode.ALREADY_BOOKMARKED_IN_FOLDER)),
 			dynamicTest("폴더 리스트를 조회한다", () -> {
 				List<BookmarkFolderResponse> bookmarkFolderResponses = bookmarkService.getBookmarkFolders(
 					readBookmarkFolderList);
@@ -103,6 +107,20 @@ class BookmarkServiceTest extends IntegrationTestSupport {
 				assertThat(bookmarkFolderRepository.findById(folder.getId())).isPresent().get()
 					.satisfies(response -> assertThat(response.getTotalCount()).isZero());
 				assertThat(bookmarkRepository.findById(bookmark.getId())).isEmpty();
+			}),
+			dynamicTest("삭제된 북마크 개수랑 요청 개수가 다르면 실패한다.", () -> {
+				final BookmarkFolder folder = bookmarkFolderRepository.save(createBookmarkFolder(user, "folder"));
+				final Long bookmarkId = bookmarkService.addBookmark(CreateBookmark.builder()
+					.bookmarkFolderId(folder.getId())
+					.userId(user.getId())
+					.spotId(spot.getId())
+					.name("bookmarkFolder")
+					.build());
+				final Bookmark bookmark = bookmarkRepository.findById(bookmarkId).get();
+				assertThatThrownBy(() -> bookmarkService.removeBookmarks(folder.getId(), user.getId(),
+					List.of(bookmark.getId(), 100L)))
+					.extracting("errorCode")
+					.isEqualTo(BookmarkErrorCode.DELETED_BOOKMARKS_DO_NOT_MATCH);
 			}),
 			dynamicTest("폴더 주인이 아니면 북마크를 삭제할 수 없다.", () -> {
 				final Spot spot1 = spotRepository.save(createSpot());
