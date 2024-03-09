@@ -1,5 +1,6 @@
 package com.tf4.photospot.spring.docs.auth;
 
+import static com.tf4.photospot.support.TestFixture.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.*;
 import static org.springframework.restdocs.headers.HeaderDocumentation.*;
@@ -53,6 +54,9 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@Test
 	@DisplayName("회원 탈퇴")
 	void unlinkUser() throws Exception {
+		// given
+		given(userService.getUser(anyLong())).willReturn(createUser("사용자"));
+
 		// when
 		mockMvc.perform(post("/api/v1/auth/unlink")
 				.header("Authorization", "Bearer access_token"))
@@ -60,7 +64,7 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 			.andDo(restDocsTemplate(
 				requestHeaders(headerWithName("Authorization").description("액세스 토큰")),
 				queryParameters(parameterWithName("isLinked").description("현재 계정 연결 상태").optional()
-					.attributes(constraints("기본적으로 true"), defaultValue(true))),
+					.attributes(defaultValue("true"))),
 				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공"))
 			));
 	}
