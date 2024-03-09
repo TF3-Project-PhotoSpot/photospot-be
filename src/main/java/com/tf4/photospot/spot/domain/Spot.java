@@ -45,7 +45,7 @@ public class Spot extends BaseEntity {
 	public Spot(String address, Point coord, Long postCount) {
 		this.address = address;
 		this.coord = coord;
-		this.postCount = postCount;
+		this.postCount = postCount == null ? 0L : postCount;
 	}
 
 	public void incPostCount() {
