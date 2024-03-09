@@ -43,8 +43,8 @@ public class SpotService {
 		if (recommendedSpots.isEmpty()) {
 			return RecommendedSpotListResponse.emptyResponse();
 		}
-		List<PostPreviewResponse> postPreviews = postJdbcRepository.findRecentlyPostThumbnailsInSpotIds(
-			recommendedSpots.stream().map(Spot::getId).toList(), request.postPreviewCount());
+		final List<PostPreviewResponse> postPreviews = getRecentPostPreviewsInSpots(recommendedSpots.getContent(),
+			request.postPreviewCount());
 		return RecommendedSpotListResponse.of(recommendedSpots, postPreviews);
 	}
 
@@ -62,5 +62,14 @@ public class SpotService {
 
 	public List<SpotCoordResponse> findSpotsOfMyPosts(Long userId) {
 		return spotQueryRepository.findSpotsOfMyPosts(userId);
+	}
+
+	public Spot getSpot(Long spotId) {
+		return spotRepository.findById(spotId)
+			.orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
+	}
+
+	public List<PostPreviewResponse> getRecentPostPreviewsInSpots(List<Spot> spots, int postPreviewCount) {
+		return postJdbcRepository.findRecentPostPreviewsInSpots(spots, postPreviewCount);
 	}
 }

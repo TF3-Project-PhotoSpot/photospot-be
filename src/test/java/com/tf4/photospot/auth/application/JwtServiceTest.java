@@ -46,7 +46,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 	@Test
 	void issueTokens() {
 		// given
-		User userInfo = new User("nickname", "kakao", "account");
+		User userInfo = createUser("nickname", "kakao", "account");
 		User savedUser = userRepository.save(userInfo);
 		String refreshToken = jwtService.issueRefreshToken(savedUser.getId());
 
@@ -107,7 +107,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Collection<DynamicTest> parseAccessToken() {
 		// given
-		User user = new User("nickname", "kakao", "account");
+		User user = createUser("nickname", "kakao", "account");
 		User savedUser = userRepository.save(user);
 		String accessToken = jwtService.issueAccessToken(savedUser.getId(), savedUser.getRole().getType());
 
@@ -176,7 +176,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Collection<DynamicTest> parseRefreshToken() {
 		// given
-		User user = new User("nickname", "kakao", "account");
+		User user = createUser("nickname", "kakao", "account");
 		User savedUser = userRepository.save(user);
 		String refreshToken = jwtService.issueRefreshToken(savedUser.getId());
 
@@ -229,7 +229,7 @@ public class JwtServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Collection<DynamicTest> validRefreshToken() {
 		// given
-		User user = new User("nickname", "kakao", "account");
+		User user = createUser("nickname", "kakao", "account");
 		User savedUser = userRepository.save(user);
 		String refreshToken = jwtService.issueRefreshToken(savedUser.getId());
 

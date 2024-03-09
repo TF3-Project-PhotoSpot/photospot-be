@@ -10,6 +10,8 @@ import java.util.stream.IntStream;
 import org.locationtech.jts.geom.Point;
 
 import com.tf4.photospot.album.domain.Album;
+import com.tf4.photospot.bookmark.domain.Bookmark;
+import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
 import com.tf4.photospot.photo.domain.Photo;
@@ -18,9 +20,7 @@ import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.domain.Tag;
-import com.tf4.photospot.spot.domain.BookmarkFolder;
 import com.tf4.photospot.spot.domain.Spot;
-import com.tf4.photospot.spot.domain.SpotBookmark;
 import com.tf4.photospot.user.domain.User;
 
 public class TestFixture {
@@ -108,12 +108,10 @@ public class TestFixture {
 		return createUser(nickname, null, null);
 	}
 
-	public static SpotBookmark createSpotBookmark(User user, Spot spot, BookmarkFolder bookmarkFolder) {
-		return SpotBookmark.builder()
-			.user(user)
+	public static Bookmark createSpotBookmark(User user, Spot spot, BookmarkFolder bookmarkFolder) {
+		return Bookmark.builder()
 			.spot(spot)
 			.bookmarkFolder(bookmarkFolder)
-			.description("기본 폴더")
 			.build();
 	}
 
@@ -175,5 +173,22 @@ public class TestFixture {
 
 	public static Album createAlbum() {
 		return new Album("album");
+	}
+
+	public static BookmarkFolder createBookmarkFolder(User user, String name) {
+		return BookmarkFolder.builder()
+			.user(user)
+			.name(name)
+			.description("description")
+			.color("color")
+			.build();
+	}
+
+	public static Bookmark createBookmark(BookmarkFolder bookmarkFolder, Spot spot) {
+		return Bookmark.builder()
+			.bookmarkFolder(bookmarkFolder)
+			.spot(spot)
+			.name("name")
+			.build();
 	}
 }

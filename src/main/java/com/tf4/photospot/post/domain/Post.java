@@ -72,8 +72,7 @@ public class Post extends BaseEntity {
 	private Integer version;
 
 	@Builder
-	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount,
-		boolean isPrivate) {
+	public Post(User writer, Photo photo, Spot spot, String detailAddress, long likeCount, boolean isPrivate) {
 		this.writer = writer;
 		this.photo = photo;
 		this.spot = spot;
@@ -113,10 +112,18 @@ public class Post extends BaseEntity {
 		this.isPrivate = status;
 	}
 
+	public boolean isWriter(User user) {
+		return this.writer.equals(user);
+	}
+
 	private void checkWriter(User user) {
-		if (!this.writer.equals(user)) {
+		if (!isWriter(user)) {
 			throw new ApiException(AuthErrorCode.PERMISSION_DENIED);
 		}
+	}
+
+	public Report reportFrom(User reporter, String reason) {
+		return new Report(reporter, this, reason);
 	}
 
 	public String getPhotoUrl() {

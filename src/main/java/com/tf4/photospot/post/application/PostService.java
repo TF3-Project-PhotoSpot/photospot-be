@@ -27,6 +27,7 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.PostUpdateResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
@@ -36,6 +37,8 @@ import com.tf4.photospot.post.domain.PostLikeRepository;
 import com.tf4.photospot.post.domain.PostRepository;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.domain.PostTagRepository;
+import com.tf4.photospot.post.domain.Report;
+import com.tf4.photospot.post.domain.ReportRepository;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
@@ -60,6 +63,7 @@ public class PostService {
 	private final UserRepository userRepository;
 	private final PostLikeRepository postLikeRepository;
 	private final S3Uploader s3Uploader;
+	private final ReportRepository reportRepository;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostSearchCondition postSearchCond) {
 		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(postSearchCond);
@@ -197,7 +201,6 @@ public class PostService {
 		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
 	}
 
-	// Todo : 방명록 존재하지 않는 스팟 바로바로 확인해서 삭제 해야 할지? 아니면 스케줄러?
 	@Transactional
 	public void delete(Long userId, Long postId) {
 		User loginUser = findLoginUser(userId);
@@ -205,6 +208,20 @@ public class PostService {
 		post.delete(loginUser);
 		postTagRepository.deleteByPostId(postId);
 		mentionRepository.deleteByPostId(postId);
+	}
+
+	@Transactional
+	public void report(Long userId, Long postId, String reason) {
+		User reporter = findLoginUser(userId);
+		Post post = findPost(postId);
+		if (postQueryRepository.existsReport(post, reporter)) {
+			throw new ApiException(PostErrorCode.ALREADY_REPORT);
+		}
+		if (post.isWriter(reporter)) {
+			throw new ApiException(PostErrorCode.CNA_NOT_REPORT_OWN_POST);
+		}
+		Report report = post.reportFrom(reporter, reason);
+		reportRepository.save(report);
 	}
 
 	private User findLoginUser(Long userId) {
@@ -231,5 +248,10 @@ public class PostService {
 				.iconUrl(tag.getIconUrl())
 				.build())
 			.toList();
+	}
+
+	public List<ReportResponse> getReports(Long userId) {
+		User user = findLoginUser(userId);
+		return postQueryRepository.findReports(user.getId());
 	}
 }

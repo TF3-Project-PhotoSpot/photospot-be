@@ -8,6 +8,9 @@ import static com.tf4.photospot.post.domain.QMention.*;
 import static com.tf4.photospot.post.domain.QPost.*;
 import static com.tf4.photospot.post.domain.QPostLike.*;
 import static com.tf4.photospot.post.domain.QPostTag.*;
+import static com.tf4.photospot.post.domain.QReport.*;
+import static com.tf4.photospot.spot.domain.QSpot.*;
+import static com.tf4.photospot.user.domain.QUser.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +31,8 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
 import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
+import com.tf4.photospot.post.application.response.QReportResponse;
+import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostLike;
@@ -54,7 +59,8 @@ public class PostQueryRepository extends QueryDslUtils {
 				photo.photoUrl
 			))
 			.from(post)
-			.join(post.photo, photo);
+			.join(post.photo, photo)
+			.leftJoin(report).on(report.post.eq(post).and(report.reporter.id.eq(cond.userId())));
 		if (searchType == PostSearchType.LIKE_POSTS) {
 			query.join(postLike).on(postLike.post.eq(post));
 		}
@@ -74,7 +80,8 @@ public class PostQueryRepository extends QueryDslUtils {
 			.from(post)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
-			.leftJoin(photo.bubble, bubble).fetchJoin();
+			.leftJoin(photo.bubble, bubble).fetchJoin()
+			.leftJoin(report).on(report.post.eq(post).and(report.reporter.id.eq(cond.userId())));
 		if (searchType == PostSearchType.LIKE_POSTS) {
 			query.join(postLike).on(postLike.post.eq(post));
 		} else {
@@ -127,19 +134,19 @@ public class PostQueryRepository extends QueryDslUtils {
 	}
 
 	private BooleanBuilder createPostSearchBuilder(PostSearchCondition cond) {
-		final BooleanBuilder searchBuilder = new BooleanBuilder(isNotDeleted());
+		final BooleanBuilder searchBuilder = new BooleanBuilder(isNotDeleted()).and(isNotReported());
 		switch (cond.type()) {
 			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
 			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond.userId()));
 			case LIKE_POSTS -> searchBuilder.and(equalsPostLike(cond.userId())).and(canVisible(cond.userId()));
-			case ALBUM_POSTS ->
-				searchBuilder.and(equalsAlbum(cond.albumId())).and(isPublicPost().or(albumUser.isNotNull()));
+			case ALBUM_POSTS -> searchBuilder.and(equalsAlbum(cond.albumId()))
+				.and((isPublicPost())).or(albumUser.isNotNull());
 		}
 		return searchBuilder;
 	}
 
 	private BooleanExpression canVisible(Long userId) {
-		return isPublicPost().or(equalsWriter(userId));
+		return (isPublicPost()).or(equalsWriter(userId));
 	}
 
 	private static BooleanExpression isPublicPost() {
@@ -148,6 +155,10 @@ public class PostQueryRepository extends QueryDslUtils {
 
 	private static BooleanExpression isNotDeleted() {
 		return post.deletedAt.isNull();
+	}
+
+	private static BooleanExpression isNotReported() {
+		return report.id.isNull();
 	}
 
 	private BooleanBuilder equalsPostLike(Long userId) {
@@ -181,7 +192,31 @@ public class PostQueryRepository extends QueryDslUtils {
 			.fetchOne());
 	}
 
+	public boolean existsReport(Post post, User user) {
+		final Integer exists = queryFactory.selectOne()
+			.from(report)
+			.where(report.post.eq(post).and(report.reporter.eq(user)))
+			.fetchFirst();
+		return exists != null;
+	}
+
 	public List<Tag> getTags() {
 		return tagRepository.findAll();
+	}
+
+	public List<ReportResponse> findReports(Long userId) {
+		return queryFactory.select(new QReportResponse(
+				post.id,
+				user.id,
+				user.nickname,
+				spot.address,
+				report.reason
+			))
+			.from(report)
+			.join(report.post, post)
+			.join(post.writer, user)
+			.join(post.spot, spot)
+			.where(report.reporter.id.eq(userId))
+			.fetch();
 	}
 }

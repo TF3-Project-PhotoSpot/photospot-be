@@ -162,7 +162,6 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("hasNext").type(JsonFieldType.BOOLEAN).description("다음 페이지 여부")
 				)));
-
 	}
 
 	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")

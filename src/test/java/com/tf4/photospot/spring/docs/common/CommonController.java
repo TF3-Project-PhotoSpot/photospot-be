@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tf4.photospot.global.argument.CoordinateValidator;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.ValidationError;
+import com.tf4.photospot.global.exception.domain.AlbumErrorCode;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.global.exception.domain.BookmarkErrorCode;
 import com.tf4.photospot.global.exception.domain.CommonErrorCode;
 import com.tf4.photospot.global.exception.domain.MapErrorCode;
+import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
 import com.tf4.photospot.global.exception.domain.SpotErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
@@ -50,9 +53,12 @@ public class CommonController {
 
 	protected static Map<String, ErrorCodeResponse> getErrorCodeResponseMap() {
 		var errorCodeGroups = Stream.of(
+			AlbumErrorCode.values(),
+			AuthErrorCode.values(),
+			BookmarkErrorCode.values(),
 			CommonErrorCode.values(),
 			MapErrorCode.values(),
-			AuthErrorCode.values(),
+			PostErrorCode.values(),
 			S3UploaderErrorCode.values(),
 			SpotErrorCode.values(),
 			UserErrorCode.values()

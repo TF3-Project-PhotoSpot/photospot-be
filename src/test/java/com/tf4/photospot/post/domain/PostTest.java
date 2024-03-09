@@ -132,4 +132,13 @@ public class PostTest {
 			})
 		);
 	}
+
+	@Test
+	void reportFromTest() {
+		// when
+		Report report = post.reportFrom(otherUser, "신고 이유");
+
+		// then
+		assertThat(report.getPost()).isEqualTo(post);
+	}
 }

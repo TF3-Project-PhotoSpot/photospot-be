@@ -1,11 +1,8 @@
 package com.tf4.photospot.user.domain;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.tf4.photospot.global.entity.BaseEntity;
-import com.tf4.photospot.spot.domain.BookmarkFolder;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,7 +10,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -30,9 +26,6 @@ public class User extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToMany(mappedBy = "user")
-	private List<BookmarkFolder> bookmarkFolders = new ArrayList<>();
-
 	private String nickname;
 
 	private String profileUrl;
@@ -47,7 +40,8 @@ public class User extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public User(String nickname, String providerType, String account) {
+	public User(Long id, String nickname, String providerType, String account) {
+		this.id = id;
 		this.nickname = nickname;
 		this.providerType = providerType;
 		this.account = account;
@@ -58,4 +52,7 @@ public class User extends BaseEntity {
 		this.profileUrl = profileUrl;
 	}
 
+	public boolean isSame(Long userId) {
+		return id.equals(userId);
+	}
 }
