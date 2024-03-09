@@ -29,8 +29,12 @@ import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostRepository;
+import com.tf4.photospot.post.domain.PostTagRepository;
+import com.tf4.photospot.post.domain.Tag;
+import com.tf4.photospot.post.domain.TagRepository;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.MostPostTagRank;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotResponse;
@@ -52,6 +56,8 @@ class SpotServiceTest extends IntegrationTestSupport {
 	private final UserRepository userRepository;
 	private final BookmarkRepository bookmarkRepository;
 	private final BookmarkFolderRepository bookmarkFolderRepository;
+	private final TagRepository tagRepository;
+	private final PostTagRepository postTagRepository;
 
 	@DisplayName("내가 쓴 방명록의 스팟 목록 조회")
 	@TestFactory
@@ -72,10 +78,8 @@ class SpotServiceTest extends IntegrationTestSupport {
 				userRepository.save(nonWriter);
 				assertThat(spotService.findSpotsOfMyPosts(nonWriter.getId())).isEmpty();
 			}),
-			dynamicTest("내가 쓴 방명록의 스팟을 조회한다.", () -> {
-				assertThatList(spotService.findSpotsOfMyPosts(writer.getId()))
-					.hasSize(totalSpot);
-			}),
+			dynamicTest("내가 쓴 방명록의 스팟을 조회한다.", () -> assertThatList(spotService.findSpotsOfMyPosts(writer.getId()))
+				.hasSize(totalSpot)),
 			dynamicTest("한 스팟에 여러 방명록을 써도 하나만 조회된다.", () -> {
 				final Spot spot = spots.get(0);
 				final List<Post> postsOfSameSpot = createList(() -> createPost(spot, writer), 3);
@@ -104,7 +108,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 		return Stream.of(
 			dynamicTest("스팟을 조회한다.", () -> {
 				//when
-				SpotResponse response = spotService.findSpot(searchCondition);
+				SpotResponse response = spotService.findSpot(searchCondition, 3);
 				//then
 				assertThat(response.id()).isEqualTo(spot.getId());
 				assertThat(response.address()).isEqualTo("address");
@@ -119,7 +123,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 				Bookmark spotBookmark = createSpotBookmark(user, spot, defaultBookmark);
 				bookmarkRepository.save(spotBookmark);
 				//when
-				SpotResponse response = spotService.findSpot(searchCondition);
+				SpotResponse response = spotService.findSpot(searchCondition, 3);
 				//then
 				assertThat(response.bookmarked()).isTrue();
 			}),
@@ -129,7 +133,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 					5);
 				postRepository.saveAll(posts);
 				//when
-				SpotResponse response = spotService.findSpot(searchCondition);
+				SpotResponse response = spotService.findSpot(searchCondition, 3);
 				//then
 				assertThat(response.previewResponses())
 					.isNotEmpty()
@@ -267,5 +271,35 @@ class SpotServiceTest extends IntegrationTestSupport {
 		//then
 		assertThat(postPreviewsGroupBySpot).isNotEmpty().allSatisfy(postPreviews ->
 			assertThat(postPreviews).isSortedAccordingTo(comparingLong(PostPreviewResponse::postId).reversed()));
+	}
+
+	@DisplayName("스팟의 태그 통계를 조회한다.")
+	@Test
+	void getMostPostTagRanks() {
+		//given
+		final Spot spot = spotRepository.save(createSpot());
+		User user = createUser("이성빈");
+		final List<Tag> tags = tagRepository.saveAll(createTags("tag1", "tag2", "tag3"));
+		final Post post1 = postRepository.save(createPost(spot, user));
+		final Post post2 = postRepository.save(createPost(spot, user));
+		final Post post3 = postRepository.save(createPost(spot, user));
+		// tag1 = 3, tag2 = 2, tag3 = 1
+		postTagRepository.saveAll(createPostTags(spot, post1, tags));
+		postTagRepository.saveAll(createPostTags(spot, post2, List.of(tags.get(0), tags.get(1))));
+		postTagRepository.save(createPostTag(spot, post3, tags.get(0)));
+		userRepository.save(user);
+		final PostSearchCondition searchCondition = PostSearchCondition.builder()
+			.spotId(spot.getId())
+			.userId(user.getId())
+			.type(PostSearchType.POSTS_OF_SPOT)
+			.pageable(PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "id")))
+			.build();
+		//when
+		final SpotResponse spotResponse = spotService.findSpot(searchCondition, 3);
+		//then
+		final List<MostPostTagRank> mostPostTagRanks = spotResponse.postTagCounts();
+		assertThat(mostPostTagRanks).isNotEmpty();
+		assertThat(mostPostTagRanks).extracting("name").containsExactly("tag1", "tag2", "tag3");
+		assertThat(mostPostTagRanks).extracting("count").containsExactly(3, 2, 1);
 	}
 }
