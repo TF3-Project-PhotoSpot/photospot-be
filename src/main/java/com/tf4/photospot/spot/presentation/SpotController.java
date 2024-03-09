@@ -25,6 +25,7 @@ import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.SpotResponse;
+import com.tf4.photospot.spot.presentation.request.FindSpotHttpRequest;
 import com.tf4.photospot.spot.presentation.response.RecommendedSpotHttpResponse;
 import com.tf4.photospot.spot.presentation.response.RecommendedSpotListHttpResponse;
 import com.tf4.photospot.spot.presentation.response.SpotHttpResponse;
@@ -75,9 +76,7 @@ public class SpotController {
 	public SpotHttpResponse getSpot(
 		@PathVariable(name = "spotId") Long spotId,
 		@ModelAttribute @Valid CoordinateDto startingCoord,
-		@RequestParam(name = "postPreviewCount", defaultValue = "5")
-		@Range(min = 1, max = 10, message = "미리보기 사진은 1~10개만 가능합니다.") Integer postPreviewCount,
-		@RequestParam(name = "distance", defaultValue = "true") Boolean requireDistance,
+		@ModelAttribute @Valid FindSpotHttpRequest request,
 		@AuthUserId Long userId
 	) {
 		Integer distance = 0;
@@ -85,11 +84,11 @@ public class SpotController {
 		PostSearchCondition postSearchCond = PostSearchCondition.builder()
 			.spotId(spotId)
 			.userId(userId)
-			.pageable(PageRequest.of(0, postPreviewCount, sortByLatest))
+			.pageable(PageRequest.of(0, request.postPreviewCount(), sortByLatest))
 			.type(PostSearchType.POSTS_OF_SPOT)
 			.build();
-		SpotResponse spotResponse = spotService.findSpot(postSearchCond);
-		if (requireDistance) {
+		SpotResponse spotResponse = spotService.findSpot(postSearchCond, request.mostPostTagCount());
+		if (request.requireDistance()) {
 			distance = mapService.searchDistanceBetween(startingCoord.toCoord(), spotResponse.coord());
 		}
 		return SpotHttpResponse.of(distance, spotResponse);

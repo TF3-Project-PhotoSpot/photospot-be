@@ -21,6 +21,7 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.SpotService;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.MostPostTagRank;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.NearbySpotResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
@@ -68,7 +69,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 		//given
 		SpotResponse spotResponse = createSpotResponse();
 		given(mapService.searchDistanceBetween(any(Point.class), any(Point.class))).willReturn(100);
-		given(spotService.findSpot(any(PostSearchCondition.class))).willReturn(spotResponse);
+		given(spotService.findSpot(any(PostSearchCondition.class), anyInt())).willReturn(spotResponse);
 		//when
 		mockMvc.perform(get("/api/v1/spots/{spotId}", spotResponse.id())
 				.queryParam("lon", String.valueOf(DEFAULT_COORD.lon()))
@@ -82,6 +83,8 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					parameterWithName("lon").description("경도").attributes(coordConstraints()),
 					parameterWithName("postPreviewCount").description("미리보기 사진 개수")
 						.optional().attributes(constraints("미리보기 사진은 1~10개만 가능합니다."), defaultValue(5)),
+					parameterWithName("mostPostTagCount").description("태그 통계 개수")
+						.optional().attributes(constraints("태그 통계는 1~5개만 가능합니다."), defaultValue(3)),
 					parameterWithName("distance").description("거리 정보 필요 여부")
 						.optional().attributes(defaultValue("true")),
 					parameterWithName("page").description("페이지")
@@ -96,6 +99,11 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("coord.lat").type(JsonFieldType.NUMBER).description("위도"),
 					fieldWithPath("coord.lon").type(JsonFieldType.NUMBER).description("경도"),
 					fieldWithPath("postCount").type(JsonFieldType.NUMBER).description("방명록 개수"),
+					fieldWithPath("tags").type(JsonFieldType.ARRAY).description("태그 통계"),
+					fieldWithPath("tags[].id").type(JsonFieldType.NUMBER).description("태그 ID"),
+					fieldWithPath("tags[].count").type(JsonFieldType.NUMBER).description("태그 개수"),
+					fieldWithPath("tags[].name").type(JsonFieldType.STRING).description("태그 이름"),
+					fieldWithPath("tags[].iconUrl").type(JsonFieldType.STRING).description("태그 아이콘 url"),
 					fieldWithPath("photoUrls").type(JsonFieldType.ARRAY).description("최신 방명록 사진")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("bookmarked").type(JsonFieldType.BOOLEAN).description("북마크 등록 여부")
@@ -111,6 +119,10 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 			.previewResponses(List.of(
 				new PostPreviewResponse(1L, 2L, "photoUrl2"),
 				new PostPreviewResponse(1L, 1L, "photoUrl1")))
+			.postTagCounts(List.of(
+				MostPostTagRank.builder().id(1L).count(5).name("tagName").iconUrl("iconUrl").build(),
+				MostPostTagRank.builder().id(2L).count(10).name("tagName2").iconUrl("iconUrl2").build()
+			))
 			.bookmarked(false)
 			.build();
 	}
@@ -167,7 +179,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 	@DisplayName("반경 내에 위치한 주변 스팟을 조회한다.")
 	@Test
 	void getNearbySpots() throws Exception {
-		//given
+		//give
 		given(spotService.getNearbySpotList(any(NearbySpotRequest.class))).willReturn(new NearbySpotListResponse(
 			List.of(new NearbySpotResponse(1L, DEFAULT_COORD))));
 		//when then
