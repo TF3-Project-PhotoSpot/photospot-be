@@ -248,6 +248,22 @@ class PostServiceTest extends IntegrationTestSupport {
 			var response = postService.getPostPreviews(postSearchCondition);
 			assertThat(response.content()).extracting(PostPreviewResponse::postId)
 				.containsExactly(like3.getPost().getId(), like2.getPost().getId(), like1.getPost().getId());
+		}), dynamicTest("내가 좋아요한 방명록 중 신고한 방명록은 조회 결과에서 제외된다.", () -> {
+			final User user = userRepository.save(createUser("user"));
+			int postLikeCount = 5;
+			List<Post> likedPosts = posts.subList(0, postLikeCount);
+			likedPosts.forEach(post -> postLikeRepository.save(createPostLike(post, user)));
+			reportRepository.save(likedPosts.get(0).reportFrom(user, "불쾌한 사진"));
+			final PostSearchCondition postSearchCondition = PostSearchCondition.builder()
+				.userId(user.getId())
+				.type(PostSearchType.LIKE_POSTS)
+				.pageable(PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "id")))
+				.build();
+			var response = postService.getPostPreviews(postSearchCondition);
+			assertThat(response.content().size()).isEqualTo(postLikeCount - 1);
+			assertThat(response.content().stream().map(PostPreviewResponse::postId).toList()).doesNotContain(
+				likedPosts.get(0).getId());
+			assertFalse(response.hasNext());
 		}));
 	}
 

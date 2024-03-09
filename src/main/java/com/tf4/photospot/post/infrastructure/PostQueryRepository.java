@@ -60,8 +60,7 @@ public class PostQueryRepository extends QueryDslUtils {
 			))
 			.from(post)
 			.join(post.photo, photo)
-			.leftJoin(report).on(report.post.eq(post).and(report.reporter.id.eq(cond.userId())))
-			.where(report.id.isNull());
+			.leftJoin(report).on(report.post.eq(post).and(report.reporter.id.eq(cond.userId())));
 		if (searchType == PostSearchType.LIKE_POSTS) {
 			query.join(postLike).on(postLike.post.eq(post));
 		}
@@ -82,8 +81,7 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin()
-			.leftJoin(report).on(report.post.eq(post).and(report.reporter.id.eq(cond.userId())))
-			.where(report.id.isNull());
+			.leftJoin(report).on(report.post.eq(post).and(report.reporter.id.eq(cond.userId())));
 		if (searchType == PostSearchType.LIKE_POSTS) {
 			query.join(postLike).on(postLike.post.eq(post));
 		} else {
@@ -136,7 +134,7 @@ public class PostQueryRepository extends QueryDslUtils {
 	}
 
 	private BooleanBuilder createPostSearchBuilder(PostSearchCondition cond) {
-		final BooleanBuilder searchBuilder = new BooleanBuilder(isNotDeleted());
+		final BooleanBuilder searchBuilder = new BooleanBuilder(isNotDeleted()).and(isNotReported());
 		switch (cond.type()) {
 			case MY_POSTS -> searchBuilder.and(equalsWriter(cond.userId()));
 			case POSTS_OF_SPOT -> searchBuilder.and(equalsSpot(cond.spotId())).and(canVisible(cond.userId()));
@@ -157,6 +155,10 @@ public class PostQueryRepository extends QueryDslUtils {
 
 	private static BooleanExpression isNotDeleted() {
 		return post.deletedAt.isNull();
+	}
+
+	private static BooleanExpression isNotReported() {
+		return report.id.isNull();
 	}
 
 	private BooleanBuilder equalsPostLike(Long userId) {

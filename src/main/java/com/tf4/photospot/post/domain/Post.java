@@ -72,12 +72,12 @@ public class Post extends BaseEntity {
 	private Integer version;
 
 	@Builder
-	public Post(User writer, Photo photo, Spot spot, String detailAddress, Long likeCount, boolean isPrivate) {
+	public Post(User writer, Photo photo, Spot spot, String detailAddress, long likeCount, boolean isPrivate) {
 		this.writer = writer;
 		this.photo = photo;
 		this.spot = spot;
 		this.detailAddress = detailAddress;
-		this.likeCount = likeCount == null ? 0L : likeCount;
+		this.likeCount = likeCount;
 		this.isPrivate = isPrivate;
 	}
 
