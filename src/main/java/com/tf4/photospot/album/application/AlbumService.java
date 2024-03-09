@@ -17,13 +17,12 @@ import com.tf4.photospot.album.infrastructure.AlbumQueryRepository;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AlbumErrorCode;
-import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.domain.User;
-import com.tf4.photospot.user.domain.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,7 +35,7 @@ public class AlbumService {
 	private final AlbumUserRepository albumUserRepository;
 	private final AlbumQueryRepository albumQueryRepository;
 	private final AlbumJdbcRepository albumJdbcRepository;
-	private final UserRepository userRepository;
+	private final UserService userService;
 
 	public SlicePageDto<PostPreviewResponse> getPostPreviewsOfAlbum(PostSearchCondition postSearchCond) {
 		validateAlbumUser(postSearchCond.albumId(), postSearchCond.userId());
@@ -50,8 +49,7 @@ public class AlbumService {
 
 	@Transactional
 	public Long create(Long userId, String albumName) {
-		final User user = userRepository.findById(userId)
-			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		final User user = userService.getUser(userId);
 		final Album album = new Album(albumName);
 		albumRepository.save(album);
 		albumUserRepository.save(new AlbumUser(user, album));

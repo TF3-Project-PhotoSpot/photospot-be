@@ -16,8 +16,7 @@ import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.config.jwt.JwtProperties;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
-import com.tf4.photospot.user.domain.User;
-import com.tf4.photospot.user.domain.UserRepository;
+import com.tf4.photospot.user.application.UserService;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -32,20 +31,20 @@ import io.jsonwebtoken.security.SecurityException;
 public class JwtService {
 	private final JwtRedisRepository jwtRedisRepository;
 	private final JwtProperties jwtProperties;
-	private final UserRepository userRepository;
+	private final UserService userService;
 
 	private final SecretKey key;
 
 	public JwtService(JwtRedisRepository jwtRedisRepository, JwtProperties jwtProperties,
-		UserRepository userRepository) {
+		UserService userService) {
 		this.jwtRedisRepository = jwtRedisRepository;
 		this.jwtProperties = jwtProperties;
-		this.userRepository = userRepository;
+		this.userService = userService;
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes(StandardCharsets.UTF_8));
 	}
 
 	public String issueAccessToken(Long userId, String authorities) {
-		return generateAccessToken(findUser(userId).getId(), authorities, new Date());
+		return generateAccessToken(userService.getUser(userId).getId(), authorities, new Date());
 	}
 
 	private String generateAccessToken(Long userId, String authorities, Date expiration) {
@@ -60,7 +59,7 @@ public class JwtService {
 	}
 
 	public String issueRefreshToken(Long userId) {
-		Long loginUserId = findUser(userId).getId();
+		Long loginUserId = userService.getUser(userId).getId();
 		String token = generateRefreshToken(loginUserId, new Date());
 		if (jwtRedisRepository.existsByUserId(loginUserId)) {
 			jwtRedisRepository.deleteByUserId(loginUserId);
@@ -124,9 +123,5 @@ public class JwtService {
 	private String removePrefix(String token) {
 		validateAccessToken(token);
 		return token.substring(JwtConstant.PREFIX.length());
-	}
-
-	private User findUser(Long userId) {
-		return userRepository.findById(userId).orElseThrow(() -> new ApiException(AuthErrorCode.NOT_FOUND_USER));
 	}
 }

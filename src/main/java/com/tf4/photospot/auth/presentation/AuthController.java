@@ -41,7 +41,7 @@ public class AuthController {
 		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String accessToken,
 		@RequestParam(name = "isLinked", defaultValue = "true") Boolean isLinked) {
 		if (Boolean.TRUE.equals(isLinked)) {
-			authService.unlinkKakaoAccount(userService.findAccountByUserId(userId));
+			authService.unlinkKakaoAccount(userService.getUser(userId).getAccount());
 		}
 		authService.deleteUser(userId, accessToken);
 		return ApiResponse.SUCCESS;
