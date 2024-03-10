@@ -2,7 +2,6 @@ package com.tf4.photospot.auth.presentation;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -41,7 +40,7 @@ public class AuthController {
 		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String accessToken,
 		@RequestParam(name = "isLinked", defaultValue = "true") Boolean isLinked) {
 		if (Boolean.TRUE.equals(isLinked)) {
-			authService.unlinkKakaoAccount(userService.getUser(userId).getAccount());
+			authService.unlinkKakaoAccount(userService.getActiveUser(userId).getAccount());
 		}
 		authService.deleteUser(userId, accessToken);
 		return ApiResponse.SUCCESS;
@@ -50,7 +49,9 @@ public class AuthController {
 	@GetMapping("/unlink/callback")
 	public void deleteUnlinkedKakaoUser(
 		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String adminKey,
-		@ModelAttribute KakaoUnlinkCallbackInfo kakaoUnlinkCallbackInfo) {
-		authService.deleteUnlinkedKakaoUser(adminKey, kakaoUnlinkCallbackInfo);
+		@RequestParam("app_id") String appId,
+		@RequestParam("user_id") String account,
+		@RequestParam("referer_type") String refererType) {
+		authService.deleteUnlinkedKakaoUser(adminKey, new KakaoUnlinkCallbackInfo(appId, account, refererType));
 	}
 }

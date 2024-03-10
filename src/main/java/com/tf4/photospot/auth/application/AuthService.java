@@ -11,6 +11,7 @@ import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.global.util.SlackAlert;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
 import com.tf4.photospot.user.application.response.OauthLoginResponse;
@@ -34,6 +35,7 @@ public class AuthService {
 	private final AppleService appleService;
 	private final KakaoService kakaoService;
 	private final UserService userService;
+	private final SlackAlert slackAlert;
 
 	private static final int NICKNAME_GENERATOR_RETRY_MAX = 5;
 
@@ -78,7 +80,7 @@ public class AuthService {
 
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
 		jwtService.validateRefreshToken(userId, refreshToken);
-		User user = userService.getUser(userId);
+		User user = userService.getActiveUser(userId);
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()),
 			jwtService.issueRefreshToken(user.getId()));
 	}
@@ -86,7 +88,7 @@ public class AuthService {
 	@Transactional
 	public void logout(String accessToken) {
 		Claims claims = jwtService.parseAccessToken(accessToken);
-		User user = userService.getUser(claims.get(JwtConstant.USER_ID, Long.class));
+		User user = userService.getActiveUser(claims.get(JwtConstant.USER_ID, Long.class));
 		jwtRedisRepository.saveAccessTokenInBlackList(accessToken, claims.getExpiration().getTime());
 		jwtRedisRepository.deleteByUserId(user.getId());
 	}
@@ -104,12 +106,11 @@ public class AuthService {
 
 	@Transactional
 	public void deleteUser(Long userId, String accessToken) {
-		User user = userService.getUser(userId);
-		userQueryRepository.deleteByUserId(user.getId());
+		User user = userService.getActiveUser(userId);
 		logout(accessToken);
+		userQueryRepository.deleteByUserId(user.getId());
 	}
 
-	// Todo : db 업데이트 실패했을 때 재시도하는 로직 추가?
 	@Transactional
 	public void deleteUnlinkedKakaoUser(String adminKey, KakaoUnlinkCallbackInfo info) {
 		kakaoService.validateRequest(adminKey, info.appId());
@@ -117,17 +118,14 @@ public class AuthService {
 			.ifPresentOrElse(user -> {
 				try {
 					userQueryRepository.deleteByUserId(user.getId());
-					createCallbackLog("성공", info, null);
+					jwtRedisRepository.deleteByUserId(user.getId());
 				} catch (Exception ex) {
-					createCallbackLog("실패", info, "DB 업데이트 과정에서 오류가 발생했습니다.");
+					sendKakaoCallbackFailureAlert(ex, info);
 				}
-			}, () -> createCallbackLog("실패", info, "존재하지 않거나 이미 탈퇴한 사용자입니다."));
+			}, () -> sendKakaoCallbackFailureAlert(new ApiException(AuthErrorCode.NOT_FOUND_USER), info));
 	}
 
-	private void createCallbackLog(String result, KakaoUnlinkCallbackInfo info, String reason) {
-		String baseMsg = String.format("카카오 연결 끊기 콜백 처리 %s, 사용자 계정 : %s, 요청 경로 : %s", result, info.account(),
-			info.refererType());
-		String fullMsg = reason != null ? baseMsg + ", 비고 : " + reason : baseMsg;
-		log.info(fullMsg);
+	private void sendKakaoCallbackFailureAlert(Exception ex, KakaoUnlinkCallbackInfo info) {
+		slackAlert.sendKakaoCallbackFailure(ex, info.account(), info.refererType());
 	}
 }
