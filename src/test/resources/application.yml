@@ -43,3 +43,6 @@ apple:
 jwt:
   issuer: test-issuer
   secret_key: testk24rlk24j4akfjaklfj3k3rj439841398sadkfjkefjkqefj44324230fskfjwkgjwlgkjw2lsfkjlefjwlkj50921ifkljfwdlkfjwlkfjdwlkfj
+
+slack:
+  url: slack_url/webhook
