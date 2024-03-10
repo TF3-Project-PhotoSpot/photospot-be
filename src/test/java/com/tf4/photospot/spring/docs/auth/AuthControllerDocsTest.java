@@ -55,7 +55,7 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@DisplayName("회원 탈퇴")
 	void unlinkUser() throws Exception {
 		// given
-		given(userService.getUser(anyLong())).willReturn(createUser("사용자"));
+		given(userService.getActiveUser(anyLong())).willReturn(createUser("사용자"));
 
 		// when
 		mockMvc.perform(post("/api/v1/auth/unlink")
