@@ -96,7 +96,7 @@ public class PostService {
 
 	@Transactional
 	public PostSaveResponse upload(PostUploadRequest request) {
-		User writer = userService.getUser(request.userId());
+		User writer = userService.getActiveUser(request.userId());
 		Spot spot = findSpotOrCreate(request.spotInfoDto());
 		// Todo : bubble
 		Photo photo = Photo.builder()
@@ -155,7 +155,7 @@ public class PostService {
 	@Retry
 	@Transactional
 	public void likePost(Long postId, Long userId) {
-		final User user = userService.getUser(userId);
+		final User user = userService.getActiveUser(userId);
 		final Post post = findPost(postId);
 		if (postQueryRepository.existsPostLike(post, user)) {
 			throw new ApiException(PostErrorCode.ALREADY_LIKE);
@@ -175,7 +175,7 @@ public class PostService {
 
 	@Transactional
 	public PostUpdateResponse update(PostUpdateRequest request) {
-		User loginUser = userService.getUser(request.userId());
+		User loginUser = userService.getActiveUser(request.userId());
 		Post post = findPost(request.postId());
 		post.updateDetailAddress(loginUser, request.detailAddress());
 		updatePostTags(post, request.tags());
@@ -195,7 +195,7 @@ public class PostService {
 
 	@Transactional
 	public PostUpdateResponse updatePrivacyState(Long userId, Long postId, boolean isPrivate) {
-		User loginUser = userService.getUser(userId);
+		User loginUser = userService.getActiveUser(userId);
 		Post post = findPost(postId);
 		post.updatePrivacyState(loginUser, isPrivate);
 		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
@@ -203,7 +203,7 @@ public class PostService {
 
 	@Transactional
 	public void delete(Long userId, Long postId) {
-		User loginUser = userService.getUser(userId);
+		User loginUser = userService.getActiveUser(userId);
 		Post post = findPost(postId);
 		post.delete(loginUser);
 		postTagRepository.deleteByPostId(postId);
@@ -212,7 +212,7 @@ public class PostService {
 
 	@Transactional
 	public void report(Long userId, Long postId, String reason) {
-		User reporter = userService.getUser(userId);
+		User reporter = userService.getActiveUser(userId);
 		Post post = findPost(postId);
 		if (postQueryRepository.existsReport(post, reporter)) {
 			throw new ApiException(PostErrorCode.ALREADY_REPORT);
@@ -247,7 +247,7 @@ public class PostService {
 	}
 
 	public List<ReportResponse> getReports(Long userId) {
-		User user = userService.getUser(userId);
+		User user = userService.getActiveUser(userId);
 		return postQueryRepository.findReports(user.getId());
 	}
 }

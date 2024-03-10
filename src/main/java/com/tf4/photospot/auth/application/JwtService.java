@@ -44,7 +44,7 @@ public class JwtService {
 	}
 
 	public String issueAccessToken(Long userId, String authorities) {
-		return generateAccessToken(userService.getUser(userId).getId(), authorities, new Date());
+		return generateAccessToken(userService.getActiveUser(userId).getId(), authorities, new Date());
 	}
 
 	private String generateAccessToken(Long userId, String authorities, Date expiration) {
@@ -59,7 +59,7 @@ public class JwtService {
 	}
 
 	public String issueRefreshToken(Long userId) {
-		Long loginUserId = userService.getUser(userId).getId();
+		Long loginUserId = userService.getActiveUser(userId).getId();
 		String token = generateRefreshToken(loginUserId, new Date());
 		if (jwtRedisRepository.existsByUserId(loginUserId)) {
 			jwtRedisRepository.deleteByUserId(loginUserId);

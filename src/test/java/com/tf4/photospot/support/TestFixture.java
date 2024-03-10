@@ -105,7 +105,7 @@ public class TestFixture {
 	}
 
 	public static User createUser(String nickname) {
-		return createUser(nickname, null, null);
+		return createUser(nickname, "123456", "kakao");
 	}
 
 	public static Bookmark createSpotBookmark(User user, Spot spot, BookmarkFolder bookmarkFolder) {

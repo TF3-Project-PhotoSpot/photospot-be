@@ -49,7 +49,7 @@ public class AlbumService {
 
 	@Transactional
 	public Long create(Long userId, String albumName) {
-		final User user = userService.getUser(userId);
+		final User user = userService.getActiveUser(userId);
 		final Album album = new Album(albumName);
 		albumRepository.save(album);
 		albumUserRepository.save(new AlbumUser(user, album));

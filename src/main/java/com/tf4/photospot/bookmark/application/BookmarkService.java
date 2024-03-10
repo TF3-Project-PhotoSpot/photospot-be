@@ -42,7 +42,7 @@ public class BookmarkService {
 
 	@Transactional
 	public Long createFolder(CreateBookmarkFolder createBookmarkFolder) {
-		final User user = userService.getUser(createBookmarkFolder.userId());
+		final User user = userService.getActiveUser(createBookmarkFolder.userId());
 		final BookmarkFolder bookmarkFolder = createBookmarkFolder.create(user);
 		return bookmarkFolderRepository.save(bookmarkFolder).getId();
 	}
