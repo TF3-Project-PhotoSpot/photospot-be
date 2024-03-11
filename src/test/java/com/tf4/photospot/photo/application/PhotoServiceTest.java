@@ -1,6 +1,7 @@
 package com.tf4.photospot.photo.application;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -32,14 +33,14 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 		var file = new MockMultipartFile("file", "test.webp", "image/webp", "<<webp data>>".getBytes());
 
 		return List.of(
-			DynamicTest.dynamicTest("사진 업로드에 성공한다", () -> {
+			dynamicTest("사진 업로드에 성공한다", () -> {
 				// when
 				String photoUrl = photoService.upload(file).photoUrl();
 
 				// then
 				assertThat(photoUrl).isEqualTo(mockS3Config.getDummyUrl());
 			}),
-			DynamicTest.dynamicTest("유효하지 않은 확장자 파일을 받으면 예외를 던진다.", () -> {
+			dynamicTest("유효하지 않은 확장자 파일을 받으면 예외를 던진다.", () -> {
 				// given
 				var gifFile = new MockMultipartFile("gif_file", "moving.gif", "image/gif", "<<gif data>>".getBytes());
 
@@ -47,62 +48,22 @@ public class PhotoServiceTest extends IntegrationTestSupport {
 				assertThatThrownBy(() -> photoService.upload(gifFile)).isInstanceOf(ApiException.class)
 					.hasMessage(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION.getMessage());
 			}),
-			DynamicTest.dynamicTest("비어있는 파일을 받으면 예외를 던진다.", () -> {
+			dynamicTest("비어있는 파일을 받으면 예외를 던진다.", () -> {
 				// given
 				var emptyFile = new MockMultipartFile("empty_file", "empty.webp", "image/webp", new byte[0]);
 
 				// when & then
 				assertThatThrownBy(() -> photoService.upload(emptyFile)).isInstanceOf(ApiException.class)
 					.hasMessage(S3UploaderErrorCode.EMPTY_FILE.getMessage());
+			}),
+			dynamicTest("파일명이 유효하지 않으면 예외를 던진다.", () -> {
+				// given
+				var invalidFile = new MockMultipartFile("invalid_file", null, "image/webp", "<<webp data>>".getBytes());
+
+				// when & then
+				assertThatThrownBy(() -> photoService.upload(invalidFile)).isInstanceOf(ApiException.class)
+					.hasMessage(S3UploaderErrorCode.INVALID_FILE_NAME.getMessage());
 			})
 		);
 	}
-
-	// @TestFactory
-	// @DisplayName("사진 저장 시나리오")
-	// Collection<DynamicTest> savePhoto() {
-	// 	// given
-	// 	var file = new MockMultipartFile("file", "test.webp", "image/webp", "<<webp data>>".getBytes());
-	// 	String photoUrl = photoService.upload(file).photoUrl();
-	// 	Point coord = new GeometryFactory().createPoint(new Coordinate(23.0, 45.0));
-	// 	coord.setSRID(4326);
-	// 	LocalDate date = LocalDate.now().minusDays(1);
-	//
-	// 	return List.of(
-	// 		DynamicTest.dynamicTest("S3 temp 폴더에 저장된 사진을 post_images 폴더로 옮기고 사진 정보를 db에 저장한다.", () -> {
-	// 			// when
-	// 			PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
-	// 			Long photoId = photoService.save(request).photoId();
-	// 			Photo savedPhoto = photoRepository.findById(photoId).get();
-	//
-	// 			// then
-	// 			assertAll(
-	// 				() -> assertThat(savedPhoto.getPhotoUrl()).doesNotContain(S3Directory.TEMP_FOLDER.getPath())
-	// 					.contains(S3Directory.POST_FOLDER.getPath()),
-	// 				() -> assertThat(savedPhoto.getPhotoUrl()).isEqualTo(mockS3Config.getDummyUrl()),
-	// 				() -> assertThat(savedPhoto.getTakenAt()).isEqualTo(date),
-	// 				() -> assertThat(savedPhoto.getCoord()).isEqualTo(coord)
-	// 			);
-	// 		}),
-	// 		DynamicTest.dynamicTest("파일 삭제 시 오류가 발생하는 경우 예외를 던진다", () -> {
-	// 			// when
-	// 			PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
-	// 			mockS3Config.mockThrowExceptionOnDelete();
-	//
-	// 			// then
-	// 			assertThatThrownBy(() -> photoService.save(request)).isInstanceOf(ApiException.class)
-	// 				.hasMessage(S3UploaderErrorCode.UNEXPECTED_DELETE_FAIL.getMessage());
-	// 		}),
-	// 		DynamicTest.dynamicTest("파일 복사 시 오류가 발생하는 경우 예외를 던진다", () -> {
-	// 			// when
-	// 			PhotoSaveRequest request = new PhotoSaveRequest(photoUrl, coord, date);
-	// 			mockS3Config.mockThrowExceptionOnCopy();
-	//
-	// 			// then
-	// 			assertThatThrownBy(() -> photoService.save(request)).isInstanceOf(ApiException.class)
-	// 				.hasMessage(S3UploaderErrorCode.UNEXPECTED_COPY_FAIL.getMessage());
-	// 		})
-	// 	);
-	// }
-
 }
