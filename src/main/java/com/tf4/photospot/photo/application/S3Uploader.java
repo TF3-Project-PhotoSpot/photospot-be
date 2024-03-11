@@ -52,7 +52,7 @@ public class S3Uploader {
 	}
 
 	private void validFileNotEmpty(MultipartFile file) {
-		if (file.isEmpty()) {
+		if (file == null || file.isEmpty()) {
 			throw new ApiException(S3UploaderErrorCode.EMPTY_FILE);
 		}
 	}
