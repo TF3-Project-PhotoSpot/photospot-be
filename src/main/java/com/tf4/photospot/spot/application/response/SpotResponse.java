@@ -15,7 +15,7 @@ public record SpotResponse(
 	Point coord,
 	Long postCount,
 	Boolean bookmarked,
-	List<MostPostTagRank> postTagCounts,
+	List<MostPostTagRank> mostPostTagRanks,
 	List<PostPreviewResponse> previewResponses
 ) {
 	@Builder

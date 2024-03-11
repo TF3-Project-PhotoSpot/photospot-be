@@ -297,7 +297,7 @@ class SpotServiceTest extends IntegrationTestSupport {
 		//when
 		final SpotResponse spotResponse = spotService.findSpot(searchCondition, 3);
 		//then
-		final List<MostPostTagRank> mostPostTagRanks = spotResponse.postTagCounts();
+		final List<MostPostTagRank> mostPostTagRanks = spotResponse.mostPostTagRanks();
 		assertThat(mostPostTagRanks).isNotEmpty();
 		assertThat(mostPostTagRanks).extracting("name").containsExactly("tag1", "tag2", "tag3");
 		assertThat(mostPostTagRanks).extracting("count").containsExactly(3, 2, 1);
