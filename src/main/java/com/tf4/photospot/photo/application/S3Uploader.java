@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.tf4.photospot.global.exception.ApiException;
@@ -53,6 +54,9 @@ public class S3Uploader {
 	private String validFileAndGetFileName(MultipartFile file) {
 		if (file == null || file.isEmpty()) {
 			throw new ApiException(S3UploaderErrorCode.EMPTY_FILE);
+		}
+		if (!StringUtils.hasText(file.getOriginalFilename())) {
+			throw new ApiException(S3UploaderErrorCode.INVALID_FILE_NAME);
 		}
 		return file.getOriginalFilename();
 	}

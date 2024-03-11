@@ -1,6 +1,7 @@
 package com.tf4.photospot.photo.application;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.DynamicTest.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +32,7 @@ public class S3UploaderTest extends IntegrationTestSupport {
 		var file = new MockMultipartFile("file", "example.webp", "image/webp", "<<webp data>>".getBytes());
 
 		return List.of(
-			DynamicTest.dynamicTest("방명록 사진을 업로드하는 경우 temp 폴더에 저장한다.", () -> {
+			dynamicTest("방명록 사진을 업로드하는 경우 temp 폴더에 저장한다.", () -> {
 				// given
 				String folder = S3Directory.TEMP_FOLDER.getFolder();
 
@@ -43,7 +44,7 @@ public class S3UploaderTest extends IntegrationTestSupport {
 					.doesNotContain(S3Directory.PROFILE_FOLDER.getPath())
 					.doesNotContain(S3Directory.POST_FOLDER.getPath());
 			}),
-			DynamicTest.dynamicTest("프로필 사진을 업로드하는 경우 profile 폴더에 저장한다.", () -> {
+			dynamicTest("프로필 사진을 업로드하는 경우 profile 폴더에 저장한다.", () -> {
 				//given
 				String folder = S3Directory.PROFILE_FOLDER.getFolder();
 
