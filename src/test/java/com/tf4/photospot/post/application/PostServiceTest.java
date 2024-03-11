@@ -26,11 +26,11 @@ import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.mockobject.MockS3Config;
+import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
-import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.ReportResponse;
@@ -47,9 +47,10 @@ import com.tf4.photospot.post.domain.Report;
 import com.tf4.photospot.post.domain.ReportRepository;
 import com.tf4.photospot.post.domain.Tag;
 import com.tf4.photospot.post.domain.TagRepository;
+import com.tf4.photospot.post.presentation.request.BubbleInfoDto;
 import com.tf4.photospot.post.presentation.request.PhotoInfoDto;
 import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
-import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
+import com.tf4.photospot.post.presentation.request.PostUploadRequest;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
@@ -279,8 +280,9 @@ class PostServiceTest extends IntegrationTestSupport {
 		// Dummy posts
 		List<Post> posts = createList(() -> createPost(spot, writer), 15);
 		postRepository.saveAll(posts);
-		// 마지막에 추가된 포스트는 태그, 좋아요 정보를 가지고 있다.
-		Post lastPost = createPost(spot, writer, createPhoto("firstPhotoUrl"));
+		// 마지막에 추가된 포스트는 사진 버블, 태그, 좋아요 정보를 가지고 있다.
+		Photo photoWithBubble = createPhotoWithBubble("firstPhotoUrl", "이미지 버블", 100, 200);
+		Post lastPost = createPost(spot, writer, photoWithBubble);
 		postRepository.save(lastPost);
 		List<Tag> tags = tagRepository.saveAll(createTags("tagA", "tagB", "tagC"));
 		postTagRepository.saveAll(createPostTags(spot, lastPost, tags));
@@ -309,18 +311,22 @@ class PostServiceTest extends IntegrationTestSupport {
 			assertThat(firstResponse.content().size()).isEqualTo(firstPageRequest.pageable().getPageSize());
 			assertThat(lastResponse.hasNext()).isFalse();
 			assertThat(lastResponse.content().size()).isLessThan(lastPageRequest.pageable().getPageSize());
-		}), dynamicTest("태그, 좋아요 정보를 조회할 수 있다.", () -> {
+		}), dynamicTest("버블, 태그, 좋아요 정보를 조회할 수 있다.", () -> {
 			//when
 			SlicePageDto<PostDetailResponse> response = postService.getPosts(firstPageRequest);
 			//then
-			PostDetailResponse postWithTagAndLikeStatus = response.content().get(0);
-			PostDetailResponse postWithoutTagAndLikeStatus = response.content().get(1);
-			assertThat(postWithTagAndLikeStatus.writer().id()).isEqualTo(writer.getId());
-			assertThat(postWithTagAndLikeStatus.tags()).extracting("tagName").containsExactly("tagA", "tagB", "tagC");
-			assertThat(postWithTagAndLikeStatus.isLiked()).isTrue();
-			assertThat(postWithTagAndLikeStatus.photoUrl()).isNotBlank();
-			assertThat(postWithoutTagAndLikeStatus.tags()).isEmpty();
-			assertThat(postWithoutTagAndLikeStatus.isLiked()).isFalse();
+			PostDetailResponse postWithExtraInfo = response.content().get(0);
+			PostDetailResponse postWithoutAnyInfo = response.content().get(1);
+			assertThat(postWithExtraInfo.writer().id()).isEqualTo(writer.getId());
+			assertThat(postWithExtraInfo.tags()).extracting("tagName").containsExactly("tagA", "tagB", "tagC");
+			assertThat(postWithExtraInfo.isLiked()).isTrue();
+			assertThat(postWithExtraInfo.photoUrl()).isNotBlank();
+			assertThat(postWithExtraInfo.bubble().text()).isEqualTo("이미지 버블");
+			assertThat(postWithExtraInfo.bubble().x()).isEqualTo(100);
+			assertThat(postWithExtraInfo.bubble().y()).isEqualTo(200);
+			assertThat(postWithoutAnyInfo.tags()).isEmpty();
+			assertThat(postWithoutAnyInfo.isLiked()).isFalse();
+			assertThat(postWithoutAnyInfo.bubble()).isNull();
 		}), dynamicTest("최신순으로 조회할 수 있다.", () -> {
 			//given
 			final PostSearchCondition searchByLatest = PostSearchCondition.builder()
@@ -475,82 +481,107 @@ class PostServiceTest extends IntegrationTestSupport {
 	@DisplayName("방명록 등록 시나리오")
 	Collection<DynamicTest> uploadPost() {
 		// given
+		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp",
+			new CoordinateDto(35.512, 126.912), "2024-01-13T05:20:18.981+09:00");
+		var bubbleInfo = new BubbleInfoDto("이미지 설명", 100, 200);
+		var spotInfo = new SpotInfoDto(new CoordinateDto(35.557, 126.923), "중점 좌표 기준 변환된 주소");
 		User writer = createUser("작성자");
 		User mentionedUser = createUser("언급된 사용자");
 		userRepository.saveAll(List.of(writer, mentionedUser));
 		List<Tag> tags = tagRepository.saveAll(createTags("tagA", "tagB", "tagC"));
 		var tagIds = List.of(tags.get(0).getId(), tags.get(1).getId(), tags.get(2).getId());
 		var mentionedUserIds = List.of(mentionedUser.getId());
-		return List.of(dynamicTest("스팟이 존재하지 않으면 스팟 생성 후 방명록을 업로드하고 그와 관련된 엔티티를 저장한다.", () -> {
-			// given
-			var httpRequest = createUploadHttpRequest("디테일 주소", tagIds, mentionedUserIds);
-			var request = PostUploadRequest.of(writer.getId(), httpRequest);
-			long rowNum = spotRepository.count();
+		return List.of(
+			dynamicTest("스팟이 존재하지 않으면 스팟 생성 후 방명록을 업로드하고 그와 관련된 엔티티를 저장한다.", () -> {
+				// given
+				var request = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "디테일 주소", tagIds,
+					mentionedUserIds,
+					false);
+				long rowNum = spotRepository.count();
 
-			// when
-			Long postId = postService.upload(request).postId();
-			var post = postRepository.findById(postId).orElseThrow();
-			var response = postService.getPost(request.userId(), postId);
+				// when
+				Long postId = postService.upload(writer.getId(), request).postId();
+				var post = postRepository.findById(postId).orElseThrow();
+				var response = postService.getPost(writer.getId(), postId);
 
-			// then
-			assertAll(
-				() -> assertEquals(post.getLikeCount(), 0L),
-				() -> assertEquals(post.getSpot().getPostCount(), 1L),
-				() -> assertThat(response.photoUrl()).contains(S3Directory.POST_FOLDER.getPath())
-					.doesNotContain(S3Directory.TEMP_FOLDER.getPath()),
-				() -> assertThat(response.detailAddress()).isEqualTo("디테일 주소"),
-				() -> assertThat(response.tags()).extracting("tagName").containsExactly("tagA", "tagB", "tagC"),
-				() -> assertThat(response.mentions()).extracting("nickname").containsExactly("언급된 사용자"),
-				() -> assertThat(response.isPrivate()).isFalse(),
-				() -> assertThat(spotRepository.count()).isEqualTo(rowNum + 1));
-		}), dynamicTest("스팟이 존재하면 기존 스팟에 방명록을 업로드한다.", () -> {
-			// given
-			spotRepository.save(createSpot(new CoordinateDto(35.512, 126.912)));
-			var httpRequest = createUploadHttpRequest("디테일 주소", tagIds, mentionedUserIds);
-			var request = PostUploadRequest.of(writer.getId(), httpRequest);
-			long rowNum = spotRepository.count();
+				// then
+				assertAll(
+					() -> assertEquals(post.getLikeCount(), 0L),
+					() -> assertEquals(post.getSpot().getPostCount(), 1L),
+					() -> assertThat(response.photoUrl()).contains(S3Directory.POST_FOLDER.getPath())
+						.doesNotContain(S3Directory.TEMP_FOLDER.getPath()),
+					() -> assertThat(response.bubble().text()).isEqualTo("이미지 설명"),
+					() -> assertThat(response.bubble().x()).isEqualTo(100),
+					() -> assertThat(response.bubble().y()).isEqualTo(200),
+					() -> assertThat(response.detailAddress()).isEqualTo("디테일 주소"),
+					() -> assertThat(response.tags()).extracting("tagName").containsExactly("tagA", "tagB", "tagC"),
+					() -> assertThat(response.mentions()).extracting("nickname").containsExactly("언급된 사용자"),
+					() -> assertThat(response.isPrivate()).isFalse(),
+					() -> assertThat(spotRepository.count()).isEqualTo(rowNum + 1));
+			}), dynamicTest("스팟이 존재하면 기존 스팟에 방명록을 업로드한다.", () -> {
+				// given
+				spotRepository.save(createSpot(new CoordinateDto(37.51, 125.91)));
+				var knownSpotInfo = new SpotInfoDto(new CoordinateDto(37.51, 125.91), "중점 좌표 기준 변환된 주소");
+				var request = new PostUploadRequest(photoInfo, bubbleInfo, knownSpotInfo, "디테일 주소", tagIds,
+					mentionedUserIds, false);
+				long rowNum = spotRepository.count();
 
-			// when
-			postService.upload(request);
+				// when
+				postService.upload(writer.getId(), request);
 
-			// then
-			assertThat(spotRepository.count()).isEqualTo(rowNum);
-		}), dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
-			// given
-			var httpRequest = createUploadHttpRequest("     ", null, null);
-			var request = PostUploadRequest.of(writer.getId(), httpRequest);
+				// then
+				assertThat(spotRepository.count()).isEqualTo(rowNum);
+			}), dynamicTest("이미지의 버블이 없는 경우 null을 저장한다.", () -> {
+				// given
+				var request = new PostUploadRequest(photoInfo, null, spotInfo, "디테일 주소", tagIds, mentionedUserIds,
+					false);
 
-			// when
-			Long postId = postService.upload(request).postId();
-			var post = postService.getPost(request.userId(), postId);
+				// when
+				Long postId = postService.upload(writer.getId(), request).postId();
+				var savedPost = postRepository.findById(postId).orElseThrow();
 
-			// then
-			assertThat(post.detailAddress()).isNull();
-		}), dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
-			// given
-			var invalidTagIds = List.of(tags.get(0).getId(), tags.get(1).getId(), 3000L);
-			var httpRequest = createUploadHttpRequest("디테일 주소", invalidTagIds, mentionedUserIds);
-			var request = PostUploadRequest.of(writer.getId(), httpRequest);
+				// then
+				assertThat(savedPost.getPhoto().getBubble()).isNull();
+			}), dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
+				// given
+				var request = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "     ", null, null, false);
 
-			// when & then
-			assertThatThrownBy(() -> postService.upload(request)).isInstanceOf(ApiException.class)
-				.hasMessage(PostErrorCode.NOT_FOUND_TAG.getMessage());
-		}), dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
-			// given
-			var invalidUserIds = List.of(mentionedUser.getId(), 3000L);
-			var httpRequest = createUploadHttpRequest("디테일 주소", tagIds, invalidUserIds);
-			var request = PostUploadRequest.of(writer.getId(), httpRequest);
+				// when
+				Long postId = postService.upload(writer.getId(), request).postId();
+				var post = postService.getPost(writer.getId(), postId);
 
-			// when & then
-			assertThatThrownBy(() -> postService.upload(request)).isInstanceOf(ApiException.class)
-				.hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
-		}));
+				// then
+				assertThat(post.detailAddress()).isNull();
+			}), dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
+				// given
+				var invalidTagIds = List.of(tags.get(0).getId(), tags.get(1).getId(), 3000L);
+				var request = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "디테일 주소", invalidTagIds,
+					mentionedUserIds, false);
+
+				// when & then
+				assertThatThrownBy(() -> postService.upload(writer.getId(), request)).isInstanceOf(ApiException.class)
+					.hasMessage(PostErrorCode.NOT_FOUND_TAG.getMessage());
+			}), dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
+				// given
+				var invalidUserIds = List.of(mentionedUser.getId(), 3000L);
+				var request = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "디테일 주소", tagIds, invalidUserIds,
+					false);
+
+				// when & then
+				assertThatThrownBy(() -> postService.upload(writer.getId(), request)).isInstanceOf(ApiException.class)
+					.hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
+			}));
 	}
 
 	@TestFactory
 	@DisplayName("방명록 내용 수정 시나리오")
 	Collection<DynamicTest> updatePost() {
 		// given
+		// given
+		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp",
+			new CoordinateDto(35.512, 126.912), "2024-01-13T05:20:18.981+09:00");
+		var bubbleInfo = new BubbleInfoDto("이미지 설명", 100, 200);
+		var spotInfo = new SpotInfoDto(new CoordinateDto(35.557, 126.923), "중점 좌표 기준 변환된 주소");
 		User writer = createUser("작성자");
 		User mentionedUser1 = createUser("사용자1");
 		User mentionedUser2 = createUser("사용자2");
@@ -559,8 +590,9 @@ class PostServiceTest extends IntegrationTestSupport {
 		List<Tag> tags = tagRepository.saveAll(createTags("tagA", "tagB", "tagC"));
 		var tagIds = List.of(tags.get(0).getId(), tags.get(1).getId());
 		var mentionedUserIds = List.of(mentionedUser1.getId(), mentionedUser2.getId());
-		var uploadRequest = createUploadHttpRequest("디테일 주소", tagIds, mentionedUserIds);
-		Long postId = postService.upload(PostUploadRequest.of(writer.getId(), uploadRequest)).postId();
+		var uploadRequest = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "디테일 주소", tagIds, mentionedUserIds,
+			false);
+		Long postId = postService.upload(writer.getId(), uploadRequest).postId();
 
 		// when
 		var prePost = postService.getPost(writer.getId(), postId);
@@ -646,14 +678,6 @@ class PostServiceTest extends IntegrationTestSupport {
 		assertThat(tagResponses).hasSize(3);
 		assertThat(tagResponses).extracting("tagName")
 			.contains("tag1", "tag2", "tag3");
-	}
-
-	private PostUploadHttpRequest createUploadHttpRequest(String detailAddress, List<Long> tagIds,
-		List<Long> mentionedUserIds) {
-		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp",
-			new CoordinateDto(35.512, 126.912), "2024-01-13T05:20:18.981+09:00");
-		var spotInfo = new SpotInfoDto(new CoordinateDto(35.557, 126.923), "중점 좌표 기준 변환된 주소");
-		return new PostUploadHttpRequest(photoInfo, spotInfo, detailAddress, tagIds, mentionedUserIds, false);
 	}
 
 	@TestFactory
