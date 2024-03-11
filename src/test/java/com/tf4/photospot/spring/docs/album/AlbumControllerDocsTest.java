@@ -23,6 +23,7 @@ import com.tf4.photospot.album.presentation.request.PostIdListHttpRequest;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
+import com.tf4.photospot.post.application.response.BubbleResponse;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
@@ -77,6 +78,7 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 			.detailAddress("detail address")
 			.likeCount(10L)
 			.photoUrl("photoUrl")
+			.bubble(new BubbleResponse("이미지 설명", 100, 200))
 			.isLiked(true)
 			.createdAt(LocalDateTime.of(2024, 1, 10, 12, 30))
 			.writer(new WriterResponse(1L, "nickname", "profileUrl"))
@@ -106,6 +108,10 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content[].detailAddress").type(JsonFieldType.STRING).description("방명록 상세 주소"),
 					fieldWithPath("content[].likeCount").type(JsonFieldType.NUMBER).description("방명록 좋아요 개수"),
 					fieldWithPath("content[].photoUrl").type(JsonFieldType.STRING).description("방명록 photo url"),
+					fieldWithPath("content[].bubble").type(JsonFieldType.OBJECT).description("방명록 photo bubble 정보"),
+					fieldWithPath("content[].bubble.text").type(JsonFieldType.STRING).description("bubble 내용"),
+					fieldWithPath("content[].bubble.x").type(JsonFieldType.NUMBER).description("bubble 위치 x 좌표"),
+					fieldWithPath("content[].bubble.y").type(JsonFieldType.NUMBER).description("bubble 위치 y 좌표"),
 					fieldWithPath("content[].isLiked").type(JsonFieldType.BOOLEAN)
 						.description("방명록 좋아요 여부"),
 					fieldWithPath("content[].createdAt").type(JsonFieldType.STRING).description("방명록 생성일")
