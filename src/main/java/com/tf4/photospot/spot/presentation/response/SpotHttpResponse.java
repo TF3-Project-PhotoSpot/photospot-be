@@ -34,7 +34,7 @@ public record SpotHttpResponse(
 			.address(response.address())
 			.coord(PointConverter.convert(response.coord()))
 			.postCount(response.postCount())
-			.tags(response.postTagCounts())
+			.tags(response.mostPostTagRanks())
 			.photoUrls(response.previewResponses().stream().map(PostPreviewResponse::photoUrl).toList())
 			.bookmarked(response.bookmarked())
 			.build();

@@ -119,7 +119,7 @@ public class SpotControllerDocsTest extends RestDocsSupport {
 			.previewResponses(List.of(
 				new PostPreviewResponse(1L, 2L, "photoUrl2"),
 				new PostPreviewResponse(1L, 1L, "photoUrl1")))
-			.postTagCounts(List.of(
+			.mostPostTagRanks(List.of(
 				MostPostTagRank.builder().id(1L).count(5).name("tagName").iconUrl("iconUrl").build(),
 				MostPostTagRank.builder().id(2L).count(10).name("tagName2").iconUrl("iconUrl2").build()
 			))
