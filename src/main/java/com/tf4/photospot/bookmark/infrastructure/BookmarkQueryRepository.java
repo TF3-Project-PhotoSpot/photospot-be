@@ -15,6 +15,8 @@ import org.springframework.stereotype.Repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.tf4.photospot.bookmark.application.request.ReadBookmarkFolderList;
+import com.tf4.photospot.bookmark.application.response.BookmarkCoord;
+import com.tf4.photospot.bookmark.application.response.QBookmarkCoord;
 import com.tf4.photospot.bookmark.domain.Bookmark;
 import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.global.exception.ApiException;
@@ -79,5 +81,20 @@ public class BookmarkQueryRepository extends QueryDslUtils {
 			.where(bookmark.bookmarkFolder.id.eq(bookmarkFolderId).and(bookmark.spot.id.eq(spotId)))
 			.fetchFirst();
 		return exists != null;
+	}
+
+	public List<BookmarkCoord> findAllMyBookmarkCoord(Long userId) {
+		return queryFactory.select(new QBookmarkCoord(
+				bookmarkFolder.id,
+				bookmarkFolder.color,
+				bookmark.id,
+				bookmark.spot.id,
+				bookmark.spot.coord
+			))
+			.from(bookmark)
+			.join(bookmark.bookmarkFolder, bookmarkFolder)
+			.join(bookmark.spot, spot)
+			.where(bookmarkFolder.user.id.eq(userId))
+			.fetch();
 	}
 }

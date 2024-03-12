@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
+import com.tf4.photospot.spot.application.response.MostPostTagRank;
 import com.tf4.photospot.spot.domain.Spot;
 
 @Repository
@@ -81,5 +82,27 @@ public class PostJdbcRepository {
 		MapSqlParameterSource params = new MapSqlParameterSource()
 			.addValue("postId", postId);
 		jdbcTemplate.update("delete from mention where post_id = :postId", params);
+	}
+
+	public List<MostPostTagRank> findMostPostTagsOfSpot(Spot spot, int count) {
+		MapSqlParameterSource params = new MapSqlParameterSource()
+			.addValue("spotId", spot.getId())
+			.addValue("count", count);
+		return jdbcTemplate.query("""
+			select t.id, tag_count, t.name, t.icon_url
+			from (
+				select tag_id, count(id) as tag_count
+				from post_tag
+				where spot_id = :spotId
+				group by tag_id
+				order by tag_count desc
+				limit :count) as pt
+			join tag t on pt.tag_id = t.id
+			""", params, ((rs, rowNum) -> MostPostTagRank.builder()
+			.id(rs.getLong("id"))
+			.count(rs.getInt("tag_count"))
+			.name(rs.getString("name"))
+			.iconUrl(rs.getString("icon_url"))
+			.build()));
 	}
 }

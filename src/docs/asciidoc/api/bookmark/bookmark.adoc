@@ -46,3 +46,11 @@ include::{snippets}/bookmark-controller-docs-test/remove-bookmarks/response-fiel
 include::{snippets}/bookmark-controller-docs-test/delete-bookmark-folder/http-request.adoc[]
 include::{snippets}/bookmark-controller-docs-test/delete-bookmark-folder/response-body.adoc[]
 include::{snippets}/bookmark-controller-docs-test/delete-bookmark-folder/response-fields.adoc[]
+
+=== 내 북마크 좌표 조회
+
+'''
+
+include::{snippets}/bookmark-controller-docs-test/get-all-my-bookmark-coord/http-request.adoc[]
+include::{snippets}/bookmark-controller-docs-test/get-all-my-bookmark-coord/response-body.adoc[]
+include::{snippets}/bookmark-controller-docs-test/get-all-my-bookmark-coord/response-fields.adoc[]

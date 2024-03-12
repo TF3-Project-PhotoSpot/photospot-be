@@ -1,18 +1,27 @@
 package com.tf4.photospot.spot.presentation.request;
 
-import org.locationtech.jts.geom.Point;
-
-import com.tf4.photospot.global.util.PointConverter;
-
-import jakarta.validation.constraints.NotNull;
+import org.hibernate.validator.constraints.Range;
 
 public record FindSpotHttpRequest(
-	@NotNull
-	Double lat,
-	@NotNull
-	Double lon
+	@Range(max = 10, message = "미리보기 사진은 1~10장만 가능합니다.")
+	Integer postPreviewCount,
+	@Range(max = 5, message = "태그 통계는 1~5개만 가능합니다.")
+	Integer mostPostTagCount,
+	Boolean distance
 ) {
-	public Point toCoord() {
-		return PointConverter.convert(lat, lon);
+	public FindSpotHttpRequest {
+		if (postPreviewCount == null) {
+			postPreviewCount = 5;
+		}
+		if (mostPostTagCount == null) {
+			mostPostTagCount = 3;
+		}
+		if (distance == null) {
+			distance = true;
+		}
+	}
+
+	public boolean requireDistance() {
+		return distance;
 	}
 }

@@ -29,6 +29,7 @@ class PostSearchConditionTest {
 			dynamicTest("특정 스팟의 방명록 조회 조건은 spotId가 필수다.", () -> {
 				var postsOfSpotBuilder = PostSearchCondition.builder()
 					.spotId(1L)
+					.userId(1L)
 					.pageable(defaultPageRequest)
 					.type(PostSearchType.POSTS_OF_SPOT);
 				var postsOfSpotBuilderNotSpotId = PostSearchCondition.builder()

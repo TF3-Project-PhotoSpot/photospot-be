@@ -1,5 +1,6 @@
 package com.tf4.photospot.photo.presentation;
 
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -18,8 +19,8 @@ public class PhotoController {
 
 	private final PhotoService photoService;
 
-	@PostMapping("/s3")
-	public PhotoUploadResponse uploadPhoto(@RequestPart("file") MultipartFile file) {
+	@PostMapping(value = "/s3", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public PhotoUploadResponse uploadPhoto(@RequestPart(value = "file", required = false) MultipartFile file) {
 		return photoService.upload(file);
 	}
 }

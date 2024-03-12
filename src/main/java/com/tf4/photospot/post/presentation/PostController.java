@@ -60,10 +60,13 @@ public class PostController {
 	@GetMapping("/preview")
 	public SlicePageDto<PostPreviewResponse> getPostPreviews(
 		@RequestParam(name = "spotId") Long spotId,
+		// @AuthUserId Long userId,
 		@SortDefault(sort = "id", direction = Sort.Direction.DESC) Pageable pageable
 	) {
+		Long userId = 1L;
 		final PostSearchCondition searchCondition = PostSearchCondition.builder()
 			.spotId(spotId)
+			.userId(userId)
 			.type(PostSearchType.POSTS_OF_SPOT)
 			.pageable(pageable)
 			.build();
