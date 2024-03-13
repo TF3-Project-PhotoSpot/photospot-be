@@ -21,12 +21,12 @@ public class Bubble extends BaseEntity {
 
 	private String text;
 
-	private long posX;
+	private double posX;
 
-	private long posY;
+	private double posY;
 
 	@Builder
-	public Bubble(String text, long posX, long posY) {
+	public Bubble(String text, double posX, double posY) {
 		this.text = text;
 		this.posX = posX;
 		this.posY = posY;

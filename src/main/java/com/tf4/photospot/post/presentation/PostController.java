@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tf4.photospot.global.argument.AuthUserId;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.photo.application.PhotoService;
+import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
@@ -40,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PostController {
 	private final PostService postService;
+	private final PhotoService photoService;
 
 	@GetMapping
 	public SlicePageDto<PostDetailResponse> getPostDetails(
@@ -146,7 +149,9 @@ public class PostController {
 	public PostSaveResponse uploadPost(
 		@AuthUserId Long userId,
 		@RequestBody @Valid PostUploadRequest request) {
-		return postService.upload(userId, request);
+		String postPhotoUrl = photoService.moveFolder(request.photoInfo().photoUrl(), S3Directory.TEMP_FOLDER,
+			S3Directory.POST_FOLDER);
+		return postService.upload(userId, request, postPhotoUrl);
 	}
 
 	@PutMapping("/{postId}")

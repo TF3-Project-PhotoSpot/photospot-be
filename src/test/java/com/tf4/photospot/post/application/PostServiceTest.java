@@ -482,7 +482,8 @@ class PostServiceTest extends IntegrationTestSupport {
 	Collection<DynamicTest> uploadPost() {
 		// given
 		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp",
-			new CoordinateDto(35.512, 126.912), "2024-01-13T05:20:18.981+09:00");
+			new CoordinateDto(35.512, 126.912), "2024-02-28T12:51:00");
+		var postPhotoUrl = "https://bucket.s3.ap-northeast-2.amazonaws.com/post_images/example.webp";
 		var bubbleInfo = new BubbleInfoDto("이미지 설명", 100, 200);
 		var spotInfo = new SpotInfoDto(new CoordinateDto(35.557, 126.923), "중점 좌표 기준 변환된 주소");
 		User writer = createUser("작성자");
@@ -500,7 +501,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				long rowNum = spotRepository.count();
 
 				// when
-				Long postId = postService.upload(writer.getId(), request).postId();
+				Long postId = postService.upload(writer.getId(), request, postPhotoUrl).postId();
 				var post = postRepository.findById(postId).orElseThrow();
 				var response = postService.getPost(writer.getId(), postId);
 
@@ -527,7 +528,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				long rowNum = spotRepository.count();
 
 				// when
-				postService.upload(writer.getId(), request);
+				postService.upload(writer.getId(), request, postPhotoUrl);
 
 				// then
 				assertThat(spotRepository.count()).isEqualTo(rowNum);
@@ -537,21 +538,25 @@ class PostServiceTest extends IntegrationTestSupport {
 					false);
 
 				// when
-				Long postId = postService.upload(writer.getId(), request).postId();
+				Long postId = postService.upload(writer.getId(), request, postPhotoUrl).postId();
 				var savedPost = postRepository.findById(postId).orElseThrow();
 
 				// then
 				assertThat(savedPost.getPhoto().getBubble()).isNull();
-			}), dynamicTest("상세 주소에 공백만 존재하는 경우 null로 저장한다.", () -> {
+			}), dynamicTest("상세 주소가 공백 또는 null일 경우 빈 문자열로 저장한다.", () -> {
 				// given
-				var request = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "     ", null, null, false);
+				var request1 = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "     ", null, null, false);
+				var request2 = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, null, null, null, false);
 
 				// when
-				Long postId = postService.upload(writer.getId(), request).postId();
-				var post = postService.getPost(writer.getId(), postId);
+				Long post1Id = postService.upload(writer.getId(), request1, postPhotoUrl).postId();
+				Long post2Id = postService.upload(writer.getId(), request2, postPhotoUrl).postId();
+				var post1 = postService.getPost(writer.getId(), post1Id);
+				var post2 = postService.getPost(writer.getId(), post2Id);
 
 				// then
-				assertThat(post.detailAddress()).isNull();
+				assertThat(post1.detailAddress()).isEqualTo("");
+				assertThat(post2.detailAddress()).isEqualTo("");
 			}), dynamicTest("존재하지 않는 태그가 포함되어 있으면 예외를 던진다.", () -> {
 				// given
 				var invalidTagIds = List.of(tags.get(0).getId(), tags.get(1).getId(), 3000L);
@@ -559,7 +564,8 @@ class PostServiceTest extends IntegrationTestSupport {
 					mentionedUserIds, false);
 
 				// when & then
-				assertThatThrownBy(() -> postService.upload(writer.getId(), request)).isInstanceOf(ApiException.class)
+				assertThatThrownBy(() -> postService.upload(writer.getId(), request, postPhotoUrl)).isInstanceOf(
+						ApiException.class)
 					.hasMessage(PostErrorCode.NOT_FOUND_TAG.getMessage());
 			}), dynamicTest("존재하지 않는 사용자가 멘션되어 있으면 예외를 던진다.", () -> {
 				// given
@@ -568,7 +574,8 @@ class PostServiceTest extends IntegrationTestSupport {
 					false);
 
 				// when & then
-				assertThatThrownBy(() -> postService.upload(writer.getId(), request)).isInstanceOf(ApiException.class)
+				assertThatThrownBy(() -> postService.upload(writer.getId(), request, postPhotoUrl)).isInstanceOf(
+						ApiException.class)
 					.hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
 			}));
 	}
@@ -577,9 +584,9 @@ class PostServiceTest extends IntegrationTestSupport {
 	@DisplayName("방명록 내용 수정 시나리오")
 	Collection<DynamicTest> updatePost() {
 		// given
-		// given
 		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp",
-			new CoordinateDto(35.512, 126.912), "2024-01-13T05:20:18.981+09:00");
+			new CoordinateDto(35.512, 126.912), "2024-02-28T12:51:00");
+		var postPhotoUrl = "https://bucket.s3.ap-northeast-2.amazonaws.com/post_images/example.webp";
 		var bubbleInfo = new BubbleInfoDto("이미지 설명", 100, 200);
 		var spotInfo = new SpotInfoDto(new CoordinateDto(35.557, 126.923), "중점 좌표 기준 변환된 주소");
 		User writer = createUser("작성자");
@@ -592,7 +599,7 @@ class PostServiceTest extends IntegrationTestSupport {
 		var mentionedUserIds = List.of(mentionedUser1.getId(), mentionedUser2.getId());
 		var uploadRequest = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "디테일 주소", tagIds, mentionedUserIds,
 			false);
-		Long postId = postService.upload(writer.getId(), uploadRequest).postId();
+		Long postId = postService.upload(writer.getId(), uploadRequest, postPhotoUrl).postId();
 
 		// when
 		var prePost = postService.getPost(writer.getId(), postId);

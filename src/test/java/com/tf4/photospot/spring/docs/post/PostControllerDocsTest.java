@@ -15,6 +15,8 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.photo.application.PhotoService;
+import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
@@ -38,10 +40,11 @@ import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class PostControllerDocsTest extends RestDocsSupport {
 	private final PostService postService = mock(PostService.class);
+	private final PhotoService photoService = mock(PhotoService.class);
 
 	@Override
 	protected Object initController() {
-		return new PostController(postService);
+		return new PostController(postService, photoService);
 	}
 
 	@Test
@@ -319,7 +322,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		var photoCoord = new CoordinateDto(35.512, 126.912);
 		var spotCoord = new CoordinateDto(35.557, 126.923);
 		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp", photoCoord,
-			"2024-01-13T05:20:18.981+09:00");
+			"2024-02-28T12:51:00");
 		var bubbleInfo = new BubbleInfoDto("이미지 설명", 100, 200);
 		var spotInfo = new SpotInfoDto(spotCoord, "서울 마포구 동교동 158-26");
 		var tags = List.of(1L, 2L, 3L);
@@ -327,7 +330,9 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		var httpRequest = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "할리스", tags, mentions, false);
 		var response = new PostSaveResponse(1L, 1L);
 
-		given(postService.upload(anyLong(), any(PostUploadRequest.class))).willReturn(response);
+		given(photoService.moveFolder(anyString(), any(S3Directory.class), any(S3Directory.class))).willReturn(
+			"https://bucket.s3.ap-northeast-2.amazonaws.com/post_images/example.webp");
+		given(postService.upload(anyLong(), any(PostUploadRequest.class), anyString())).willReturn(response);
 
 		// when & then
 		mockMvc.perform(post("/api/v1/posts")
@@ -348,7 +353,8 @@ public class PostControllerDocsTest extends RestDocsSupport {
 						.description("사진 버블 메타데이터")
 						.optional()
 						.attributes(defaultValue("null")),
-					fieldWithPath("bubbleInfo.text").type(JsonFieldType.STRING).description("버블 내용"),
+					fieldWithPath("bubbleInfo.text").type(JsonFieldType.STRING).description("버블 내용")
+						.attributes(constraints("최대 60자까지 입력 가능합니다.")),
 					fieldWithPath("bubbleInfo.x").type(JsonFieldType.NUMBER).description("버블 위치 x 좌표"),
 					fieldWithPath("bubbleInfo.y").type(JsonFieldType.NUMBER).description("버블 위치 y 좌표"),
 					fieldWithPath("spotInfo").type(JsonFieldType.OBJECT).description("장소 메타데이터"),

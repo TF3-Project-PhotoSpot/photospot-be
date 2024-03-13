@@ -6,8 +6,8 @@ import lombok.Builder;
 
 public record BubbleResponse(
 	String text,
-	long x,
-	long y
+	double x,
+	double y
 ) {
 
 	@Builder

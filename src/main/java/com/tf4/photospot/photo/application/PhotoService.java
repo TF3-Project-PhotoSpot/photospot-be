@@ -19,4 +19,8 @@ public class PhotoService {
 	public PhotoUploadResponse upload(MultipartFile file) {
 		return new PhotoUploadResponse(s3Uploader.upload(file, S3Directory.TEMP_FOLDER.getFolder()));
 	}
+
+	public String moveFolder(String photoUrl, S3Directory from, S3Directory to) {
+		return s3Uploader.copyToOtherDirectory(photoUrl, from, to);
+	}
 }
