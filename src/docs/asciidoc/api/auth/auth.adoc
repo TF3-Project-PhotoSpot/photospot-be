@@ -23,3 +23,11 @@ include::{snippets}/auth-controller-docs-test/reissue-token/http-request.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/request-headers.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-body.adoc[]
 include::{snippets}/auth-controller-docs-test/reissue-token/response-fields.adoc[]
+
+=== 회원 탈퇴
+
+'''
+
+include::{snippets}/auth-controller-docs-test/unlink-user/http-request.adoc[]
+include::{snippets}/auth-controller-docs-test/unlink-user/request-headers.adoc[]
+include::{snippets}/auth-controller-docs-test/unlink-user/query-parameters.adoc[]

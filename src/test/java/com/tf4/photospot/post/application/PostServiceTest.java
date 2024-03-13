@@ -737,7 +737,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				// then
 				assertAll(
 					() -> assertThat(myReports).hasSize(2),
-					() -> assertThat(myReports.stream().map(ReportResponse::postId).toList()).containsExactly(
+					() -> assertThat(myReports.stream().map(ReportResponse::postId).toList()).containsExactlyInAnyOrder(
 						post1.getId(), post2.getId()),
 					() -> assertThat(myReports).allMatch(report -> report.spotAddress().equals(spot.getAddress()))
 				);

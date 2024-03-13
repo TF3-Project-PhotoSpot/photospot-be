@@ -47,8 +47,8 @@ import com.tf4.photospot.post.presentation.request.PostUploadRequest;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
+import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.domain.User;
-import com.tf4.photospot.user.domain.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.utils.CollectionUtils;
@@ -63,10 +63,10 @@ public class PostService {
 	private final PostTagRepository postTagRepository;
 	private final MentionRepository mentionRepository;
 	private final SpotRepository spotRepository;
-	private final UserRepository userRepository;
 	private final PostLikeRepository postLikeRepository;
 	private final S3Uploader s3Uploader;
 	private final ReportRepository reportRepository;
+	private final UserService userService;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostSearchCondition postSearchCond) {
 		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(postSearchCond);
@@ -99,7 +99,7 @@ public class PostService {
 
 	@Transactional
 	public PostSaveResponse upload(Long userId, PostUploadRequest request) {
-		User writer = findLoginUser(userId);
+		User writer = userService.getActiveUser(userId);
 		Spot spot = findOrCreateSpot(request.spotInfo());
 		Photo photo = createPhoto(request.photoInfo(), request.bubbleInfo());
 		Post post = Post.builder()
@@ -171,7 +171,7 @@ public class PostService {
 	@Retry
 	@Transactional
 	public void likePost(Long postId, Long userId) {
-		final User user = findLoginUser(userId);
+		final User user = userService.getActiveUser(userId);
 		final Post post = findPost(postId);
 		if (postQueryRepository.existsPostLike(post, user)) {
 			throw new ApiException(PostErrorCode.ALREADY_LIKE);
@@ -191,7 +191,7 @@ public class PostService {
 
 	@Transactional
 	public PostUpdateResponse update(PostUpdateRequest request) {
-		User loginUser = findLoginUser(request.userId());
+		User loginUser = userService.getActiveUser(request.userId());
 		Post post = findPost(request.postId());
 		post.updateDetailAddress(loginUser, request.detailAddress());
 		updatePostTags(post, request.tags());
@@ -211,7 +211,7 @@ public class PostService {
 
 	@Transactional
 	public PostUpdateResponse updatePrivacyState(Long userId, Long postId, boolean isPrivate) {
-		User loginUser = findLoginUser(userId);
+		User loginUser = userService.getActiveUser(userId);
 		Post post = findPost(postId);
 		post.updatePrivacyState(loginUser, isPrivate);
 		return new PostUpdateResponse(post.getId(), post.getSpot().getId());
@@ -219,7 +219,7 @@ public class PostService {
 
 	@Transactional
 	public void delete(Long userId, Long postId) {
-		User loginUser = findLoginUser(userId);
+		User loginUser = userService.getActiveUser(userId);
 		Post post = findPost(postId);
 		post.delete(loginUser);
 		postTagRepository.deleteByPostId(postId);
@@ -228,7 +228,7 @@ public class PostService {
 
 	@Transactional
 	public void report(Long userId, Long postId, String reason) {
-		User reporter = findLoginUser(userId);
+		User reporter = userService.getActiveUser(userId);
 		Post post = findPost(postId);
 		if (postQueryRepository.existsReport(post, reporter)) {
 			throw new ApiException(PostErrorCode.ALREADY_REPORT);
@@ -238,10 +238,6 @@ public class PostService {
 		}
 		Report report = post.reportFrom(reporter, reason);
 		reportRepository.save(report);
-	}
-
-	private User findLoginUser(Long userId) {
-		return userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
 	}
 
 	private Post findPost(Long postId) {
@@ -267,7 +263,7 @@ public class PostService {
 	}
 
 	public List<ReportResponse> getReports(Long userId) {
-		User user = findLoginUser(userId);
+		User user = userService.getActiveUser(userId);
 		return postQueryRepository.findReports(user.getId());
 	}
 }

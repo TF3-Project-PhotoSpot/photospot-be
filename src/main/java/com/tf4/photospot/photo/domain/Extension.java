@@ -17,7 +17,7 @@ public enum Extension {
 
 	public static Optional<Extension> getPhotoExtension(String contentType) {
 		return Arrays.stream(Extension.values())
-			.filter(extension -> ("image/" + extension.type).equals(contentType))
+			.filter(extension -> extension.type.equals(contentType))
 			.findFirst();
 	}
 }

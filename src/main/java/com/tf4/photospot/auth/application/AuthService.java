@@ -6,28 +6,37 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
 import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
+import com.tf4.photospot.auth.presentation.request.KakaoUnlinkCallbackInfo;
 import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
+import com.tf4.photospot.global.util.SlackAlert;
+import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
 import com.tf4.photospot.user.application.response.OauthLoginResponse;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
+import com.tf4.photospot.user.infrastructure.UserQueryRepository;
 
 import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@Transactional(readOnly = true)
+@Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AuthService {
 	private final UserRepository userRepository;
+	private final UserQueryRepository userQueryRepository;
 	private final JwtRedisRepository jwtRedisRepository;
 	private final JwtService jwtService;
 	private final AppleService appleService;
 	private final KakaoService kakaoService;
+	private final UserService userService;
+	private final SlackAlert slackAlert;
 
 	private static final int NICKNAME_GENERATOR_RETRY_MAX = 5;
 
@@ -72,7 +81,7 @@ public class AuthService {
 
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {
 		jwtService.validateRefreshToken(userId, refreshToken);
-		User user = userRepository.findById(userId).orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		User user = userService.getActiveUser(userId);
 		return new ReissueTokenResponse(jwtService.issueAccessToken(user.getId(), user.getRole().getType()),
 			jwtService.issueRefreshToken(user.getId()));
 	}
@@ -80,8 +89,7 @@ public class AuthService {
 	@Transactional
 	public void logout(String accessToken) {
 		Claims claims = jwtService.parseAccessToken(accessToken);
-		User user = userRepository.findById(claims.get(JwtConstant.USER_ID, Long.class))
-			.orElseThrow(() -> new ApiException(UserErrorCode.NOT_FOUND_USER));
+		User user = userService.getActiveUser(claims.get(JwtConstant.USER_ID, Long.class));
 		jwtRedisRepository.saveAccessTokenInBlackList(accessToken, claims.getExpiration().getTime());
 		jwtRedisRepository.deleteByUserId(user.getId());
 	}
@@ -91,5 +99,35 @@ public class AuthService {
 		if (jwtRedisRepository.existsBlacklist(accessToken)) {
 			throw new ApiException(AuthErrorCode.INVALID_ACCESS_TOKEN);
 		}
+	}
+
+	public void unlinkKakaoAccount(Long userId) {
+		Long account = Long.valueOf(userService.getActiveUser(userId).getAccount());
+		kakaoService.unlink(account);
+	}
+
+	@Transactional
+	public void deleteUser(Long userId, String accessToken) {
+		User user = userService.getActiveUser(userId);
+		logout(accessToken);
+		userQueryRepository.deleteByUserId(user.getId());
+	}
+
+	@Transactional
+	public void deleteUnlinkedKakaoUser(String adminKey, KakaoUnlinkCallbackInfo info) {
+		kakaoService.validateRequest(adminKey, info.appId());
+		userRepository.findUserByProviderTypeAndAccount(OauthAttributes.KAKAO.getProvider(), info.account())
+			.ifPresentOrElse(user -> {
+				try {
+					userQueryRepository.deleteByUserId(user.getId());
+					jwtRedisRepository.deleteByUserId(user.getId());
+				} catch (Exception ex) {
+					sendKakaoCallbackFailureAlert(ex, info);
+				}
+			}, () -> sendKakaoCallbackFailureAlert(new ApiException(UserErrorCode.NOT_FOUND_USER), info));
+	}
+
+	private void sendKakaoCallbackFailureAlert(Exception ex, KakaoUnlinkCallbackInfo info) {
+		slackAlert.sendKakaoCallbackFailure(ex, info.account(), info.refererType());
 	}
 }

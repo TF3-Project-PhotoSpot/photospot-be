@@ -14,8 +14,9 @@ public record SpotResponse(
 	String address,
 	Point coord,
 	Long postCount,
-	List<PostPreviewResponse> previewResponses,
-	Boolean bookmarked
+	Boolean bookmarked,
+	List<MostPostTagRank> mostPostTagRanks,
+	List<PostPreviewResponse> previewResponses
 ) {
 	@Builder
 	public SpotResponse {
@@ -24,14 +25,16 @@ public record SpotResponse(
 		}
 	}
 
-	public static SpotResponse of(Spot spot, Boolean bookmarked, List<PostPreviewResponse> previewResponses) {
+	public static SpotResponse of(Spot spot, Boolean bookmarked, List<MostPostTagRank> mostPostTagRanks,
+		List<PostPreviewResponse> previewResponses) {
 		return new SpotResponse(
 			spot.getId(),
 			spot.getAddress(),
 			spot.getCoord(),
 			spot.getPostCount(),
-			previewResponses,
-			bookmarked
+			bookmarked,
+			mostPostTagRanks,
+			previewResponses
 		);
 	}
 }

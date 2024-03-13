@@ -14,6 +14,7 @@ import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
 import com.tf4.photospot.spot.application.request.NearbySpotRequest;
 import com.tf4.photospot.spot.application.request.RecommendedSpotsRequest;
+import com.tf4.photospot.spot.application.response.MostPostTagRank;
 import com.tf4.photospot.spot.application.response.NearbySpotListResponse;
 import com.tf4.photospot.spot.application.response.RecommendedSpotListResponse;
 import com.tf4.photospot.spot.application.response.SpotCoordResponse;
@@ -52,12 +53,14 @@ public class SpotService {
 		return new NearbySpotListResponse(spotQueryRepository.findNearbySpots(request.coord(), request.radius()));
 	}
 
-	public SpotResponse findSpot(PostSearchCondition searchCond) {
+	public SpotResponse findSpot(PostSearchCondition searchCond, int mostPostTagCount) {
 		final Spot spot = spotRepository.findById(searchCond.spotId())
 			.orElseThrow(() -> new ApiException(SpotErrorCode.INVALID_SPOT_ID));
 		final Boolean bookmarked = spotQueryRepository.existsBookmark(spot.getId(), searchCond.userId());
 		final Slice<PostPreviewResponse> postPreviews = postQueryRepository.findPostPreviews(searchCond);
-		return SpotResponse.of(spot, bookmarked, postPreviews.getContent());
+		final List<MostPostTagRank> mostPostTagRanks = postJdbcRepository.findMostPostTagsOfSpot(spot,
+			mostPostTagCount);
+		return SpotResponse.of(spot, bookmarked, mostPostTagRanks, postPreviews.getContent());
 	}
 
 	public List<SpotCoordResponse> findSpotsOfMyPosts(Long userId) {

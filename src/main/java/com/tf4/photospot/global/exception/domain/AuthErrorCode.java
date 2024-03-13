@@ -18,7 +18,6 @@ public enum AuthErrorCode implements ApiErrorCode {
 	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다."),
 	UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "인증되지 않은 사용자입니다."),
 	PERMISSION_DENIED(HttpStatus.FORBIDDEN, "해당 요청에 대한 권한이 없습니다."),
-	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
 	INVALID_ROLE(HttpStatus.BAD_REQUEST, "유효하지 않은 권한입니다."),
 	INVALID_PROVIDER_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 공급자입니다."),
 	UNEXPECTED_NICKNAME_GENERATE_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 생성 중 예상치 못한 오류가 발생했습니다."),
@@ -27,6 +26,7 @@ public enum AuthErrorCode implements ApiErrorCode {
 	KAKAO_AUTH_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Kakao 인증 서버 통신 중 오류가 발생했습니다."),
 	INVALID_KAKAO_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 카카오 엑세스 토큰입니다."),
 	EXPIRED_KAKAO_ACCESS_TOKEN(HttpStatus.UNAUTHORIZED, "카카오 엑세스 토큰이 만료되었습니다."),
+	INVALID_KAKAO_REQUEST(HttpStatus.BAD_REQUEST, "카카오 서버의 요청이 유효하지 않습니다."),
 
 	// apple server
 	APPLE_AUTH_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Apple ID 서버 통신 중 오류가 발생했습니다."),
