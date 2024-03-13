@@ -13,6 +13,7 @@ public record PostDetailResponse(
 	String detailAddress,
 	Long likeCount,
 	String photoUrl,
+	BubbleResponse bubble,
 	Boolean isLiked,
 	LocalDateTime createdAt,
 	WriterResponse writer,
@@ -29,6 +30,7 @@ public record PostDetailResponse(
 			.detailAddress(post.getDetailAddress())
 			.likeCount(post.getLikeCount())
 			.photoUrl(post.getPhoto().getPhotoUrl())
+			.bubble(BubbleResponse.from(post.getPhoto().getBubble()))
 			.createdAt(post.getCreatedAt())
 			.writer(WriterResponse.from(post.getWriter()))
 			.isLiked(postResponse.isLiked())

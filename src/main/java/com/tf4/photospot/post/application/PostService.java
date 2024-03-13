@@ -16,11 +16,10 @@ import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.photo.application.S3Uploader;
-import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.photo.domain.S3Directory;
+import com.tf4.photospot.post.application.request.PostCreateDto;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
-import com.tf4.photospot.post.application.request.PostUploadRequest;
 import com.tf4.photospot.post.application.response.PostAllResponse;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
@@ -41,6 +40,7 @@ import com.tf4.photospot.post.domain.Report;
 import com.tf4.photospot.post.domain.ReportRepository;
 import com.tf4.photospot.post.infrastructure.PostJdbcRepository;
 import com.tf4.photospot.post.infrastructure.PostQueryRepository;
+import com.tf4.photospot.post.presentation.request.PostUploadRequest;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.spot.domain.SpotRepository;
@@ -95,23 +95,10 @@ public class PostService {
 	}
 
 	@Transactional
-	public PostSaveResponse upload(PostUploadRequest request) {
-		User writer = userService.getActiveUser(request.userId());
-		Spot spot = findSpotOrCreate(request.spotInfoDto());
-		// Todo : bubble
-		Photo photo = Photo.builder()
-			.photoUrl(s3Uploader.copyToOtherDirectory(request.photoUrl(), S3Directory.TEMP_FOLDER,
-				S3Directory.POST_FOLDER))
-			.coord(request.photoCoord())
-			.takenAt(request.photoTakenAt())
-			.build();
-		Post post = Post.builder()
-			.photo(photo)
-			.spot(spot)
-			.writer(writer)
-			.detailAddress(request.detailAddress())
-			.isPrivate(request.isPrivate())
-			.build();
+	public PostSaveResponse upload(Long userId, PostUploadRequest request, String postPhotoUrl) {
+		User writer = userService.getActiveUser(userId);
+		Spot spot = findOrCreateSpot(request.spotInfo());
+		Post post = PostCreateDto.of(spot, writer, request, postPhotoUrl).toPost();
 		return savePostAndRelatedEntities(post, spot, request.tags(), request.mentions());
 	}
 
@@ -129,7 +116,7 @@ public class PostService {
 		}
 	}
 
-	private Spot findSpotOrCreate(SpotInfoDto spotInfoDto) {
+	private Spot findOrCreateSpot(SpotInfoDto spotInfoDto) {
 		return spotRepository.findByCoord(spotInfoDto.coord().toCoord())
 			.orElseGet(() -> spotRepository.save(spotInfoDto.toSpot()));
 	}

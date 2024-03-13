@@ -4,10 +4,12 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotNull;
 
-public record PostUploadHttpRequest(
+public record PostUploadRequest(
 
 	@NotNull
 	PhotoInfoDto photoInfo,
+
+	BubbleInfoDto bubbleInfo,
 
 	@NotNull
 	SpotInfoDto spotInfo,

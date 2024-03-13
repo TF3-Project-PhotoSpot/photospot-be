@@ -15,10 +15,12 @@ import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.dto.SlicePageDto;
+import com.tf4.photospot.photo.application.PhotoService;
+import com.tf4.photospot.photo.domain.S3Directory;
 import com.tf4.photospot.post.application.PostService;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
-import com.tf4.photospot.post.application.request.PostUploadRequest;
+import com.tf4.photospot.post.application.response.BubbleResponse;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
@@ -27,20 +29,22 @@ import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.application.response.WriterResponse;
 import com.tf4.photospot.post.presentation.PostController;
+import com.tf4.photospot.post.presentation.request.BubbleInfoDto;
 import com.tf4.photospot.post.presentation.request.PhotoInfoDto;
 import com.tf4.photospot.post.presentation.request.PostReportRequest;
 import com.tf4.photospot.post.presentation.request.PostStateUpdateRequest;
 import com.tf4.photospot.post.presentation.request.PostUpdateHttpRequest;
-import com.tf4.photospot.post.presentation.request.PostUploadHttpRequest;
+import com.tf4.photospot.post.presentation.request.PostUploadRequest;
 import com.tf4.photospot.post.presentation.request.SpotInfoDto;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 
 public class PostControllerDocsTest extends RestDocsSupport {
 	private final PostService postService = mock(PostService.class);
+	private final PhotoService photoService = mock(PhotoService.class);
 
 	@Override
 	protected Object initController() {
-		return new PostController(postService);
+		return new PostController(postService, photoService);
 	}
 
 	@Test
@@ -84,6 +88,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.detailAddress("detail address")
 			.likeCount(10L)
 			.photoUrl("photoUrl")
+			.bubble(new BubbleResponse("이미지 설명", 100, 200))
 			.isLiked(true)
 			.createdAt(LocalDateTime.of(2024, 1, 10, 12, 30))
 			.writer(new WriterResponse(1L, "nickname", "profileUrl"))
@@ -114,6 +119,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content[].detailAddress").type(JsonFieldType.STRING).description("방명록 상세 주소"),
 					fieldWithPath("content[].likeCount").type(JsonFieldType.NUMBER).description("방명록 좋아요 개수"),
 					fieldWithPath("content[].photoUrl").type(JsonFieldType.STRING).description("방명록 photo url"),
+					fieldWithPath("content[].bubble").type(JsonFieldType.OBJECT).description("방명록 photo bubble 정보"),
+					fieldWithPath("content[].bubble.text").type(JsonFieldType.STRING).description("bubble 내용"),
+					fieldWithPath("content[].bubble.x").type(JsonFieldType.NUMBER).description("bubble 위치 x 좌표"),
+					fieldWithPath("content[].bubble.y").type(JsonFieldType.NUMBER).description("bubble 위치 y 좌표"),
 					fieldWithPath("content[].isLiked").type(JsonFieldType.BOOLEAN)
 						.description("방명록 좋아요 여부"),
 					fieldWithPath("content[].createdAt").type(JsonFieldType.STRING).description("방명록 생성일")
@@ -169,6 +178,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.detailAddress("detail address")
 			.likeCount(10L)
 			.photoUrl("photoUrl")
+			.bubble(new BubbleResponse("이미지 설명", 100, 200))
 			.isLiked(true)
 			.createdAt(LocalDateTime.of(2024, 1, 10, 12, 30))
 			.writer(new WriterResponse(1L, "nickname", "profileUrl"))
@@ -205,6 +215,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content[].writer.nickname").type(JsonFieldType.STRING).description("작성자 닉네임"),
 					fieldWithPath("content[].writer.profileUrl").type(JsonFieldType.STRING)
 						.description("작성자 profile url"),
+					fieldWithPath("content[].bubble").type(JsonFieldType.OBJECT).description("방명록 photo bubble 정보"),
+					fieldWithPath("content[].bubble.text").type(JsonFieldType.STRING).description("bubble 내용"),
+					fieldWithPath("content[].bubble.x").type(JsonFieldType.NUMBER).description("bubble 위치 x 좌표"),
+					fieldWithPath("content[].bubble.y").type(JsonFieldType.NUMBER).description("bubble 위치 y 좌표"),
 					fieldWithPath("content[].tags").type(JsonFieldType.ARRAY).description("태그 리스트")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("content[].tags[].tagId").type(JsonFieldType.NUMBER).description("태그 ID"),
@@ -252,6 +266,7 @@ public class PostControllerDocsTest extends RestDocsSupport {
 			.detailAddress("detail address")
 			.likeCount(10L)
 			.photoUrl("photoUrl")
+			.bubble(new BubbleResponse("이미지 설명", 100, 200))
 			.isLiked(true)
 			.createdAt(LocalDateTime.of(2024, 1, 10, 12, 30))
 			.writer(new WriterResponse(1L, "nickname", "profileUrl"))
@@ -288,6 +303,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content[].writer.nickname").type(JsonFieldType.STRING).description("작성자 닉네임"),
 					fieldWithPath("content[].writer.profileUrl").type(JsonFieldType.STRING)
 						.description("작성자 profile url"),
+					fieldWithPath("content[].bubble").type(JsonFieldType.OBJECT).description("방명록 photo bubble 정보"),
+					fieldWithPath("content[].bubble.text").type(JsonFieldType.STRING).description("bubble 내용"),
+					fieldWithPath("content[].bubble.x").type(JsonFieldType.NUMBER).description("bubble 위치 x 좌표"),
+					fieldWithPath("content[].bubble.y").type(JsonFieldType.NUMBER).description("bubble 위치 y 좌표"),
 					fieldWithPath("content[].tags").type(JsonFieldType.ARRAY).description("태그 리스트")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("content[].tags[].tagId").type(JsonFieldType.NUMBER).description("태그 ID"),
@@ -303,14 +322,17 @@ public class PostControllerDocsTest extends RestDocsSupport {
 		var photoCoord = new CoordinateDto(35.512, 126.912);
 		var spotCoord = new CoordinateDto(35.557, 126.923);
 		var photoInfo = new PhotoInfoDto("https://bucket.s3.ap-northeast-2.amazonaws.com/temp/example.webp", photoCoord,
-			"2024-01-13T05:20:18.981+09:00");
+			"2024-02-28T12:51:00");
+		var bubbleInfo = new BubbleInfoDto("이미지 설명", 100, 200);
 		var spotInfo = new SpotInfoDto(spotCoord, "서울 마포구 동교동 158-26");
 		var tags = List.of(1L, 2L, 3L);
 		var mentions = List.of(4L, 5L, 6L);
-		var httpRequest = new PostUploadHttpRequest(photoInfo, spotInfo, "할리스", tags, mentions, false);
+		var httpRequest = new PostUploadRequest(photoInfo, bubbleInfo, spotInfo, "할리스", tags, mentions, false);
 		var response = new PostSaveResponse(1L, 1L);
 
-		given(postService.upload(any(PostUploadRequest.class))).willReturn(response);
+		given(photoService.moveFolder(anyString(), any(S3Directory.class), any(S3Directory.class))).willReturn(
+			"https://bucket.s3.ap-northeast-2.amazonaws.com/post_images/example.webp");
+		given(postService.upload(anyLong(), any(PostUploadRequest.class), anyString())).willReturn(response);
 
 		// when & then
 		mockMvc.perform(post("/api/v1/posts")
@@ -327,18 +349,35 @@ public class PostControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("photoInfo.coord.lat").type(JsonFieldType.NUMBER).description("위도"),
 					fieldWithPath("photoInfo.coord.lon").type(JsonFieldType.NUMBER).description("경도"),
 					fieldWithPath("photoInfo.takenAt").description("사진이 찍힌 날짜 및 시간"),
+					fieldWithPath("bubbleInfo").type(JsonFieldType.OBJECT)
+						.description("사진 버블 메타데이터")
+						.optional()
+						.attributes(defaultValue("null")),
+					fieldWithPath("bubbleInfo.text").type(JsonFieldType.STRING).description("버블 내용")
+						.attributes(constraints("최대 60자까지 입력 가능합니다.")),
+					fieldWithPath("bubbleInfo.x").type(JsonFieldType.NUMBER).description("버블 위치 x 좌표"),
+					fieldWithPath("bubbleInfo.y").type(JsonFieldType.NUMBER).description("버블 위치 y 좌표"),
 					fieldWithPath("spotInfo").type(JsonFieldType.OBJECT).description("장소 메타데이터"),
 					fieldWithPath("spotInfo.coord").type(JsonFieldType.OBJECT).description("장소 중심 좌표"),
 					fieldWithPath("spotInfo.coord.lat").type(JsonFieldType.NUMBER).description("위도"),
 					fieldWithPath("spotInfo.coord.lon").type(JsonFieldType.NUMBER).description("경도"),
 					fieldWithPath("spotInfo.address").type(JsonFieldType.STRING).description("장소 중심 좌표를 주소로 변환한 값"),
-					fieldWithPath("detailAddress").type(JsonFieldType.STRING).description("작성자가 직접 입력한 상세 주소"),
-					fieldWithPath("tags").type(JsonFieldType.ARRAY).description("작성자가 선택한 태그 id 리스트"),
-					fieldWithPath("mentions").type(JsonFieldType.ARRAY).description("작성자가 언급한 유저 id 리스트"),
+					fieldWithPath("detailAddress").type(JsonFieldType.STRING)
+						.description("작성자가 직접 입력한 상세 주소")
+						.optional()
+						.attributes(defaultValue("null")),
+					fieldWithPath("tags").type(JsonFieldType.ARRAY)
+						.description("작성자가 선택한 태그 id 리스트")
+						.optional()
+						.attributes(defaultValue("emptyList")),
+					fieldWithPath("mentions").type(JsonFieldType.ARRAY)
+						.description("작성자가 언급한 유저 id 리스트")
+						.optional()
+						.attributes(defaultValue("emptyList")),
 					fieldWithPath("isPrivate").type(JsonFieldType.BOOLEAN)
 						.description("사진 비공개 설정 유무")
 						.optional()
-						.attributes(defaultValue(false))
+						.attributes(defaultValue("false"))
 				),
 				responseFields(
 					fieldWithPath("postId").type(JsonFieldType.NUMBER).description("업로드 된 방명록 id 반환"),

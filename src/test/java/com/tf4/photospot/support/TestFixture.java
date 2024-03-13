@@ -14,6 +14,7 @@ import com.tf4.photospot.bookmark.domain.Bookmark;
 import com.tf4.photospot.bookmark.domain.BookmarkFolder;
 import com.tf4.photospot.global.dto.CoordinateDto;
 import com.tf4.photospot.global.util.PointConverter;
+import com.tf4.photospot.photo.domain.Bubble;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
@@ -92,8 +93,24 @@ public class TestFixture {
 			.build();
 	}
 
+	public static Photo createPhotoWithBubble(String photoUrl, String text, long posX, long posY) {
+		return Photo.builder()
+			.photoUrl(photoUrl)
+			.bubble(createBubble(text, posX, posY))
+			.coord(createPoint())
+			.build();
+	}
+
 	public static Photo createPhoto() {
 		return createPhoto("photoUrl");
+	}
+
+	public static Bubble createBubble(String text, long posX, long posY) {
+		return Bubble.builder()
+			.text(text)
+			.posX(posX)
+			.posY(posY)
+			.build();
 	}
 
 	public static User createUser(String nickname, String account, String providerType) {

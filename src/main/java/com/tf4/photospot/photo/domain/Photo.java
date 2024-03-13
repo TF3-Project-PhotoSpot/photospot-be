@@ -1,6 +1,5 @@
 package com.tf4.photospot.photo.domain;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.locationtech.jts.geom.Point;
@@ -31,7 +30,7 @@ public class Photo extends BaseEntity {
 
 	private String photoUrl;
 
-	private LocalDate takenAt;
+	private LocalDateTime takenAt;
 
 	@Column(columnDefinition = "POINT SRID 4326", nullable = false)
 	private Point coord;
@@ -43,7 +42,7 @@ public class Photo extends BaseEntity {
 	private LocalDateTime deletedAt;
 
 	@Builder
-	public Photo(String photoUrl, LocalDate takenAt, Point coord, Bubble bubble) {
+	public Photo(String photoUrl, LocalDateTime takenAt, Point coord, Bubble bubble) {
 		this.photoUrl = photoUrl;
 		this.takenAt = takenAt;
 		this.coord = coord;
