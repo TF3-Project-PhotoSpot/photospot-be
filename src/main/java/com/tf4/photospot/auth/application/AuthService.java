@@ -11,6 +11,7 @@ import com.tf4.photospot.auth.util.NicknameGenerator;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.global.util.SlackAlert;
 import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.application.request.LoginUserInfo;
@@ -100,8 +101,9 @@ public class AuthService {
 		}
 	}
 
-	public void unlinkKakaoAccount(String account) {
-		kakaoService.unlink(Long.valueOf(account));
+	public void unlinkKakaoAccount(Long userId) {
+		Long account = Long.valueOf(userService.getActiveUser(userId).getAccount());
+		kakaoService.unlink(account);
 	}
 
 	@Transactional
@@ -122,7 +124,7 @@ public class AuthService {
 				} catch (Exception ex) {
 					sendKakaoCallbackFailureAlert(ex, info);
 				}
-			}, () -> sendKakaoCallbackFailureAlert(new ApiException(AuthErrorCode.NOT_FOUND_USER), info));
+			}, () -> sendKakaoCallbackFailureAlert(new ApiException(UserErrorCode.NOT_FOUND_USER), info));
 	}
 
 	private void sendKakaoCallbackFailureAlert(Exception ex, KakaoUnlinkCallbackInfo info) {

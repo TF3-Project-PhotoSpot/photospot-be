@@ -26,7 +26,7 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 
 	@Override
 	protected Object initController() {
-		return new AuthController(authService, userService);
+		return new AuthController(authService);
 	}
 
 	@Test

@@ -15,7 +15,6 @@ import com.tf4.photospot.global.argument.AuthUserId;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.dto.ApiResponse;
 import com.tf4.photospot.global.dto.LoginUserDto;
-import com.tf4.photospot.user.application.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
 	private final AuthService authService;
-	private final UserService userService;
 
 	@GetMapping("/reissue")
 	public ReissueTokenResponse reissueToken(
@@ -40,7 +38,7 @@ public class AuthController {
 		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String accessToken,
 		@RequestParam(name = "isLinked", defaultValue = "true") Boolean isLinked) {
 		if (Boolean.TRUE.equals(isLinked)) {
-			authService.unlinkKakaoAccount(userService.getActiveUser(userId).getAccount());
+			authService.unlinkKakaoAccount(userId);
 		}
 		authService.deleteUser(userId, accessToken);
 		return ApiResponse.SUCCESS;
