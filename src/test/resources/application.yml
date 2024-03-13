@@ -35,6 +35,7 @@ logging:
 kakao:
   rest-api-key: test6d177caw1120g3510952427y92d3
   app-id: 123456
+  admin-key: admin-key-admin-key-admin-key
 
 apple:
   client-id: apple.client.id
@@ -42,3 +43,6 @@ apple:
 jwt:
   issuer: test-issuer
   secret_key: testk24rlk24j4akfjaklfj3k3rj439841398sadkfjkefjkqefj44324230fskfjwkgjwlgkjw2lsfkjlefjwlkj50921ifkljfwdlkfjwlkfjdwlkfj
+
+slack:
+  url: slack_url/webhook

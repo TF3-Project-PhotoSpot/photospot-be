@@ -77,6 +77,9 @@ dependencies {
     // Apache Commons Lang
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.14.0'
 
+    // slack
+    implementation group: 'com.slack.api', name: 'slack-api-client', version: '1.36.1'
+
     // test
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
@@ -146,16 +149,17 @@ jacocoTestReport {
         classDirectories.setFrom(
                 files(classDirectories.files.collect {
                     fileTree(dir: it, excludes: [
-                            '**/GlobalExceptionHandler.java',
+                            '**/GlobalExceptionHandler.*',
                             '**/ApplePublicKeyResponse*',
-                            '**/AppleService.class',
-                            '**/KakaoService.class',
+                            '**/AppleService.*',
+                            '**/KakaoService.*',
                             '**/*Request.*',
                             '**/*Response.*',
                             '**/*Dto.*',
                             '**/*Constant.*',
                             '**/config/**/*',
-                            '**/filter/**/*'
+                            '**/filter/**/*',
+                            '**/SlackAlert.*'
                     ] + Qdomains)
                 })
         )
@@ -189,7 +193,8 @@ jacocoTestCoverageVerification {
                     '*.*Dto',
                     '*.*Constant',
                     '*.config.*',
-                    '*.filter.*'
+                    '*.filter.*',
+                    '*.SlackAlert'
             ] + Qdomains
         }
     }
@@ -210,7 +215,7 @@ sonar {
         property 'sonar.host.url', "https://sonarcloud.io"
         property 'sonar.java.checkstyle.reportPaths', 'build/reports/checkstyle/main.xml'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-        property 'sonar.coverage.exclusions', '**/GlobalExceptionHandler.java, **/AppleService.java, **/KakaoService.java' +
-                '**/ApplePublicKeyResponse*, **/*Request.*, **/*Response.*, **/*Dto.*, **/*Constant.*, **/config/**/*, **/filter/**/*'
+        property 'sonar.coverage.exclusions', '**/GlobalExceptionHandler.*, **/AppleService.*, **/KakaoService.*, **/ApplePublicKeyResponse*' +
+                '**/*Request.*, **/*Response.*, **/*Dto.*, **/*Constant.*, **/config/**/*, **/filter/**/*, **/SlackAlert.*'
     }
 }

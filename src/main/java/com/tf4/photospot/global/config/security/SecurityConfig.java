@@ -34,8 +34,8 @@ public class SecurityConfig {
 
 	@Bean
 	public WebSecurityCustomizer webSecurityCustomizer() {
-		// 정적 리소스 경로에 대해서 시큐리티 필터 제외
 		return (web -> web.ignoring()
+			.requestMatchers("/api/v1/auth/unlink/callback")
 			.requestMatchers("/docs/index.html")
 			.requestMatchers(PathRequest.toStaticResources().atCommonLocations()));
 	}
