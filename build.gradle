@@ -66,6 +66,8 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
     implementation group: 'com.auth0', name: 'java-jwt', version: '4.4.0'
+    implementation group: 'org.bouncycastle', name: 'bcprov-jdk18on', version: '1.77'
+    implementation group: 'org.bouncycastle', name: 'bcpkix-jdk18on', version: '1.77'
 
     // Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
