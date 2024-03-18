@@ -2,6 +2,7 @@ package com.tf4.photospot.auth.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.OauthAttributes;
@@ -101,9 +102,27 @@ public class AuthService {
 		}
 	}
 
+	public void unlinkAccountFromOauthServer(Long userId, String provider, String authorizationCode) {
+		if (OauthAttributes.KAKAO.equals(OauthAttributes.findByType(provider))) {
+			unlinkKakaoAccount(userId);
+		} else {
+			unlinkAppleAccount(authorizationCode);
+		}
+	}
+
 	public void unlinkKakaoAccount(Long userId) {
-		Long account = Long.valueOf(userService.getActiveUser(userId).getAccount());
-		kakaoService.unlink(account);
+		User user = userService.getActiveUser(userId);
+		if (!user.getProviderType().equals(OauthAttributes.KAKAO.getProvider())) {
+			throw new ApiException(UserErrorCode.NOT_FOUND_USER);
+		}
+		kakaoService.unlink(Long.valueOf(user.getAccount()));
+	}
+
+	public void unlinkAppleAccount(String authorizationCode) {
+		if (!StringUtils.hasText(authorizationCode)) {
+			throw new ApiException(AuthErrorCode.INVALID_APPLE_AUTHORIZATION_CODE);
+		}
+		appleService.unlink(authorizationCode);
 	}
 
 	@Transactional
