@@ -11,11 +11,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
 import org.springframework.restdocs.payload.JsonFieldType;
 
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.presentation.AuthController;
+import com.tf4.photospot.auth.presentation.request.UnlinkRequest;
 import com.tf4.photospot.spring.docs.RestDocsSupport;
 import com.tf4.photospot.user.application.UserService;
 
@@ -55,14 +57,26 @@ public class AuthControllerDocsTest extends RestDocsSupport {
 	@DisplayName("회원 탈퇴")
 	void unlinkUser() throws Exception {
 		// given
+		var request = new UnlinkRequest("kakao", true, null);
 		given(userService.getActiveUser(anyLong())).willReturn(createUser("사용자"));
 
 		// when
 		mockMvc.perform(post("/api/v1/auth/unlink")
-				.header("Authorization", "Bearer access_token"))
+				.header("Authorization", "Bearer access_token")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(mapper.writeValueAsString(request)))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
 				requestHeaders(headerWithName("Authorization").description("액세스 토큰")),
+				requestFields(
+					fieldWithPath("provider").description("oauth 공급자"),
+					fieldWithPath("isLinked").description("oauth server 계정 연결 상태")
+						.optional()
+						.attributes(constraints("true인 경우 oauth server 연결 끊기 api 호출"), defaultValue("false")),
+					fieldWithPath("authorizationCode").description("apple 인증 코드")
+						.optional()
+						.attributes(constraints("카카오인 경우 null"), defaultValue("null"))
+				),
 				queryParameters(parameterWithName("isLinked").description("현재 계정 연결 상태").optional()
 					.attributes(defaultValue("true"))),
 				responseFields(fieldWithPath("message").type(JsonFieldType.STRING).description("성공"))
