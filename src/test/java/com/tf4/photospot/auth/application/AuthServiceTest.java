@@ -4,7 +4,7 @@ import static com.tf4.photospot.support.TestFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,12 +20,16 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tf4.photospot.auth.application.request.KakaoUnlinkRequest;
+import com.tf4.photospot.auth.application.response.KakaoUnlinkResponse;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
+import com.tf4.photospot.auth.infrastructure.KakaoClient;
 import com.tf4.photospot.auth.presentation.request.KakaoUnlinkCallbackInfo;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.global.util.SlackAlert;
 import com.tf4.photospot.mockobject.WithCustomMockUser;
 import com.tf4.photospot.support.IntegrationTestSupport;
@@ -37,16 +41,24 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AuthServiceTest extends IntegrationTestSupport {
-	private final AuthService authService;
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final JwtRedisRepository jwtRedisRepository;
 
 	@SpyBean
+	private final AuthService authService;
+
+	@SpyBean
 	private UserQueryRepository userQueryRepository;
+
+	@SpyBean
+	private KakaoService kakaoService;
 
 	@MockBean
 	private SlackAlert slackAlert;
+
+	@MockBean
+	private KakaoClient kakaoClient;
 
 	@TestFactory
 	@DisplayName("사용자 등록 시나리오")
@@ -157,6 +169,30 @@ public class AuthServiceTest extends IntegrationTestSupport {
 					() -> assertThatThrownBy(() -> authService.existsBlacklist(accessToken))
 						.isInstanceOf(ApiException.class).hasMessage(AuthErrorCode.INVALID_ACCESS_TOKEN.getMessage())
 				);
+			}),
+			dynamicTest("존재하지 않거나 이미 탈퇴한 회원에 대해 회원탈퇴 시 예외를 던진다.", () -> {
+				// when & then
+				assertThatThrownBy(() -> authService.deleteUser(loginUser.getId(), accessToken))
+					.isInstanceOf(ApiException.class).hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
+			}),
+			dynamicTest("계정 연결 끊기 메서드에서 공급자 파라미터가 카카오인 경우 카카오 연결 끊기 메서드를 호출한다.", () -> {
+				// given
+				User user = createUser("사용자", "110", "kakao");
+				userRepository.save(user);
+				var response = new KakaoUnlinkResponse();
+
+				// when
+				authService.unlinkAccountFromOauthServer(user.getId(), "kakao", null);
+				given(kakaoClient.unlink(anyString(), any(KakaoUnlinkRequest.class))).willReturn(response);
+				willDoNothing().given(kakaoService).unlink(anyLong());
+
+				// then
+				verify(authService, times(1)).unlinkKakaoAccount(anyLong());
+			}),
+			dynamicTest("계정 연결 끊기 메서드에서 공급자 파라미터가 유효하지 않는 경우 예외를 던진다", () -> {
+				// when & then
+				assertThatThrownBy(() -> authService.unlinkAccountFromOauthServer(loginUser.getId(), "wrong", null))
+					.isInstanceOf(ApiException.class).hasMessage(AuthErrorCode.INVALID_PROVIDER_TYPE.getMessage());
 			}),
 			dynamicTest("카카오 콜백 요청에 따라 연결이 끊긴 사용자를 탈퇴처리한다.", () -> {
 				// given
