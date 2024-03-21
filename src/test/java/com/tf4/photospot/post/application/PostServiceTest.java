@@ -272,7 +272,8 @@ class PostServiceTest extends IntegrationTestSupport {
 	@TestFactory
 	Stream<DynamicTest> getPosts() {
 		//given
-		Spot spot = createSpot();
+		String spotAddress = "spot address";
+		Spot spot = createSpot(spotAddress, createPoint(), 0L);
 		User writer = createUser("작성자");
 		User reader = createUser("읽는이");
 		spotRepository.save(spot);
@@ -311,12 +312,13 @@ class PostServiceTest extends IntegrationTestSupport {
 			assertThat(firstResponse.content().size()).isEqualTo(firstPageRequest.pageable().getPageSize());
 			assertThat(lastResponse.hasNext()).isFalse();
 			assertThat(lastResponse.content().size()).isLessThan(lastPageRequest.pageable().getPageSize());
-		}), dynamicTest("버블, 태그, 좋아요 정보를 조회할 수 있다.", () -> {
+		}), dynamicTest("스팟 주소, 버블, 태그, 좋아요 정보를 조회할 수 있다.", () -> {
 			//when
 			SlicePageDto<PostDetailResponse> response = postService.getPosts(firstPageRequest);
 			//then
 			PostDetailResponse postWithExtraInfo = response.content().get(0);
 			PostDetailResponse postWithoutAnyInfo = response.content().get(1);
+			assertThat(postWithExtraInfo.address()).isEqualTo(spotAddress);
 			assertThat(postWithExtraInfo.writer().id()).isEqualTo(writer.getId());
 			assertThat(postWithExtraInfo.tags()).extracting("tagName").containsExactly("tagA", "tagB", "tagC");
 			assertThat(postWithExtraInfo.isLiked()).isTrue();
@@ -327,6 +329,15 @@ class PostServiceTest extends IntegrationTestSupport {
 			assertThat(postWithoutAnyInfo.tags()).isEmpty();
 			assertThat(postWithoutAnyInfo.isLiked()).isFalse();
 			assertThat(postWithoutAnyInfo.bubble()).isNull();
+		}), dynamicTest("내가 쓴 글 여부를 확인할 수 있다..", () -> {
+			//when
+			postRepository.save(createPost(spot, reader));
+			SlicePageDto<PostDetailResponse> response = postService.getPosts(firstPageRequest);
+			//then
+			PostDetailResponse myPost = response.content().get(0);
+			PostDetailResponse otherPost = response.content().get(1);
+			assertThat(myPost.writer().isWriter()).isTrue();
+			assertThat(otherPost.writer().isWriter()).isFalse();
 		}), dynamicTest("최신순으로 조회할 수 있다.", () -> {
 			//given
 			final PostSearchCondition searchByLatest = PostSearchCondition.builder()

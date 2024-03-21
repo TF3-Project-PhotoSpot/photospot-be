@@ -26,7 +26,8 @@ public record PostAllResponse(
 	public PostAllResponse {
 	}
 
-	public static PostAllResponse of(PostWithLikeStatus postResponse, List<PostTag> postTags, List<Mention> mentions) {
+	public static PostAllResponse of(PostDetail postResponse, List<PostTag> postTags, List<Mention> mentions,
+		Long userId) {
 		final Post post = postResponse.post();
 		return PostAllResponse.builder()
 			.id(post.getId())
@@ -35,7 +36,7 @@ public record PostAllResponse(
 			.photoUrl(post.getPhoto().getPhotoUrl())
 			.bubble(BubbleResponse.from(post.getPhoto().getBubble()))
 			.createdAt(post.getCreatedAt())
-			.writer(WriterResponse.from(post.getWriter()))
+			.writer(WriterResponse.from(post.getWriter(), userId))
 			.isLiked(postResponse.isLiked())
 			.isPrivate(post.isPrivate())
 			.tags(postTags.stream().map(TagResponse::from).toList())

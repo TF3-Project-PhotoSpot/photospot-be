@@ -75,13 +75,14 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 		//given
 		var response = SlicePageDto.wrap(List.of(PostDetailResponse.builder()
 			.id(1L)
+			.address("spot address")
 			.detailAddress("detail address")
 			.likeCount(10)
 			.photoUrl("photoUrl")
 			.bubble(new BubbleResponse("이미지 설명", 100, 200))
 			.isLiked(true)
 			.createdAt(LocalDateTime.of(2024, 1, 10, 12, 30))
-			.writer(new WriterResponse(1L, "nickname", "profileUrl"))
+			.writer(new WriterResponse(1L, true, "nickname", "profileUrl"))
 			.tags(List.of(new TagResponse(1L, "iconUrl", "tagName")))
 			.build()), false);
 		given(albumService.getPostsOfAlbum(any(PostSearchCondition.class))).willReturn(response);
@@ -105,6 +106,7 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content").type(JsonFieldType.ARRAY).description("방명록 상세 목록 리스트")
 						.attributes(defaultValue("emptyList")),
 					fieldWithPath("content[].id").type(JsonFieldType.NUMBER).description("방명록 ID"),
+					fieldWithPath("content[].address").type(JsonFieldType.STRING).description("스팟 주소"),
 					fieldWithPath("content[].detailAddress").type(JsonFieldType.STRING).description("방명록 상세 주소"),
 					fieldWithPath("content[].likeCount").type(JsonFieldType.NUMBER).description("방명록 좋아요 개수"),
 					fieldWithPath("content[].photoUrl").type(JsonFieldType.STRING).description("방명록 photo url"),
@@ -117,6 +119,7 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 					fieldWithPath("content[].createdAt").type(JsonFieldType.STRING).description("방명록 생성일")
 						.description("생성"),
 					fieldWithPath("content[].writer.id").type(JsonFieldType.NUMBER).description("작성자 ID"),
+					fieldWithPath("content[].writer.isWriter").type(JsonFieldType.BOOLEAN).description("작성자 본인 여부"),
 					fieldWithPath("content[].writer.nickname").type(JsonFieldType.STRING).description("작성자 닉네임"),
 					fieldWithPath("content[].writer.profileUrl").type(JsonFieldType.STRING)
 						.description("작성자 profile url"),

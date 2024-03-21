@@ -20,11 +20,11 @@ import com.tf4.photospot.post.application.request.PostCreateDto;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.response.PostAllResponse;
+import com.tf4.photospot.post.application.response.PostDetail;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.PostSaveResponse;
 import com.tf4.photospot.post.application.response.PostUpdateResponse;
-import com.tf4.photospot.post.application.response.PostWithLikeStatus;
 import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
@@ -67,16 +67,27 @@ public class PostService {
 	private final UserService userService;
 
 	public SlicePageDto<PostDetailResponse> getPosts(PostSearchCondition postSearchCond) {
-		final Slice<PostWithLikeStatus> postResponses = postQueryRepository.findPostsWithLikeStatus(postSearchCond);
-		final Map<Post, List<PostTag>> postTagGroup = postQueryRepository
-			.findPostTagsIn(postResponses.stream().map(PostWithLikeStatus::post).toList())
+		final Slice<PostDetail> postDetails = postQueryRepository.findPostDetails(postSearchCond);
+		final List<PostTag> postTags = postQueryRepository.findPostTagsIn(postDetails
 			.stream()
+			.map(PostDetail::post)
+			.toList());
+		return SlicePageDto.wrap(
+			groupByPostDetails(postDetails, postTags, postSearchCond.userId()),
+			postDetails.hasNext()
+		);
+	}
+
+	private List<PostDetailResponse> groupByPostDetails(Slice<PostDetail> postDetails, List<PostTag> postTags,
+		Long userId) {
+		final Map<Post, List<PostTag>> postTagGroup = postTags.stream()
 			.collect(Collectors.groupingBy(PostTag::getPost));
-		final List<PostDetailResponse> postDetailResponses = postResponses.stream()
-			.map(postResponse -> PostDetailResponse.of(postResponse,
-				postTagGroup.getOrDefault(postResponse.post(), Collections.emptyList())))
+		return postDetails.stream()
+			.map(postDetail -> PostDetailResponse.of(
+				postDetail,
+				postTagGroup.getOrDefault(postDetail.post(), Collections.emptyList()),
+				userId))
 			.toList();
-		return SlicePageDto.wrap(postDetailResponses, postResponses.hasNext());
 	}
 
 	public SlicePageDto<PostPreviewResponse> getPostPreviews(PostSearchCondition postSearchCond) {
@@ -84,7 +95,7 @@ public class PostService {
 	}
 
 	public PostAllResponse getPost(Long userId, Long postId) {
-		final PostWithLikeStatus postResponse = postQueryRepository.findPost(userId, postId);
+		final PostDetail postResponse = postQueryRepository.findPost(userId, postId);
 		if (postResponse == null) {
 			throw new ApiException(PostErrorCode.NOT_FOUND_POST);
 		}
@@ -92,7 +103,7 @@ public class PostService {
 			Collections.singletonList(postResponse.post()));
 		final List<Mention> mentions = postQueryRepository.findMentionsIn(
 			Collections.singletonList(postResponse.post()));
-		return PostAllResponse.of(postResponse, postTags, mentions);
+		return PostAllResponse.of(postResponse, postTags, mentions, userId);
 	}
 
 	@Transactional

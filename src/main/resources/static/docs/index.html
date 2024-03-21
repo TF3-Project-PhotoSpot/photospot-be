@@ -2156,18 +2156,20 @@ Host: localhost:8080</code></pre>
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
   "content" : [ {
     "id" : 1,
+    "address" : "spot address",
     "detailAddress" : "detail address",
     "likeCount" : 10,
     "photoUrl" : "photoUrl",
+    "isLiked" : true,
+    "createdAt" : "2024-01-10T12:30:00",
     "bubble" : {
       "text" : "이미지 설명",
       "x" : 100.0,
       "y" : 200.0
     },
-    "isLiked" : true,
-    "createdAt" : "2024-01-10T12:30:00",
     "writer" : {
       "id" : 1,
+      "isWriter" : true,
       "nickname" : "nickname",
       "profileUrl" : "profileUrl"
     },
@@ -2211,6 +2213,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">방명록 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].address</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">장소 주소</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].detailAddress</code></p></td>
@@ -2271,6 +2279,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">작성자 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.isWriter</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 본인 여부</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.nickname</code></p></td>
@@ -2485,18 +2499,20 @@ Host: localhost:8080</code></pre>
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
   "content" : [ {
     "id" : 1,
+    "address" : "spot address",
     "detailAddress" : "detail address",
     "likeCount" : 10,
     "photoUrl" : "photoUrl",
+    "isLiked" : true,
+    "createdAt" : "2024-01-10T12:30:00",
     "bubble" : {
       "text" : "이미지 설명",
       "x" : 100.0,
       "y" : 200.0
     },
-    "isLiked" : true,
-    "createdAt" : "2024-01-10T12:30:00",
     "writer" : {
       "id" : 1,
+      "isWriter" : true,
       "nickname" : "nickname",
       "profileUrl" : "profileUrl"
     },
@@ -2542,6 +2558,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">방명록 ID</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].address</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">장소 주소</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].detailAddress</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -2576,6 +2598,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">작성자 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.isWriter</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">작성자</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.nickname</code></p></td>
@@ -2903,18 +2931,20 @@ Host: localhost:8080</code></pre>
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
   "content" : [ {
     "id" : 1,
+    "address" : "spot address",
     "detailAddress" : "detail address",
     "likeCount" : 10,
     "photoUrl" : "photoUrl",
+    "isLiked" : true,
+    "createdAt" : "2024-01-10T12:30:00",
     "bubble" : {
       "text" : "이미지 설명",
       "x" : 100.0,
       "y" : 200.0
     },
-    "isLiked" : true,
-    "createdAt" : "2024-01-10T12:30:00",
     "writer" : {
       "id" : 1,
+      "isWriter" : true,
       "nickname" : "nickname",
       "profileUrl" : "profileUrl"
     },
@@ -2960,6 +2990,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock">방명록 ID</p></td>
 </tr>
 <tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].address</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">장소 주소</p></td>
+</tr>
+<tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].detailAddress</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -2994,6 +3030,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">작성자 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.isWriter</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 본인 여부</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.nickname</code></p></td>
@@ -4015,18 +4057,20 @@ Host: localhost:8080</code></pre>
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
   "content" : [ {
     "id" : 1,
+    "address" : "spot address",
     "detailAddress" : "detail address",
     "likeCount" : 10,
     "photoUrl" : "photoUrl",
+    "isLiked" : true,
+    "createdAt" : "2024-01-10T12:30:00",
     "bubble" : {
       "text" : "이미지 설명",
       "x" : 100.0,
       "y" : 200.0
     },
-    "isLiked" : true,
-    "createdAt" : "2024-01-10T12:30:00",
     "writer" : {
       "id" : 1,
+      "isWriter" : true,
       "nickname" : "nickname",
       "profileUrl" : "profileUrl"
     },
@@ -4070,6 +4114,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">방명록 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].address</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">스팟 주소</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].detailAddress</code></p></td>
@@ -4130,6 +4180,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>Number</code></p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">작성자 ID</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.isWriter</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>Boolean</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">작성자 본인 여부</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>content[].writer.nickname</code></p></td>
@@ -4967,7 +5023,7 @@ Host: localhost:8080</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-03-11 00:59:36 +0900
+Last updated 2024-03-08 18:13:28 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
