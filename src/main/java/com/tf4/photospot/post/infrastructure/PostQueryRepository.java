@@ -26,10 +26,10 @@ import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.global.util.QueryDslUtils;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
+import com.tf4.photospot.post.application.response.PostDetail;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.application.response.QPostDetail;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
-import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QReportResponse;
 import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.domain.Mention;
@@ -70,12 +70,16 @@ public class PostQueryRepository extends QueryDslUtils {
 		return orderBy(query, getPostSearchPathBase(cond.type()), pageable).toSlice(query, pageable);
 	}
 
-	public Slice<PostWithLikeStatus> findPostsWithLikeStatus(PostSearchCondition cond) {
+	public Slice<PostDetail> findPostDetails(PostSearchCondition cond) {
 		final PostSearchType searchType = cond.type();
 		final Pageable pageable = cond.pageable();
 		final QUser writer = new QUser("writer");
-		var query = queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
+		var query = queryFactory.select(new QPostDetail(
+				post,
+				spot.address,
+				postLike.isNotNull()))
 			.from(post)
+			.join(post.spot, spot)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin()
@@ -103,10 +107,14 @@ public class PostQueryRepository extends QueryDslUtils {
 		return post;
 	}
 
-	public PostWithLikeStatus findPost(Long userId, Long postId) {
+	public PostDetail findPost(Long userId, Long postId) {
 		final QUser writer = new QUser("writer");
-		return queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
+		return queryFactory.select(new QPostDetail(
+				post,
+				spot.address,
+				postLike.isNotNull()))
 			.from(post)
+			.join(post.spot, spot)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin()
