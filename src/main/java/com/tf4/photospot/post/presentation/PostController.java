@@ -89,7 +89,7 @@ public class PostController {
 		@PathVariable(name = "postId") Long postId,
 		@AuthUserId Long userId
 	) {
-		postService.likePost(postId, userId);
+		postService.cancelPostLike(postId, userId);
 		return ApiResponse.SUCCESS;
 	}
 

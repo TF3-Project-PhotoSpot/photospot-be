@@ -13,7 +13,6 @@ import static com.tf4.photospot.spot.domain.QSpot.*;
 import static com.tf4.photospot.user.domain.QUser.*;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -35,7 +34,6 @@ import com.tf4.photospot.post.application.response.QReportResponse;
 import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
-import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.domain.Tag;
 import com.tf4.photospot.post.domain.TagRepository;
@@ -177,21 +175,6 @@ public class PostQueryRepository extends QueryDslUtils {
 		return nullSafeBuilder(() -> albumPost.album.id.eq(albumId));
 	}
 
-	public boolean existsPostLike(Post post, User user) {
-		final Integer exists = queryFactory.selectOne()
-			.from(postLike)
-			.where(postLike.post.eq(post).and(postLike.user.eq(user)))
-			.fetchFirst();
-		return exists != null;
-	}
-
-	public Optional<PostLike> findPostLikeFetch(Long postId, Long userId) {
-		return Optional.ofNullable(queryFactory.selectFrom(postLike)
-			.join(postLike.post, post).fetchJoin()
-			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
-			.fetchOne());
-	}
-
 	public boolean existsReport(Post post, User user) {
 		final Integer exists = queryFactory.selectOne()
 			.from(report)
@@ -218,5 +201,12 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(post.spot, spot)
 			.where(report.reporter.id.eq(userId))
 			.fetch();
+	}
+
+	public boolean cancelLike(Long postId, Long userId) {
+		final long deleted = queryFactory.delete(postLike)
+			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
+			.execute();
+		return deleted != 0L;
 	}
 }

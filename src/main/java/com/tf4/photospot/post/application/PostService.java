@@ -10,7 +10,6 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.global.aop.Retry;
 import com.tf4.photospot.global.dto.SlicePageDto;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.PostErrorCode;
@@ -48,10 +47,12 @@ import com.tf4.photospot.user.application.UserService;
 import com.tf4.photospot.user.domain.User;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.utils.CollectionUtils;
 
 @Transactional(readOnly = true)
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PostService {
 	private final PostQueryRepository postQueryRepository;
@@ -139,25 +140,24 @@ public class PostService {
 		}
 	}
 
-	@Retry
 	@Transactional
 	public void likePost(Long postId, Long userId) {
 		final User user = userService.getActiveUser(userId);
 		final Post post = findPost(postId);
-		if (postQueryRepository.existsPostLike(post, user)) {
+		if (postLikeRepository.existsByPostIdAndUserId(postId, userId)) {
 			throw new ApiException(PostErrorCode.ALREADY_LIKE);
 		}
-		final PostLike postLike = post.likeFrom(user);
-		postLikeRepository.save(postLike);
+		postLikeRepository.save(PostLike.of(post, user));
+		postJdbcRepository.increasePostLike(postId);
 	}
 
-	@Retry
 	@Transactional
 	public void cancelPostLike(Long postId, Long userId) {
-		final PostLike postLike = postQueryRepository.findPostLikeFetch(postId, userId)
-			.orElseThrow(() -> new ApiException(PostErrorCode.NO_EXISTS_LIKE));
-		postLike.cancel();
-		postLikeRepository.delete(postLike);
+		final boolean notCanceled = !postQueryRepository.cancelLike(postId, userId);
+		if (notCanceled) {
+			throw new ApiException(PostErrorCode.NO_EXISTS_LIKE);
+		}
+		postJdbcRepository.decreasePostLike(postId);
 	}
 
 	@Transactional
@@ -212,7 +212,8 @@ public class PostService {
 	}
 
 	private Post findPost(Long postId) {
-		return postRepository.findById(postId).orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
+		return postRepository.findById(postId)
+			.orElseThrow(() -> new ApiException(PostErrorCode.NOT_FOUND_POST));
 	}
 
 	public Optional<String> getFirstPostImage(PostSearchCondition postSearchCond) {

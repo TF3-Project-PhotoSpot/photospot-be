@@ -52,25 +52,25 @@ public class TestFixture {
 
 	public static Post createPost(Spot spot, User user) {
 		spot.incPostCount();
-		return createPost(spot, user, 0L);
+		return createPost(spot, user, 0);
 	}
 
 	public static Post createPost(Spot spot, User user, boolean isPrivate) {
 		spot.incPostCount();
-		return createPost(spot, user, createPhoto(), 0L, isPrivate);
+		return createPost(spot, user, createPhoto(), 0, isPrivate);
 	}
 
-	public static Post createPost(Spot spot, User user, Long likeCount) {
+	public static Post createPost(Spot spot, User user, int likeCount) {
 		spot.incPostCount();
 		return createPost(spot, user, createPhoto(), likeCount, false);
 	}
 
 	public static Post createPost(Spot spot, User user, Photo photo) {
 		spot.incPostCount();
-		return createPost(spot, user, photo, 0L, false);
+		return createPost(spot, user, photo, 0, false);
 	}
 
-	public static Post createPost(Spot spot, User user, Photo photo, Long likeCount, boolean isPrivate) {
+	public static Post createPost(Spot spot, User user, Photo photo, int likeCount, boolean isPrivate) {
 		spot.incPostCount();
 		return Post.builder()
 			.spot(spot)

@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -13,6 +14,9 @@ import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.spot.application.response.MostPostTagRank;
 import com.tf4.photospot.spot.domain.Spot;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Repository
 public class PostJdbcRepository {
 	private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -104,5 +108,33 @@ public class PostJdbcRepository {
 			.name(rs.getString("name"))
 			.iconUrl(rs.getString("icon_url"))
 			.build()));
+	}
+
+	public void increasePostLike(Long postId) {
+		jdbcTemplate.update("update post set like_count = like_count + 1 where id = :id",
+			new MapSqlParameterSource("id", postId));
+	}
+
+	public void decreasePostLike(Long postId) {
+		try {
+			jdbcTemplate.update("update post set like_count = like_count - 1 where id = :id",
+				new MapSqlParameterSource("id", postId));
+		} catch (DataIntegrityViolationException exception) {
+			log.error("[POST ID={}] 방명록의 좋아요 개수가 일치하지 않습니다.", postId);
+			syncLikeCount(postId);
+		}
+	}
+
+	private void syncLikeCount(Long postId) {
+		jdbcTemplate.update("""
+				update post
+				set like_count = (
+					select count(*)
+					from post_like pl
+					where pl.post_id = :post_id
+				)
+				where id = :post_id
+					""",
+			new MapSqlParameterSource("post_id", postId));
 	}
 }
