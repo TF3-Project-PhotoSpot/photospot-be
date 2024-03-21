@@ -58,6 +58,7 @@ import com.tf4.photospot.support.IntegrationTestSupport;
 import com.tf4.photospot.user.domain.User;
 import com.tf4.photospot.user.domain.UserRepository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -72,6 +73,7 @@ class PostServiceTest extends IntegrationTestSupport {
 	private final TagRepository tagRepository;
 	private final MentionRepository mentionRepository;
 	private final ReportRepository reportRepository;
+	private final EntityManager em;
 
 	@DisplayName("방명록 좋아요")
 	@TestFactory
@@ -79,34 +81,32 @@ class PostServiceTest extends IntegrationTestSupport {
 		//given
 		final Spot spot = spotRepository.save(createSpot());
 		final User writer = userRepository.save(createUser("이성빈"));
-		final Post post = postRepository.save(createPost(spot, writer, 0L));
+		final Post post = postRepository.save(createPost(spot, writer, 0));
 		final User user = userRepository.save(createUser("user"));
 
 		return Stream.of(
 			dynamicTest("좋아요를 할 수 있다.", () -> {
 				//given
-				final Long beforeLikes = post.getLikeCount();
+				final int beforeLikes = post.getLikeCount();
 				//when
 				postService.likePost(post.getId(), user.getId());
 				//then
-				assertThat(postRepository.findById(post.getId())).isPresent()
-					.get()
+				em.clear();
+				assertThat(postRepository.findById(post.getId())).isPresent().get()
 					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes + 1));
-			}), dynamicTest("좋아요를 중복해서 할 수 없다.",
-				() -> assertThatThrownBy(() -> postService.likePost(post.getId(), user.getId())).isInstanceOf(
-					ApiException.class).extracting("errorCode").isEqualTo(PostErrorCode.ALREADY_LIKE)),
+			}),
+			dynamicTest("좋아요를 중복해서 할 수 없다.", () ->
+				assertThatThrownBy(() -> postService.likePost(post.getId(), user.getId()))
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.ALREADY_LIKE)),
 			dynamicTest("좋아요 취소를 할 수 있다.", () -> {
-				//given
-				final Long beforeLikes = post.getLikeCount();
-				//when
-				postService.cancelPostLike(post.getId(), user.getId());
-				//then
-				assertThat(postRepository.findById(post.getId())).isPresent()
-					.get()
-					.satisfies(updatedPost -> assertThat(updatedPost.getLikeCount()).isEqualTo(beforeLikes - 1));
-			}), dynamicTest("좋아요 취소를 중복해서 할 수 없다.",
-				() -> assertThatThrownBy(() -> postService.cancelPostLike(post.getId(), user.getId())).isInstanceOf(
-					ApiException.class).extracting("errorCode").isEqualTo(PostErrorCode.NO_EXISTS_LIKE)));
+				assertDoesNotThrow(() -> postService.cancelPostLike(post.getId(), user.getId()));
+				assertThat(postLikeRepository.existsByPostIdAndUserId(post.getId(), user.getId())).isFalse();
+			}),
+			dynamicTest("좋아요 취소를 중복해서 할 수 없다.", () ->
+				assertThatThrownBy(() -> postService.cancelPostLike(post.getId(), user.getId()))
+					.extracting("errorCode")
+					.isEqualTo(PostErrorCode.NO_EXISTS_LIKE)));
 	}
 
 	@DisplayName("방명록 미리보기 목록 조회")
@@ -372,7 +372,7 @@ class PostServiceTest extends IntegrationTestSupport {
 				comparing(PostDetailResponse::likeCount));
 		}), dynamicTest("좋아요순으로, 좋아요가 같으면 최신순으로 조회할 수 있다.", () -> {
 			//given
-			final Long mostLikeCount = 1000L;
+			final int mostLikeCount = 1000;
 			final PostSearchCondition searchCondition = PostSearchCondition.builder()
 				.spotId(spot.getId())
 				.userId(reader.getId())
@@ -757,5 +757,28 @@ class PostServiceTest extends IntegrationTestSupport {
 				assertThat(emptyReports).isEmpty();
 			})
 		);
+	}
+
+	@DisplayName("좋아요 개수가 마이너스가 되면 재조정을 한다.")
+	@Test
+	void syncLikeCount() {
+		//given
+		final Spot spot = spotRepository.save(createSpot());
+		final User user = userRepository.save(createUser("user"));
+		final User user2 = userRepository.save(createUser("user2"));
+		final Post post = postRepository.save(createPost(spot, user));
+		postLikeRepository.save(createPostLike(post, user));
+		postLikeRepository.save(createPostLike(post, user2));
+
+		//when
+		postService.cancelPostLike(post.getId(), user.getId());
+
+		//then
+		em.clear();
+		assertThat(postRepository.findById(post.getId()))
+			.isPresent()
+			.get()
+			.extracting("likeCount")
+			.isEqualTo(1);
 	}
 }

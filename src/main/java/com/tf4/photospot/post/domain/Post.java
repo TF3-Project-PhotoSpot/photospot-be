@@ -7,12 +7,12 @@ import java.util.List;
 import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
-import com.tf4.photospot.global.exception.domain.PostErrorCode;
 import com.tf4.photospot.photo.domain.Photo;
 import com.tf4.photospot.spot.domain.Spot;
 import com.tf4.photospot.user.domain.User;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -24,7 +24,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -62,17 +61,15 @@ public class Post extends BaseEntity {
 
 	private String detailAddress;
 
-	private Long likeCount;
+	@Column(columnDefinition = "INT UNSIGNED DEFAULT 0")
+	private int likeCount;
 
 	private boolean isPrivate;
 
 	private LocalDateTime deletedAt;
 
-	@Version
-	private Integer version;
-
 	@Builder
-	public Post(User writer, Photo photo, Spot spot, String detailAddress, long likeCount, boolean isPrivate) {
+	public Post(User writer, Photo photo, Spot spot, String detailAddress, int likeCount, boolean isPrivate) {
 		this.writer = writer;
 		this.photo = photo;
 		this.spot = spot;
@@ -88,18 +85,6 @@ public class Post extends BaseEntity {
 			getPhoto().delete();
 			getSpot().decPostCount();
 		}
-	}
-
-	public PostLike likeFrom(User user) {
-		likeCount++;
-		return new PostLike(this, user);
-	}
-
-	public void cancelLike(PostLike postLike) {
-		if (this != postLike.getPost() || likeCount == 0L) {
-			throw new ApiException(PostErrorCode.CAN_NOT_CANCEL_LIKE);
-		}
-		likeCount--;
 	}
 
 	public void updateDetailAddress(User loginUser, String detailAddress) {

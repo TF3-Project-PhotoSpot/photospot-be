@@ -76,7 +76,7 @@ public class AlbumControllerDocsTest extends RestDocsSupport {
 		var response = SlicePageDto.wrap(List.of(PostDetailResponse.builder()
 			.id(1L)
 			.detailAddress("detail address")
-			.likeCount(10L)
+			.likeCount(10)
 			.photoUrl("photoUrl")
 			.bubble(new BubbleResponse("이미지 설명", 100, 200))
 			.isLiked(true)

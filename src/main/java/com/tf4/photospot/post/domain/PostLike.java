@@ -3,7 +3,9 @@ package com.tf4.photospot.post.domain;
 import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.user.domain.User;
 
+import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -28,11 +30,11 @@ public class PostLike extends BaseEntity {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "post_id")
+	@JoinColumn(name = "post_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private Post post;
 
 	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
 	private User user;
 
 	@Builder
@@ -41,7 +43,10 @@ public class PostLike extends BaseEntity {
 		this.user = user;
 	}
 
-	public void cancel() {
-		post.cancelLike(this);
+	public static PostLike of(Post post, User user) {
+		return PostLike.builder()
+			.user(user)
+			.post(post)
+			.build();
 	}
 }

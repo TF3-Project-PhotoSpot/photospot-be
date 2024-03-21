@@ -11,7 +11,7 @@ import lombok.Builder;
 public record PostDetailResponse(
 	Long id,
 	String detailAddress,
-	Long likeCount,
+	int likeCount,
 	String photoUrl,
 	BubbleResponse bubble,
 	Boolean isLiked,
