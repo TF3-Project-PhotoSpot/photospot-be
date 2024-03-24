@@ -8,13 +8,15 @@ import lombok.Builder;
 public record UserInfoResponse(
 	Long userId,
 	String nickname,
-	String profileUrl
+	String profileUrl,
+	String provider
 ) {
 	public static UserInfoResponse of(User user) {
 		return UserInfoResponse.builder()
 			.userId(user.getId())
 			.nickname(user.getNickname())
 			.profileUrl(user.getProfileUrl())
+			.provider(user.getProviderType())
 			.build();
 	}
 }

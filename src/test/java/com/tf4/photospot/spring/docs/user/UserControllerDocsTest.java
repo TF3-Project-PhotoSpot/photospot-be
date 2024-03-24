@@ -79,7 +79,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 	@DisplayName("사용자 정보 조회")
 	void getUserInfo() throws Exception {
 		var response = new UserInfoResponse(1L, "사용자",
-			"https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp");
+			"https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp", "kakao");
 		given(userService.getInfo(anyLong())).willReturn(response);
 
 		mockMvc.perform(get("/api/v1/me"))
@@ -88,7 +88,8 @@ public class UserControllerDocsTest extends RestDocsSupport {
 				responseFields(
 					fieldWithPath("userId").type(JsonFieldType.NUMBER).description("사용자 id"),
 					fieldWithPath("nickname").type(JsonFieldType.STRING).description("사용자 닉네임"),
-					fieldWithPath("profileUrl").type(JsonFieldType.STRING).description("사용자 프로필 url")
+					fieldWithPath("profileUrl").type(JsonFieldType.STRING).description("사용자 프로필 url"),
+					fieldWithPath("provider").type(JsonFieldType.STRING).description("사용자 계정 OAuth 공급자")
 				)
 			));
 	}

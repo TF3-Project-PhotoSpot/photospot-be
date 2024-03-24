@@ -16,7 +16,6 @@ import com.tf4.photospot.user.application.response.NicknameUpdateResponse;
 import com.tf4.photospot.user.application.response.ProfileUpdateResponse;
 import com.tf4.photospot.user.application.response.UserInfoResponse;
 import com.tf4.photospot.user.presentation.request.NicknameUpdateRequest;
-import com.tf4.photospot.user.presentation.request.UpdateProfileRequest;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -60,7 +60,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 
 	@TestFactory
 	Stream<DynamicTest> getUserInfo() {
-		var user = createUser("사용자");
+		var user = createUser("사용자", "123456", "kakao");
 		user.updateProfile("image.com");
 		Long userId = userRepository.save(user).getId();
 		return Stream.of(
@@ -69,6 +69,7 @@ public class UserServiceTest extends IntegrationTestSupport {
 				assertThat(response.userId()).isEqualTo(userId);
 				assertThat(response.nickname()).isEqualTo("사용자");
 				assertThat(response.profileUrl()).isEqualTo("image.com");
+				assertThat(response.provider()).isEqualTo("kakao");
 			}),
 			dynamicTest("존재하지 않는 사용자 정보 조회 시 예외를 던진다.", () -> {
 				assertThatThrownBy(() -> userService.getInfo(100L))
