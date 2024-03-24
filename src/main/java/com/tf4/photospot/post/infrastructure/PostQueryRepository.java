@@ -10,7 +10,6 @@ import static com.tf4.photospot.post.domain.QPostLike.*;
 import static com.tf4.photospot.post.domain.QPostTag.*;
 import static com.tf4.photospot.post.domain.QReport.*;
 import static com.tf4.photospot.spot.domain.QSpot.*;
-import static com.tf4.photospot.user.domain.QUser.*;
 
 import java.util.List;
 
@@ -30,8 +29,6 @@ import com.tf4.photospot.post.application.response.PostDetail;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
 import com.tf4.photospot.post.application.response.QPostDetail;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
-import com.tf4.photospot.post.application.response.QReportResponse;
-import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
 import com.tf4.photospot.post.domain.PostTag;
@@ -193,22 +190,6 @@ public class PostQueryRepository extends QueryDslUtils {
 
 	public List<Tag> getTags() {
 		return tagRepository.findAll();
-	}
-
-	public List<ReportResponse> findReports(Long userId) {
-		return queryFactory.select(new QReportResponse(
-				post.id,
-				user.id,
-				user.nickname,
-				spot.address,
-				report.reason
-			))
-			.from(report)
-			.join(report.post, post)
-			.join(post.writer, user)
-			.join(post.spot, spot)
-			.where(report.reporter.id.eq(userId))
-			.fetch();
 	}
 
 	public boolean cancelLike(Long postId, Long userId) {
