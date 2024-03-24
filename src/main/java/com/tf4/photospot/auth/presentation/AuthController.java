@@ -3,6 +3,7 @@ package com.tf4.photospot.auth.presentation;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tf4.photospot.auth.application.AuthService;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.presentation.request.KakaoUnlinkCallbackInfo;
+import com.tf4.photospot.auth.presentation.request.UnlinkRequest;
 import com.tf4.photospot.global.argument.AuthUserId;
 import com.tf4.photospot.global.config.jwt.JwtConstant;
 import com.tf4.photospot.global.dto.ApiResponse;
@@ -36,10 +38,9 @@ public class AuthController {
 	public ApiResponse unlinkUser(
 		@AuthUserId Long userId,
 		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String accessToken,
-		@RequestParam(name = "isLinked", defaultValue = "true") Boolean isLinked) {
-		if (Boolean.TRUE.equals(isLinked)) {
-			authService.unlinkKakaoAccount(userId);
-		}
+		@RequestBody UnlinkRequest request
+	) {
+		authService.unlinkAccountFromOauthServer(userId, request.authorizationCode());
 		authService.deleteUser(userId, accessToken);
 		return ApiResponse.SUCCESS;
 	}

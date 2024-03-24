@@ -32,7 +32,10 @@ public enum AuthErrorCode implements ApiErrorCode {
 	APPLE_AUTH_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Apple ID 서버 통신 중 오류가 발생했습니다."),
 	CRYPTO_KEY_PROCESSING_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "암호화 중 오류가 발생했습니다."),
 	INVALID_APPLE_IDENTIFY_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 Apple ID 토큰입니다."),
-	EXPIRED_APPLE_IDENTIFY_TOKEN(HttpStatus.UNAUTHORIZED, "Apple ID 토큰이 만료되었습니다.");
+	EXPIRED_APPLE_IDENTIFY_TOKEN(HttpStatus.UNAUTHORIZED, "Apple ID 토큰이 만료되었습니다."),
+	INVALID_APPLE_AUTHORIZATION_CODE(HttpStatus.BAD_REQUEST, "사용자 authorization code가 유효하지 않습니다."),
+	INVALID_PRIVATE_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "Private Key가 올바르지 않습니다."),
+	EMPTY_PRIVATE_KEY(HttpStatus.INTERNAL_SERVER_ERROR, "Private Key가 존재하지 않습니다.");
 
 	private final HttpStatusCode statusCode;
 	private final String message;

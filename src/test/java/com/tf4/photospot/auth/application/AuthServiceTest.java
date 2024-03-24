@@ -4,7 +4,7 @@ import static com.tf4.photospot.support.TestFixture.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,9 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
+import com.tf4.photospot.auth.infrastructure.KakaoClient;
 import com.tf4.photospot.auth.presentation.request.KakaoUnlinkCallbackInfo;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
+import com.tf4.photospot.global.exception.domain.UserErrorCode;
 import com.tf4.photospot.global.util.SlackAlert;
 import com.tf4.photospot.mockobject.WithCustomMockUser;
 import com.tf4.photospot.support.IntegrationTestSupport;
@@ -37,16 +39,24 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public class AuthServiceTest extends IntegrationTestSupport {
-	private final AuthService authService;
 	private final JwtService jwtService;
 	private final UserRepository userRepository;
 	private final JwtRedisRepository jwtRedisRepository;
 
 	@SpyBean
+	private final AuthService authService;
+
+	@SpyBean
 	private UserQueryRepository userQueryRepository;
+
+	@SpyBean
+	private KakaoService kakaoService;
 
 	@MockBean
 	private SlackAlert slackAlert;
+
+	@MockBean
+	private KakaoClient kakaoClient;
 
 	@TestFactory
 	@DisplayName("사용자 등록 시나리오")
@@ -157,6 +167,11 @@ public class AuthServiceTest extends IntegrationTestSupport {
 					() -> assertThatThrownBy(() -> authService.existsBlacklist(accessToken))
 						.isInstanceOf(ApiException.class).hasMessage(AuthErrorCode.INVALID_ACCESS_TOKEN.getMessage())
 				);
+			}),
+			dynamicTest("존재하지 않거나 이미 탈퇴한 회원에 대해 회원탈퇴 시 예외를 던진다.", () -> {
+				// when & then
+				assertThatThrownBy(() -> authService.deleteUser(loginUser.getId(), accessToken))
+					.isInstanceOf(ApiException.class).hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
 			}),
 			dynamicTest("카카오 콜백 요청에 따라 연결이 끊긴 사용자를 탈퇴처리한다.", () -> {
 				// given
