@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Builder;
 
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record GetAppleRefreshTokenRequest(
+public record AppleRefreshTokenRequest(
 	String clientId,
 	String clientSecret,
 	String code,
@@ -14,6 +14,6 @@ public record GetAppleRefreshTokenRequest(
 	String redirectUri
 ) {
 	@Builder
-	public GetAppleRefreshTokenRequest {
+	public AppleRefreshTokenRequest {
 	}
 }

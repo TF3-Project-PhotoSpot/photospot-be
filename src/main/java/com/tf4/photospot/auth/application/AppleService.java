@@ -1,13 +1,8 @@
 package com.tf4.photospot.auth.application;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.math.BigInteger;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
@@ -17,22 +12,19 @@ import java.util.Base64;
 import java.util.Date;
 import java.util.Map;
 
-import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
-import org.bouncycastle.openssl.PEMParser;
-import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tf4.photospot.auth.application.request.AppleRefreshTokenRequest;
 import com.tf4.photospot.auth.application.request.AppleRevokeRequest;
-import com.tf4.photospot.auth.application.request.GetAppleRefreshTokenRequest;
 import com.tf4.photospot.auth.application.response.ApplePublicKeyResponse;
 import com.tf4.photospot.auth.application.response.AuthUserInfoDto;
 import com.tf4.photospot.auth.infrastructure.AppleClient;
+import com.tf4.photospot.auth.util.KeyParser;
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.AuthErrorCode;
 
@@ -50,11 +42,15 @@ public class AppleService {
 	@Value("${apple.client-id}")
 	private String appleBundleId;
 
-	// Todo : 애플에서 값 생성 후 application.yml 환경변수로 변경
+	@Value("${apple.key-id}")
+
 	private String appleKeyId;
 
+	@Value("${apple.team-id}")
 	private String appleTeamId;
-	private String appleSignKeyFilePath;
+
+	@Value("${apple.sign-key}")
+	private String appleSignKey;
 
 	private static final String KID = "kid";
 	private static final String ALG = "alg";
@@ -137,7 +133,7 @@ public class AppleService {
 	}
 
 	private String getRefreshToken(String authorizationCode, String clientSecret) {
-		GetAppleRefreshTokenRequest request = GetAppleRefreshTokenRequest.builder()
+		AppleRefreshTokenRequest request = AppleRefreshTokenRequest.builder()
 			.clientId(appleBundleId)
 			.clientSecret(clientSecret)
 			.code(authorizationCode)
@@ -159,20 +155,7 @@ public class AppleService {
 			.setExpiration(expirationDate)
 			.setAudience(APPLE_ID_SERVER)
 			.setSubject(appleBundleId)
-			.signWith(getPrivateKey(), SignatureAlgorithm.ES256)
+			.signWith(KeyParser.getPrivateKey(appleSignKey), SignatureAlgorithm.ES256)
 			.compact();
-	}
-
-	private PrivateKey getPrivateKey() {
-		try {
-			ClassPathResource resource = new ClassPathResource(appleSignKeyFilePath);
-			String privateKey = new String(Files.readAllBytes(Paths.get(resource.getURI())));
-			PEMParser pemParser = new PEMParser(new StringReader(privateKey));
-			JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
-			PrivateKeyInfo object = (PrivateKeyInfo)pemParser.readObject();
-			return converter.getPrivateKey(object);
-		} catch (IOException ex) {
-			throw new ApiException(AuthErrorCode.INVALID_PRIVATE_KEY);
-		}
 	}
 }

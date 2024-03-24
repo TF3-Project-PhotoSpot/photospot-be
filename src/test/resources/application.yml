@@ -38,7 +38,10 @@ kakao:
   admin-key: admin-key-admin-key-admin-key
 
 apple:
-  client-id: apple.client.id
+  client-id: appleClientId
+  key-id: appleKeyId
+  team-id: appleTeamId
+  sign-key: signKey
 
 jwt:
   issuer: test-issuer

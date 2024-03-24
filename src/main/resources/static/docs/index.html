@@ -820,7 +820,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>INVALID_PRIVATE_KEY</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">INVALID_PRIVATE_KEY</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Apple Private Key 파일을 불러오는 데 실패했습니다.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Private Key가 올바르지 않습니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AuthErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>EMPTY_PRIVATE_KEY</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">EMPTY_PRIVATE_KEY</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">500</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Private Key가 존재하지 않습니다.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">BookmarkErrorCode</p></td>
@@ -961,13 +968,6 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <td class="tableblock halign-left valign-top"><p class="tableblock">NO_EXISTS_LIKE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">400</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">해당 방명록 좋아요가 존재하지 않습니다.</p></td>
-</tr>
-<tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">PostErrorCode</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock"><code>CAN_NOT_CANCEL_LIKE</code></p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">CAN_NOT_CANCEL_LIKE</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">400</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">해당 방명록 좋아요를 취소할 수 없습니다.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">PostErrorCode</p></td>
@@ -5044,7 +5044,7 @@ Host: localhost:8080</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 0.0.1-SNAPSHOT<br>
-Last updated 2024-03-08 18:13:28 +0900
+Last updated 2024-03-11 00:59:36 +0900
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>

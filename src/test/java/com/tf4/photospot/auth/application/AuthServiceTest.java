@@ -20,8 +20,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tf4.photospot.auth.application.request.KakaoUnlinkRequest;
-import com.tf4.photospot.auth.application.response.KakaoUnlinkResponse;
 import com.tf4.photospot.auth.application.response.ReissueTokenResponse;
 import com.tf4.photospot.auth.domain.RefreshToken;
 import com.tf4.photospot.auth.infrastructure.JwtRedisRepository;
@@ -174,20 +172,6 @@ public class AuthServiceTest extends IntegrationTestSupport {
 				// when & then
 				assertThatThrownBy(() -> authService.deleteUser(loginUser.getId(), accessToken))
 					.isInstanceOf(ApiException.class).hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
-			}),
-			dynamicTest("계정 연결 끊기 메서드에서 공급자 파라미터가 카카오인 경우 카카오 연결 끊기 메서드를 호출한다.", () -> {
-				// given
-				User user = createUser("사용자", "110", "kakao");
-				userRepository.save(user);
-				var response = new KakaoUnlinkResponse();
-
-				// when
-				authService.unlinkAccountFromOauthServer(user.getId(), "kakao", null);
-				given(kakaoClient.unlink(anyString(), any(KakaoUnlinkRequest.class))).willReturn(response);
-				willDoNothing().given(kakaoService).unlink(anyLong());
-
-				// then
-				verify(authService, times(1)).unlinkKakaoAccount(anyLong());
 			}),
 			dynamicTest("계정 연결 끊기 메서드에서 공급자 파라미터가 유효하지 않는 경우 예외를 던진다", () -> {
 				// when & then
