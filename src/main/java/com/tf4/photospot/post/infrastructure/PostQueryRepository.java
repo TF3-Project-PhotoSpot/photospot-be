@@ -13,7 +13,6 @@ import static com.tf4.photospot.spot.domain.QSpot.*;
 import static com.tf4.photospot.user.domain.QUser.*;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -27,15 +26,14 @@ import com.tf4.photospot.global.entity.BaseEntity;
 import com.tf4.photospot.global.util.QueryDslUtils;
 import com.tf4.photospot.post.application.request.PostSearchCondition;
 import com.tf4.photospot.post.application.request.PostSearchType;
+import com.tf4.photospot.post.application.response.PostDetail;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.PostWithLikeStatus;
+import com.tf4.photospot.post.application.response.QPostDetail;
 import com.tf4.photospot.post.application.response.QPostPreviewResponse;
-import com.tf4.photospot.post.application.response.QPostWithLikeStatus;
 import com.tf4.photospot.post.application.response.QReportResponse;
 import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.Post;
-import com.tf4.photospot.post.domain.PostLike;
 import com.tf4.photospot.post.domain.PostTag;
 import com.tf4.photospot.post.domain.Tag;
 import com.tf4.photospot.post.domain.TagRepository;
@@ -72,12 +70,16 @@ public class PostQueryRepository extends QueryDslUtils {
 		return orderBy(query, getPostSearchPathBase(cond.type()), pageable).toSlice(query, pageable);
 	}
 
-	public Slice<PostWithLikeStatus> findPostsWithLikeStatus(PostSearchCondition cond) {
+	public Slice<PostDetail> findPostDetails(PostSearchCondition cond) {
 		final PostSearchType searchType = cond.type();
 		final Pageable pageable = cond.pageable();
 		final QUser writer = new QUser("writer");
-		var query = queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
+		var query = queryFactory.select(new QPostDetail(
+				post,
+				spot.address,
+				postLike.isNotNull()))
 			.from(post)
+			.join(post.spot, spot)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin()
@@ -105,10 +107,14 @@ public class PostQueryRepository extends QueryDslUtils {
 		return post;
 	}
 
-	public PostWithLikeStatus findPost(Long userId, Long postId) {
+	public PostDetail findPost(Long userId, Long postId) {
 		final QUser writer = new QUser("writer");
-		return queryFactory.select(new QPostWithLikeStatus(post, postLike.isNotNull()))
+		return queryFactory.select(new QPostDetail(
+				post,
+				spot.address,
+				postLike.isNotNull()))
 			.from(post)
+			.join(post.spot, spot)
 			.join(post.writer, writer).fetchJoin()
 			.join(post.photo, photo).fetchJoin()
 			.leftJoin(photo.bubble, bubble).fetchJoin()
@@ -177,21 +183,6 @@ public class PostQueryRepository extends QueryDslUtils {
 		return nullSafeBuilder(() -> albumPost.album.id.eq(albumId));
 	}
 
-	public boolean existsPostLike(Post post, User user) {
-		final Integer exists = queryFactory.selectOne()
-			.from(postLike)
-			.where(postLike.post.eq(post).and(postLike.user.eq(user)))
-			.fetchFirst();
-		return exists != null;
-	}
-
-	public Optional<PostLike> findPostLikeFetch(Long postId, Long userId) {
-		return Optional.ofNullable(queryFactory.selectFrom(postLike)
-			.join(postLike.post, post).fetchJoin()
-			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
-			.fetchOne());
-	}
-
 	public boolean existsReport(Post post, User user) {
 		final Integer exists = queryFactory.selectOne()
 			.from(report)
@@ -218,5 +209,12 @@ public class PostQueryRepository extends QueryDslUtils {
 			.join(post.spot, spot)
 			.where(report.reporter.id.eq(userId))
 			.fetch();
+	}
+
+	public boolean cancelLike(Long postId, Long userId) {
+		final long deleted = queryFactory.delete(postLike)
+			.where(postLike.post.id.eq(postId).and(postLike.user.id.eq(userId)))
+			.execute();
+		return deleted != 0L;
 	}
 }

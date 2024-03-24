@@ -6,6 +6,7 @@ import lombok.Builder;
 
 public record WriterResponse(
 	Long id,
+	Boolean isWriter,
 	String nickname,
 	String profileUrl
 ) {
@@ -13,11 +14,12 @@ public record WriterResponse(
 	public WriterResponse {
 	}
 
-	public static WriterResponse from(User user) {
+	public static WriterResponse from(User writer, Long readUserId) {
 		return WriterResponse.builder()
-			.id(user.getId())
-			.nickname(user.getNickname())
-			.profileUrl(user.getProfileUrl())
+			.id(writer.getId())
+			.isWriter(writer.getId().equals(readUserId))
+			.nickname(writer.getNickname())
+			.profileUrl(writer.getProfileUrl())
 			.build();
 	}
 }

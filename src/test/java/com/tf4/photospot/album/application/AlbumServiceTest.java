@@ -251,7 +251,7 @@ class AlbumServiceTest extends IntegrationTestSupport {
 				//given
 				final User user3 = userRepository.save(createUser("user3"));
 				Post privatePost = postRepository.save(createPost(spot, user3,
-					createPhoto("photoUrl4"), 0L, true));
+					createPhoto("photoUrl4"), 0, true));
 				albumService.addPosts(List.of(privatePost.getId()), album1.getId(), user1.getId());
 				//when
 				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());
@@ -263,7 +263,7 @@ class AlbumServiceTest extends IntegrationTestSupport {
 			dynamicTest("가장 최근에 추가된 방명록이 비공개 되는 경우 앨범 유저의 방명록이면 조회할 수 있다.", () -> {
 				//given
 				Post privatePost = postRepository.save(createPost(spot, user1,
-					createPhoto("photoUrl5"), 0L, true));
+					createPhoto("photoUrl5"), 0, true));
 				albumService.addPosts(List.of(privatePost.getId()), album1.getId(), user1.getId());
 				//when
 				final List<AlbumPreviewResponse> albumResponses = albumService.getAlbums(user1.getId());

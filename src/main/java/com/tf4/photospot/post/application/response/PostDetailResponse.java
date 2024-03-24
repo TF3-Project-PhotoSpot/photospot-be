@@ -10,12 +10,13 @@ import lombok.Builder;
 
 public record PostDetailResponse(
 	Long id,
+	String address,
 	String detailAddress,
-	Long likeCount,
+	int likeCount,
 	String photoUrl,
-	BubbleResponse bubble,
 	Boolean isLiked,
 	LocalDateTime createdAt,
+	BubbleResponse bubble,
 	WriterResponse writer,
 	List<TagResponse> tags
 ) {
@@ -23,17 +24,18 @@ public record PostDetailResponse(
 	public PostDetailResponse {
 	}
 
-	public static PostDetailResponse of(PostWithLikeStatus postResponse, List<PostTag> postTags) {
-		final Post post = postResponse.post();
+	public static PostDetailResponse of(PostDetail postDetail, List<PostTag> postTags, Long userId) {
+		final Post post = postDetail.post();
 		return PostDetailResponse.builder()
 			.id(post.getId())
+			.address(postDetail.spotAddress())
 			.detailAddress(post.getDetailAddress())
 			.likeCount(post.getLikeCount())
 			.photoUrl(post.getPhoto().getPhotoUrl())
 			.bubble(BubbleResponse.from(post.getPhoto().getBubble()))
 			.createdAt(post.getCreatedAt())
-			.writer(WriterResponse.from(post.getWriter()))
-			.isLiked(postResponse.isLiked())
+			.writer(WriterResponse.from(post.getWriter(), userId))
+			.isLiked(postDetail.isLiked())
 			.tags(postTags.stream().map(TagResponse::from).toList())
 			.build();
 	}
