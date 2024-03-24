@@ -113,9 +113,9 @@ class SpotControllerTest {
 			.coord(new CoordinateDto(127.0, 37.0))
 			.postCount(5L)
 			.postPreviewResponses(List.of(
-				new PostPreviewResponse(1L, 1L, "imageUrl"),
-				new PostPreviewResponse(1L, 1L, "imageUrl"),
-				new PostPreviewResponse(1L, 1L, "imageUrl")))
+				new PostPreviewResponse(1L, 1L, "profileUrl"),
+				new PostPreviewResponse(1L, 1L, "profileUrl"),
+				new PostPreviewResponse(1L, 1L, "profileUrl")))
 			.build();
 	}
 

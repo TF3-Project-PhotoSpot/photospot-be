@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum UserErrorCode implements ApiErrorCode {
 
-	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않거나 이미 탈퇴한 사용자입니다.");
+	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "존재하지 않거나 이미 탈퇴한 사용자입니다."),
+	DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이미 존재하는 닉네임입니다.");
 
 	private final HttpStatusCode statusCode;
 	private final String message;
