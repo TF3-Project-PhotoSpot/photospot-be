@@ -173,11 +173,6 @@ public class AuthServiceTest extends IntegrationTestSupport {
 				assertThatThrownBy(() -> authService.deleteUser(loginUser.getId(), accessToken))
 					.isInstanceOf(ApiException.class).hasMessage(UserErrorCode.NOT_FOUND_USER.getMessage());
 			}),
-			dynamicTest("계정 연결 끊기 메서드에서 공급자 파라미터가 유효하지 않는 경우 예외를 던진다", () -> {
-				// when & then
-				assertThatThrownBy(() -> authService.unlinkAccountFromOauthServer(loginUser.getId(), "wrong", null))
-					.isInstanceOf(ApiException.class).hasMessage(AuthErrorCode.INVALID_PROVIDER_TYPE.getMessage());
-			}),
 			dynamicTest("카카오 콜백 요청에 따라 연결이 끊긴 사용자를 탈퇴처리한다.", () -> {
 				// given
 				User user = createUser("사용자", "100", "kakao");

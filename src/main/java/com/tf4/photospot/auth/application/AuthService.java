@@ -102,8 +102,9 @@ public class AuthService {
 		}
 	}
 
-	public void unlinkAccountFromOauthServer(Long userId, String provider, String authorizationCode) {
-		if (OauthAttributes.KAKAO.equals(OauthAttributes.findByType(provider))) {
+	public void unlinkAccountFromOauthServer(Long userId, String authorizationCode) {
+		User user = userService.getActiveUser(userId);
+		if (OauthAttributes.KAKAO.equals(OauthAttributes.findByType(user.getProviderType()))) {
 			unlinkKakaoAccount(userId);
 		} else {
 			unlinkAppleAccount(authorizationCode);

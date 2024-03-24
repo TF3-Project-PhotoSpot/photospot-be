@@ -40,9 +40,7 @@ public class AuthController {
 		@RequestHeader(JwtConstant.AUTHORIZATION_HEADER) String accessToken,
 		@RequestBody UnlinkRequest request
 	) {
-		if (Boolean.TRUE.equals(request.isLinked())) {
-			authService.unlinkAccountFromOauthServer(userId, request.provider(), request.authorizationCode());
-		}
+		authService.unlinkAccountFromOauthServer(userId, request.authorizationCode());
 		authService.deleteUser(userId, accessToken);
 		return ApiResponse.SUCCESS;
 	}
