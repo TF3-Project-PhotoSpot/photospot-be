@@ -182,7 +182,7 @@ public class PostController {
 	public ApiResponse reportPost(
 		@AuthUserId Long userId,
 		@PathVariable("postId") Long postId,
-		@RequestBody PostReportRequest request) {
+		@RequestBody @Valid PostReportRequest request) {
 		postService.report(userId, postId, request.reason());
 		return ApiResponse.SUCCESS;
 	}

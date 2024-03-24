@@ -501,6 +501,10 @@ public class PostControllerDocsTest extends RestDocsSupport {
 				.accept(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
+				requestFields(
+					fieldWithPath("reason").type(JsonFieldType.STRING).description("신고 사유")
+						.attributes(constraints("신고 사유는 200자 이하여야 합니다."))
+				),
 				responseFields(
 					fieldWithPath("message").type(JsonFieldType.STRING).description("성공")
 				)
