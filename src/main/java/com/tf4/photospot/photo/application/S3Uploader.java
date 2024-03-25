@@ -53,7 +53,7 @@ public class S3Uploader {
 	private String getFileKey(String originalFileName, String folder) {
 		S3Directory s3Directory = S3Directory.findByFolder(folder)
 			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.NOT_FOUND_FOLDER));
-		return s3Directory.getPath() + FileUtils.generateNewFileName(validAndGetFileName(originalFileName));
+		return s3Directory.getPath() + FileUtils.generateNewFileName(originalFileName);
 	}
 
 	private String validAndGetFileName(String originalFileName) {

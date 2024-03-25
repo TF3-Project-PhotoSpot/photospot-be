@@ -47,7 +47,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 		given(userService.updateProfile(anyLong(), anyString())).willReturn(response);
 
 		// when & then
-		mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/me/profile")
+		mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/profile/me")
 				.file(profile)
 				.contentType(MediaType.MULTIPART_FORM_DATA)
 				.accept(MediaType.APPLICATION_JSON))
@@ -64,7 +64,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 		var request = new NicknameUpdateRequest("새로운_닉네임");
 		given(userService.updateNickname(anyLong(), anyString())).willReturn(new NicknameUpdateResponse("새로운_닉네임"));
 
-		mockMvc.perform(patch("/api/v1/me/nickname")
+		mockMvc.perform(patch("/api/v1/user/nickname/me")
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(mapper.writeValueAsString(request))
 				.accept(MediaType.APPLICATION_JSON))
@@ -82,7 +82,7 @@ public class UserControllerDocsTest extends RestDocsSupport {
 			"https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp", "kakao");
 		given(userService.getInfo(anyLong())).willReturn(response);
 
-		mockMvc.perform(get("/api/v1/me"))
+		mockMvc.perform(get("/api/v1/user/me"))
 			.andExpect(status().isOk())
 			.andDo(restDocsTemplate(
 				responseFields(

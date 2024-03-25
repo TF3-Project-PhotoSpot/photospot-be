@@ -11,9 +11,10 @@ import com.tf4.photospot.photo.domain.Extension;
 public class FileUtils {
 	private static final String NAME_SEPARATOR = "_";
 	private static final String EXTENSION_SEPARATOR = ".";
+	private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
 	public static String generateNewFileName(String originalFileName) {
-		String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+		String now = LocalDateTime.now().format(DATE_TIME_FORMATTER);
 		String uuid = UUID.randomUUID().toString().substring(0, 8);
 		return now + NAME_SEPARATOR + uuid + EXTENSION_SEPARATOR + extractExtension(originalFileName).getType();
 	}

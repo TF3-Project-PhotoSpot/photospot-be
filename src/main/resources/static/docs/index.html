@@ -991,6 +991,13 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>NOT_FOUND_FOLDER</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">NOT_FOUND_FOLDER</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">404</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">존재하지 않는 폴더입니다.</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">S3UploaderErrorCode</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock"><code>NOT_FOUND_FILE</code></p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">NOT_FOUND_FILE</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">404</p></td>
@@ -1336,7 +1343,7 @@ Content-Type: application/x-www-form-urlencoded</code></pre>
 <hr>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/me HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">GET /api/v1/user/me HTTP/1.1
 Host: localhost:8080</code></pre>
 </div>
 </div>
@@ -1345,7 +1352,8 @@ Host: localhost:8080</code></pre>
 <pre class="highlightjs highlight nowrap"><code class="language-json hljs" data-lang="json">{
   "userId" : 1,
   "nickname" : "사용자",
-  "profileUrl" : "https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp"
+  "profileUrl" : "https://bucket.s3.ap-northeast-2.amazonaws.com/profile/example.webp",
+  "provider" : "kakao"
 }</code></pre>
 </div>
 </div>
@@ -1385,6 +1393,12 @@ Host: localhost:8080</code></pre>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">사용자 프로필 url</p></td>
 </tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>provider</code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>String</code></p></td>
+<td class="tableblock halign-left valign-top"></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">사용자 계정 OAuth 공급자</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1394,7 +1408,7 @@ Host: localhost:8080</code></pre>
 <hr>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PATCH /api/v1/me/profile HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PATCH /api/v1/user/profile/me HTTP/1.1
 Content-Type: multipart/form-data;charset=UTF-8; boundary=6o2knFse3p53ty9dmcQvWAIx1zInP11uCfbm
 Accept: application/json
 Host: localhost:8080</code></pre>
@@ -1458,7 +1472,7 @@ Host: localhost:8080</code></pre>
 <hr>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PATCH /api/v1/me/nickname HTTP/1.1
+<pre class="highlightjs highlight nowrap"><code class="language-http hljs" data-lang="http">PATCH /api/v1/user/nickname/me HTTP/1.1
 Content-Type: application/json;charset=UTF-8
 Accept: application/json
 Content-Length: 40

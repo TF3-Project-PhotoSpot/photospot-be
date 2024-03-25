@@ -23,13 +23,13 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/me")
+@RequestMapping("/api/v1/user")
 public class UserController {
 
 	private final UserService userService;
 	private final S3Uploader s3Uploader;
 
-	@PatchMapping("/profile")
+	@PatchMapping("/profile/me")
 	public ProfileUpdateResponse updateProfile(
 		@RequestPart("file") MultipartFile file,
 		@AuthUserId Long userId) {
@@ -37,14 +37,14 @@ public class UserController {
 		return userService.updateProfile(userId, imageUrl);
 	}
 
-	@PatchMapping("/nickname")
+	@PatchMapping("/nickname/me")
 	public NicknameUpdateResponse updateNickname(
 		@AuthUserId Long userId,
 		@RequestBody NicknameUpdateRequest request) {
 		return userService.updateNickname(userId, request.nickname());
 	}
 
-	@GetMapping
+	@GetMapping("/me")
 	public UserInfoResponse getUserInfo(@AuthUserId Long userId) {
 		return userService.getInfo(userId);
 	}
