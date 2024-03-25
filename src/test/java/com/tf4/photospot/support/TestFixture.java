@@ -208,4 +208,10 @@ public class TestFixture {
 			.name("name")
 			.build();
 	}
+
+	public static String createDummyStr(int length) {
+		final StringBuilder dummyStr = new StringBuilder();
+		IntStream.range(0, length).forEach(i -> dummyStr.append("a"));
+		return dummyStr.toString();
+	}
 }

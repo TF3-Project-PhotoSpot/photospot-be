@@ -18,6 +18,10 @@ include::api/common/common.adoc[]
 
 include::api/auth/auth.adoc[]
 
+== User API
+
+include::api/user/user.adoc[]
+
 == Spot API
 
 include::api/spot/spot.adoc[]

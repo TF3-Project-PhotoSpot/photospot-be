@@ -68,15 +68,11 @@ public class AuthService {
 	private String generateNickname() {
 		for (int attempt = 0; attempt < NICKNAME_GENERATOR_RETRY_MAX; attempt++) {
 			String nickname = NicknameGenerator.generateRandomNickname();
-			if (!isNicknameDuplicated(nickname)) {
+			if (!userService.isNicknameDuplicated(nickname)) {
 				return nickname;
 			}
 		}
 		throw new ApiException(AuthErrorCode.UNEXPECTED_NICKNAME_GENERATE_FAIL);
-	}
-
-	private boolean isNicknameDuplicated(String nickname) {
-		return userRepository.existsByNickname(nickname);
 	}
 
 	public ReissueTokenResponse reissueToken(Long userId, String refreshToken) {

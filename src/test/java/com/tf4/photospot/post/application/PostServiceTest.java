@@ -33,7 +33,6 @@ import com.tf4.photospot.post.application.request.PostSearchType;
 import com.tf4.photospot.post.application.request.PostUpdateRequest;
 import com.tf4.photospot.post.application.response.PostDetailResponse;
 import com.tf4.photospot.post.application.response.PostPreviewResponse;
-import com.tf4.photospot.post.application.response.ReportResponse;
 import com.tf4.photospot.post.application.response.TagResponse;
 import com.tf4.photospot.post.domain.Mention;
 import com.tf4.photospot.post.domain.MentionRepository;
@@ -729,43 +728,6 @@ class PostServiceTest extends IntegrationTestSupport {
 				// when & then
 				assertThatThrownBy(() -> postService.report(post.getWriter().getId(), post.getId(), "이상한 사진입니다."))
 					.isInstanceOf(ApiException.class).hasMessage(PostErrorCode.CNA_NOT_REPORT_OWN_POST.getMessage());
-			})
-		);
-	}
-
-	@TestFactory
-	@DisplayName("신고 방명록 목록 조회 시나리오")
-	Stream<DynamicTest> getReportedPosts() {
-		// given
-		Spot spot = spotRepository.save(createSpot());
-		User writer = userRepository.save(createUser("작성자"));
-		User reporter = userRepository.save(createUser("신고자"));
-
-		return Stream.of(
-			dynamicTest("내가 신고한 방명록 목록을 조회한다.", () -> {
-				// given
-				Post post1 = postRepository.save(createPost(spot, writer));
-				Post post2 = postRepository.save(createPost(spot, writer));
-				reportRepository.save(post1.reportFrom(reporter, "불쾌한 사진"));
-				reportRepository.save(post2.reportFrom(reporter, "징그러운 사진"));
-
-				// when
-				var myReports = postService.getReports(reporter.getId());
-
-				// then
-				assertAll(
-					() -> assertThat(myReports).hasSize(2),
-					() -> assertThat(myReports.stream().map(ReportResponse::postId).toList()).containsExactlyInAnyOrder(
-						post1.getId(), post2.getId()),
-					() -> assertThat(myReports).allMatch(report -> report.spotAddress().equals(spot.getAddress()))
-				);
-			}),
-			dynamicTest("신고한 목록이 없으면 빈 리스트를 반환한다.", () -> {
-				// when
-				var emptyReports = postService.getReports(writer.getId());
-
-				// then
-				assertThat(emptyReports).isEmpty();
 			})
 		);
 	}

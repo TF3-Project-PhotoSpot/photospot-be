@@ -52,6 +52,10 @@ public class User extends BaseEntity {
 		this.profileUrl = profileUrl;
 	}
 
+	public void updateNickname(String nickname) {
+		this.nickname = nickname;
+	}
+
 	public boolean isSame(Long userId) {
 		return id.equals(userId);
 	}

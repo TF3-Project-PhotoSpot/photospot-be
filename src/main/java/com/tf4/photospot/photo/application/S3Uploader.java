@@ -1,9 +1,7 @@
 package com.tf4.photospot.photo.application;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.UUID;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,8 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.tf4.photospot.global.exception.ApiException;
 import com.tf4.photospot.global.exception.domain.S3UploaderErrorCode;
-import com.tf4.photospot.photo.domain.Extension;
 import com.tf4.photospot.photo.domain.S3Directory;
+import com.tf4.photospot.photo.util.FileUtils;
 
 import io.awspring.cloud.s3.ObjectMetadata;
 import io.awspring.cloud.s3.S3Template;
@@ -26,10 +24,6 @@ import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 @Component
 @RequiredArgsConstructor
 public class S3Uploader {
-
-	private static final String NAME_SEPARATOR = "_";
-	private static final String EXTENSION_SEPARATOR = ".";
-
 	private final S3Template s3Template;
 
 	private final S3Client s3Client;
@@ -38,41 +32,42 @@ public class S3Uploader {
 	private String bucket;
 
 	public String upload(MultipartFile file, String folder) {
-		S3Directory s3Directory = S3Directory.findByFolder(folder)
-			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION));
-		String fileKey = s3Directory.getPath() + generateNewFileName(validFileAndGetFileName(file));
+		validFile(file);
+		String fileName = validAndGetFileName(file.getOriginalFilename());
+		String fileKey = getFileKey(fileName, folder);
 		try {
-			ObjectMetadata objectMetadata = generateObjectMetadata(file);
+			ObjectMetadata objectMetadata = generateObjectMetadata(
+				FileUtils.extractExtension(Objects.requireNonNull(fileName)).getType(), file.getSize());
 			return s3Template.upload(bucket, fileKey, file.getInputStream(), objectMetadata).getURL().toString();
 		} catch (IOException ex) {
 			throw new ApiException(S3UploaderErrorCode.UNEXPECTED_GET_URL_FAIL);
-		} catch (Exception ex) {
-			throw new ApiException(S3UploaderErrorCode.UNEXPECTED_UPLOAD_FAIL);
 		}
 	}
 
-	private String validFileAndGetFileName(MultipartFile file) {
+	private void validFile(MultipartFile file) {
 		if (file == null || file.isEmpty()) {
 			throw new ApiException(S3UploaderErrorCode.EMPTY_FILE);
 		}
-		if (!StringUtils.hasText(file.getOriginalFilename())) {
+	}
+
+	private String getFileKey(String originalFileName, String folder) {
+		S3Directory s3Directory = S3Directory.findByFolder(folder)
+			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.NOT_FOUND_FOLDER));
+		return s3Directory.getPath() + FileUtils.generateNewFileName(originalFileName);
+	}
+
+	private String validAndGetFileName(String originalFileName) {
+		if (!StringUtils.hasText(originalFileName)) {
 			throw new ApiException(S3UploaderErrorCode.INVALID_FILE_NAME);
 		}
-		return file.getOriginalFilename();
+		return originalFileName;
 	}
 
-	private String generateNewFileName(String originalFileName) {
-		String contentType = originalFileName.substring(originalFileName.lastIndexOf(".") + 1);
-		Extension extension = Extension.getPhotoExtension(contentType)
-			.orElseThrow(() -> new ApiException(S3UploaderErrorCode.INVALID_PHOTO_EXTENSION));
-		String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-		String uuid = UUID.randomUUID().toString().substring(0, 8);
-
-		return now + NAME_SEPARATOR + uuid + EXTENSION_SEPARATOR + extension.getType();
-	}
-
-	private ObjectMetadata generateObjectMetadata(MultipartFile file) {
-		return new ObjectMetadata.Builder().contentType(file.getContentType()).contentLength(file.getSize()).build();
+	private ObjectMetadata generateObjectMetadata(String extension, Long length) {
+		return new ObjectMetadata.Builder()
+			.contentType(extension)
+			.contentLength(length)
+			.build();
 	}
 
 	public String copyToOtherDirectory(String photoUrl, S3Directory fromDirectory, S3Directory toDirectory) {

@@ -1,9 +1,9 @@
 package com.tf4.photospot.bookmark.presentation.request;
 
+import static com.tf4.photospot.support.TestFixture.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -48,8 +48,8 @@ class AddBookmarkHttpRequestTest {
 	}
 
 	private static Stream<Arguments> provideValidAddBookmarkHttpRequests() {
-		final String maxNameLength = generateDummyStr(10);
-		final String maxDescriptionLength = generateDummyStr(30);
+		final String maxNameLength = createDummyStr(10);
+		final String maxDescriptionLength = createDummyStr(30);
 		final Long spotId = 1L;
 		return Stream.of(
 			Arguments.of(spotId, "name", "description"),
@@ -61,19 +61,13 @@ class AddBookmarkHttpRequestTest {
 	}
 
 	private static Stream<Arguments> provideInValidAddBookmarkHttpRequests() {
-		final String overMaxNameLength = generateDummyStr(11);
-		final String overMaxDescriptionLength = generateDummyStr(31);
+		final String overMaxNameLength = createDummyStr(11);
+		final String overMaxDescriptionLength = createDummyStr(31);
 		return Stream.of(
 			Arguments.of(-1L, "name", "description"),
 			Arguments.of(0L, "name", "description"),
 			Arguments.of(1L, overMaxNameLength, "description"),
 			Arguments.of(1L, "name", overMaxDescriptionLength)
 		);
-	}
-
-	private static String generateDummyStr(int length) {
-		final StringBuilder dummyStr = new StringBuilder();
-		IntStream.range(0, length).forEach(i -> dummyStr.append("a"));
-		return dummyStr.toString();
 	}
 }
